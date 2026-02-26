@@ -32,7 +32,7 @@ export default function OurTeamPage() {
             {TEAM_MEMBERS.map((member) => (
               <a
                 key={member.slug}
-                href={`/our-team/${member.slug}`}
+                href={assetPath(`/our-team/${member.slug}`)}
                 className="group block rounded-lg border border-charcoal/10 bg-white p-6 shadow-sm hover:shadow-lg hover:border-gold/30 transition-all"
               >
                 <div className="mb-5 flex justify-center">

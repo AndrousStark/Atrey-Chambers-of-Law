@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { TechBackground } from '@/components/TechBackground';
+import { assetPath } from '@/lib/utils';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,7 +14,7 @@ export default function AdminPage() {
   useEffect(() => {
     const admin = localStorage.getItem('isAdmin');
     if (!admin) {
-      router.push('/signin');
+      router.push(assetPath('/signin'));
     } else {
       setIsAuthenticated(true);
     }
@@ -23,7 +24,7 @@ export default function AdminPage() {
     localStorage.removeItem('isAdmin');
     // Dispatch custom event to update Header
     window.dispatchEvent(new Event('authChange'));
-    router.push('/');
+    router.push(assetPath('/'));
   };
 
   if (!isAuthenticated) return null;
@@ -50,7 +51,7 @@ export default function AdminPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <a
-              href="/admin/resources"
+              href={assetPath("/admin/resources")}
               className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow border-2 border-transparent hover:border-deepGreen/30"
             >
               <h2 className="text-2xl font-semibold text-deepGreen mb-2">Manage Resources</h2>
@@ -59,7 +60,7 @@ export default function AdminPage() {
               </p>
             </a>
             <a
-              href="/admin/testimonials"
+              href={assetPath("/admin/testimonials")}
               className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow border-2 border-transparent hover:border-deepGreen/30"
             >
               <h2 className="text-2xl font-semibold text-deepGreen mb-2">Manage Testimonials</h2>

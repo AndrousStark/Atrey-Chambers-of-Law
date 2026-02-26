@@ -1,6 +1,7 @@
 'use client';
 
 import { PRACTICE_AREAS } from '@/lib/data/practice-areas';
+import { assetPath } from '@/lib/utils';
 
 const topPracticeAreas = PRACTICE_AREAS.slice(0, 8);
 
@@ -41,7 +42,7 @@ export const ServicesGrid = () => {
               </span>
             </div>
             <div className="card-back">
-              <a href={`/practice-area/${area.slug}`}>
+              <a href={assetPath(`/practice-area/${area.slug}`)}>
                 {area.description}
               </a>
             </div>
@@ -51,7 +52,7 @@ export const ServicesGrid = () => {
 
       <div className="mt-8 text-center">
         <a
-          href="/practice-area"
+          href={assetPath("/practice-area")}
           className="inline-block rounded border border-cream/30 bg-cream/10 px-8 py-3 text-sm text-cream font-semibold hover:bg-cream/20 transition-colors backdrop-blur-sm"
         >
           View All Practice Areas &rarr;

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { staggerContainer, cardHover } from '@/lib/animations';
+import { assetPath } from '@/lib/utils';
 
 interface PublishedResource {
   id: string;
@@ -313,7 +314,7 @@ export const NewsGrid = ({ showAll = false }: NewsGridProps) => {
                   </div>
                   {item.category && (
                     <a
-                      href={`/resources/${categoryToSlug[item.category]}`}
+                      href={assetPath(`/resources/${categoryToSlug[item.category]}`)}
                       onClick={(e) => e.stopPropagation()}
                       className="rounded-full bg-deepGreen/10 px-3 py-1 text-xs font-semibold text-deepGreen hover:bg-deepGreen hover:text-white transition-colors"
                     >
@@ -374,7 +375,7 @@ export const NewsGrid = ({ showAll = false }: NewsGridProps) => {
                 </div>
                 {featured.category && (
                   <a
-                    href={`/resources/${categoryToSlug[featured.category]}`}
+                    href={assetPath(`/resources/${categoryToSlug[featured.category]}`)}
                     onClick={(e) => e.stopPropagation()}
                     className="rounded-full bg-deepGreen/10 px-3 py-1 text-xs font-semibold text-deepGreen hover:bg-deepGreen hover:text-white transition-colors"
                   >
@@ -415,7 +416,7 @@ export const NewsGrid = ({ showAll = false }: NewsGridProps) => {
                 </div>
                 {item.category && (
                   <a
-                    href={`/resources/${categoryToSlug[item.category]}`}
+                    href={assetPath(`/resources/${categoryToSlug[item.category]}`)}
                     onClick={(e) => e.stopPropagation()}
                     className="rounded-full bg-deepGreen/10 px-3 py-1 text-xs font-semibold text-deepGreen hover:bg-deepGreen hover:text-white transition-colors"
                   >

@@ -3,6 +3,7 @@
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { PRACTICE_AREAS } from '@/lib/data/practice-areas';
+import { assetPath } from '@/lib/utils';
 
 export default function PracticeAreaPage() {
   return (
@@ -24,7 +25,7 @@ export default function PracticeAreaPage() {
             {PRACTICE_AREAS.map((area) => (
               <a
                 key={area.slug}
-                href={`/practice-area/${area.slug}`}
+                href={assetPath(`/practice-area/${area.slug}`)}
                 className="group flex gap-4 rounded-lg border border-charcoal/10 bg-white p-6 shadow-sm hover:shadow-md hover:border-gold/30 transition-all"
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-deepGreen/5 flex items-center justify-center text-deepGreen group-hover:bg-deepGreen group-hover:text-cream transition-colors">

@@ -275,7 +275,7 @@ export const AttorneyProfile = ({ member }: AttorneyProfileProps) => {
           </div>
           <Divider variant="gold" width="full" className="my-4" />
           <a
-            href="/schedule"
+            href={assetPath("/schedule")}
             className="block w-full text-center rounded bg-deepGreen py-2.5 text-sm font-semibold text-cream hover:bg-deepGreenLight transition-colors"
           >
             Schedule Consultation

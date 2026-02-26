@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LegalParticles } from './LegalParticles';
+import { assetPath } from '@/lib/utils';
 
 // Resources sections - all 4 sections including News Telecast
 // Version: 2024-12-24 - Ensure all 4 sections are included
@@ -157,7 +158,7 @@ export const ResourcesLayout = () => {
                                         </p>
                                 <div className="flex justify-end items-center">
                                             <a 
-                                                href={`/resources/${activeSection.slug}`}
+                                                href={assetPath(`/resources/${activeSection.slug}`)}
                                                 className="px-6 py-2 rounded-lg bg-deepGreen text-white text-sm font-bold hover:bg-deepGreen/90 transition-colors"
                                             >
                                                 Explore

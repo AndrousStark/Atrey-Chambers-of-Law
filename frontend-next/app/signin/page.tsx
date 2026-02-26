@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { TechBackground } from '@/components/TechBackground';
+import { assetPath } from '@/lib/utils';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ export default function SignInPage() {
       localStorage.setItem('isAdmin', 'true');
       // Dispatch custom event to update Header
       window.dispatchEvent(new Event('authChange'));
-      router.push('/admin');
+      router.push(assetPath('/admin'));
     }
   };
 

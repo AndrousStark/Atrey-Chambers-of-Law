@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { fadeUp, staggerContainer } from '@/lib/animations';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { assetPath } from '@/lib/utils';
 
 const cases = [
   {
@@ -132,7 +133,7 @@ export const LandmarkCases = () => {
         className="mt-10 text-center"
       >
         <a
-          href="/practice-area"
+          href={assetPath("/practice-area")}
           className="inline-flex items-center gap-2 text-sm font-semibold text-deepGreen hover:text-gold transition-colors animated-underline"
         >
           Explore All Practice Areas

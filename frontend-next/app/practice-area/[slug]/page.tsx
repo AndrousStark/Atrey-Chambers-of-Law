@@ -3,6 +3,7 @@ import { Footer } from '@/components/Footer';
 import { PRACTICE_AREAS, getPracticeArea } from '@/lib/data/practice-areas';
 import { Divider } from '@/components/ui/Divider';
 import { notFound } from 'next/navigation';
+import { assetPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -37,7 +38,7 @@ export default function PracticeAreaDetailPage({ params }: Props) {
             {/* Main content */}
             <div>
               <div className="mb-8">
-                <a href="/practice-area" className="text-sm text-charcoal/50 hover:text-deepGreen transition-colors">
+                <a href={assetPath("/practice-area")} className="text-sm text-charcoal/50 hover:text-deepGreen transition-colors">
                   &larr; All Practice Areas
                 </a>
               </div>
@@ -92,7 +93,7 @@ export default function PracticeAreaDetailPage({ params }: Props) {
                   Schedule a consultation with Dr. Abhishek Atrey to discuss your matter.
                 </p>
                 <a
-                  href="/schedule"
+                  href={assetPath("/schedule")}
                   className="inline-block rounded bg-gold px-8 py-3 text-sm font-semibold text-white hover:bg-goldLight transition-colors"
                 >
                   Schedule Consultation
@@ -108,14 +109,14 @@ export default function PracticeAreaDetailPage({ params }: Props) {
                   {otherAreas.map((other) => (
                     <a
                       key={other.slug}
-                      href={`/practice-area/${other.slug}`}
+                      href={assetPath(`/practice-area/${other.slug}`)}
                       className="block text-sm text-charcoal/70 hover:text-deepGreen py-1.5 border-b border-charcoal/5 last:border-0 transition-colors"
                     >
                       {other.shortTitle}
                     </a>
                   ))}
                   <a
-                    href="/practice-area"
+                    href={assetPath("/practice-area")}
                     className="block text-sm text-gold font-semibold pt-2 hover:underline"
                   >
                     View All &rarr;
@@ -132,7 +133,7 @@ export default function PracticeAreaDetailPage({ params }: Props) {
                 <p className="text-sm text-charcoal/70">+91-11-22053080</p>
                 <p className="text-sm text-charcoal/70">support@atreychambers.com</p>
                 <a
-                  href="/schedule"
+                  href={assetPath("/schedule")}
                   className="mt-4 block w-full text-center rounded bg-deepGreen py-2.5 text-sm font-semibold text-cream hover:bg-deepGreenLight transition-colors"
                 >
                   Schedule Call

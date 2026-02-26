@@ -12,41 +12,41 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Our Firm', href: '/our-firm' },
+  { label: 'Our Firm', href: assetPath('/our-firm') },
   {
     label: 'Practice Areas',
-    href: '/practice-area',
+    href: assetPath('/practice-area'),
     children: [
-      { label: 'Constitutional Law & PIL', href: '/practice-area/constitutional-law-pil', description: 'Fundamental rights & public interest' },
-      { label: 'Supreme Court Litigation', href: '/practice-area/supreme-court-litigation', description: 'AOR — direct filing & appeals' },
-      { label: 'Environmental Law & NGT', href: '/practice-area/environmental-law-ngt', description: 'NGT & environmental compliance' },
-      { label: 'Government Litigation', href: '/practice-area/government-litigation', description: 'Union & State representation' },
-      { label: 'Criminal Law & Defense', href: '/practice-area/criminal-law', description: 'Defense & criminal appeals' },
-      { label: 'View All Practice Areas →', href: '/practice-area' },
+      { label: 'Constitutional Law & PIL', href: assetPath('/practice-area/constitutional-law-pil'), description: 'Fundamental rights & public interest' },
+      { label: 'Supreme Court Litigation', href: assetPath('/practice-area/supreme-court-litigation'), description: 'AOR — direct filing & appeals' },
+      { label: 'Environmental Law & NGT', href: assetPath('/practice-area/environmental-law-ngt'), description: 'NGT & environmental compliance' },
+      { label: 'Government Litigation', href: assetPath('/practice-area/government-litigation'), description: 'Union & State representation' },
+      { label: 'Criminal Law & Defense', href: assetPath('/practice-area/criminal-law'), description: 'Defense & criminal appeals' },
+      { label: 'View All Practice Areas →', href: assetPath('/practice-area') },
     ],
   },
   {
     label: 'Our Team',
-    href: '/our-team',
+    href: assetPath('/our-team'),
     children: [
-      { label: 'Dr. Abhishek Atrey', href: '/our-team/abhishek-atrey', description: 'Founder & Managing Partner' },
-      { label: 'Mrs. Ambika Atrey', href: '/our-team/ambika-atrey', description: 'Partner' },
-      { label: 'Aniruddh Atrey', href: '/our-team/aniruddh-atrey', description: 'Director of Technology' },
-      { label: 'View Full Team →', href: '/our-team' },
+      { label: 'Dr. Abhishek Atrey', href: assetPath('/our-team/abhishek-atrey'), description: 'Founder & Managing Partner' },
+      { label: 'Mrs. Ambika Atrey', href: assetPath('/our-team/ambika-atrey'), description: 'Partner' },
+      { label: 'Aniruddh Atrey', href: assetPath('/our-team/aniruddh-atrey'), description: 'Director of Technology' },
+      { label: 'View Full Team →', href: assetPath('/our-team') },
     ],
   },
   {
     label: 'Publications',
-    href: '/publications',
+    href: assetPath('/publications'),
     children: [
-      { label: 'Books', href: '/publications#books', description: '3 authored books' },
-      { label: 'Articles', href: '/publications#articles', description: '20+ legal articles' },
-      { label: 'TV Appearances', href: '/publications#media', description: '30+ national TV shows' },
-      { label: 'Blog', href: '/our-blog', description: 'Legal insights & updates' },
+      { label: 'Books', href: assetPath('/publications') + '#books', description: '3 authored books' },
+      { label: 'Articles', href: assetPath('/publications') + '#articles', description: '20+ legal articles' },
+      { label: 'TV Appearances', href: assetPath('/publications') + '#media', description: '30+ national TV shows' },
+      { label: 'Blog', href: assetPath('/our-blog'), description: 'Legal insights & updates' },
     ],
   },
-  { label: 'Media', href: '/publications#media' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Media', href: assetPath('/publications') + '#media' },
+  { label: 'Contact', href: assetPath('/') + '#contact' },
 ];
 
 export const Header = () => {
@@ -223,7 +223,7 @@ export const Header = () => {
           ))}
 
           <motion.a
-            href="/schedule"
+            href={assetPath("/schedule")}
             custom={navItems.length + 1}
             variants={prefersReducedMotion ? {} : headerItemVariant}
             initial={prefersReducedMotion ? {} : 'hidden'}
@@ -298,7 +298,7 @@ export const Header = () => {
                   </div>
                 ))}
                 <motion.a
-                  href="/schedule"
+                  href={assetPath("/schedule")}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: navItems.length * 0.06 }}

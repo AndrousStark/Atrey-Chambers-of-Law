@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { TechBackground } from '@/components/TechBackground';
+import { assetPath } from '@/lib/utils';
 
 export default function ProfilePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,7 +14,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const admin = localStorage.getItem('isAdmin');
     if (!admin) {
-      router.push('/signin');
+      router.push(assetPath('/signin'));
     } else {
       setIsAuthenticated(true);
     }
@@ -23,7 +24,7 @@ export default function ProfilePage() {
     localStorage.removeItem('isAdmin');
     // Dispatch custom event to update Header
     window.dispatchEvent(new Event('authChange'));
-    router.push('/');
+    router.push(assetPath('/'));
   };
 
   if (!isAuthenticated) return null;
@@ -71,7 +72,7 @@ export default function ProfilePage() {
               </h2>
               <div className="space-y-4">
                 <a
-                  href="/admin/resources"
+                  href={assetPath("/admin/resources")}
                   className="block bg-deepGreen/10 hover:bg-deepGreen/20 border border-deepGreen/30 rounded-lg p-4 text-deepGreen transition-colors"
                 >
                   <h3 className="font-semibold mb-2">Manage Resources</h3>
@@ -80,7 +81,7 @@ export default function ProfilePage() {
                   </p>
                 </a>
                 <a
-                  href="/admin/testimonials"
+                  href={assetPath("/admin/testimonials")}
                   className="block bg-deepGreen/10 hover:bg-deepGreen/20 border border-deepGreen/30 rounded-lg p-4 text-deepGreen transition-colors"
                 >
                   <h3 className="font-semibold mb-2">Manage Testimonials</h3>

@@ -118,12 +118,12 @@ export const Hero = () => {
             type="button"
             aria-label="Schedule a Consultation"
             className="!border-gold !text-white hover:!bg-gold hover:!text-white !bg-gold/20 !backdrop-blur-sm"
-            onClick={() => { window.location.href = '/schedule'; }}
+            onClick={() => { window.location.href = assetPath('/schedule'); }}
           >
             Schedule a Consultation
           </CTAButton>
           <a
-            href="/our-firm"
+            href={assetPath("/our-firm")}
             className="inline-flex items-center rounded border border-white/40 bg-white/10 px-6 py-2.5 text-xs uppercase tracking-widest text-white backdrop-blur-sm hover:bg-white/20 transition-colors"
           >
             About Our Firm

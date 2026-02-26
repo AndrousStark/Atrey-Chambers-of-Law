@@ -68,7 +68,7 @@ export const AboutUs = () => {
 
           <div className="flex flex-wrap gap-4">
             <a
-              href="/our-firm"
+              href={assetPath("/our-firm")}
               className="inline-flex items-center gap-2 rounded-lg bg-deepGreen px-6 py-3 text-sm text-cream font-semibold hover:bg-deepGreenLight transition-colors"
             >
               Learn More About Us
@@ -77,7 +77,7 @@ export const AboutUs = () => {
               </svg>
             </a>
             <a
-              href="/our-team"
+              href={assetPath("/our-team")}
               className="inline-flex items-center gap-2 rounded-lg border-2 border-deepGreen px-6 py-3 text-sm text-deepGreen font-semibold hover:bg-deepGreen hover:text-cream transition-colors"
             >
               Meet Our Team

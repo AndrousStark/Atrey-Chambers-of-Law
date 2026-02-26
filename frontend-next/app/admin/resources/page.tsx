@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { TechBackground } from '@/components/TechBackground';
+import { assetPath } from '@/lib/utils';
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { 
@@ -166,7 +167,7 @@ export default function AdminResourcesPage() {
   useEffect(() => {
     const admin = localStorage.getItem('isAdmin');
     if (!admin) {
-      router.push('/signin');
+      router.push(assetPath('/signin'));
     } else {
       setIsAuthenticated(true);
       fetchResources();
@@ -602,7 +603,7 @@ export default function AdminResourcesPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('isAdmin');
-    router.push('/');
+    router.push(assetPath('/'));
   };
 
   if (!isAuthenticated) return null;
@@ -621,7 +622,7 @@ export default function AdminResourcesPage() {
             </h1>
             <div className="flex gap-4">
               <a
-                href="/admin"
+                href={assetPath("/admin")}
                 className="px-4 py-2 bg-charcoal/80 text-cream rounded hover:bg-charcoal transition-colors"
               >
                 Back to Dashboard

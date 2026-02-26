@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { TechBackground } from '@/components/TechBackground';
+import { assetPath } from '@/lib/utils';
 
 interface Testimonial {
   id: string;
@@ -33,7 +34,7 @@ export default function AdminTestimonialsPage() {
   useEffect(() => {
     const admin = localStorage.getItem('isAdmin');
     if (!admin) {
-      router.push('/signin');
+      router.push(assetPath('/signin'));
     } else {
       setIsAuthenticated(true);
       fetchTestimonials();
@@ -202,7 +203,7 @@ export default function AdminTestimonialsPage() {
   const handleLogout = () => {
     localStorage.removeItem('isAdmin');
     window.dispatchEvent(new Event('authChange'));
-    router.push('/');
+    router.push(assetPath('/'));
   };
 
   if (!isAuthenticated) return null;
@@ -221,7 +222,7 @@ export default function AdminTestimonialsPage() {
             </h1>
             <div className="flex gap-4">
               <a
-                href="/profile"
+                href={assetPath("/profile")}
                 className="px-4 py-2 bg-charcoal/80 text-cream rounded hover:bg-charcoal transition-colors"
               >
                 Back to Profile

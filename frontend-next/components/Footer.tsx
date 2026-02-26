@@ -81,13 +81,13 @@ export const Footer = () => {
             <h3 className="font-display font-semibold text-cream mb-5 text-sm uppercase tracking-wider">Quick Links</h3>
             <ul className="space-y-2.5">
               {[
-                { label: 'Our Firm', href: '/our-firm' },
-                { label: 'Our Team', href: '/our-team' },
-                { label: 'Practice Areas', href: '/practice-area' },
-                { label: 'Publications', href: '/publications' },
-                { label: 'Awards', href: '/awards' },
-                { label: 'Our Clients', href: '/our-clients' },
-                { label: 'Schedule Call', href: '/schedule' },
+                { label: 'Our Firm', href: assetPath('/our-firm') },
+                { label: 'Our Team', href: assetPath('/our-team') },
+                { label: 'Practice Areas', href: assetPath('/practice-area') },
+                { label: 'Publications', href: assetPath('/publications') },
+                { label: 'Awards', href: assetPath('/awards') },
+                { label: 'Our Clients', href: assetPath('/our-clients') },
+                { label: 'Schedule Call', href: assetPath('/schedule') },
               ].map((link) => (
                 <li key={link.label}>
                   <a
