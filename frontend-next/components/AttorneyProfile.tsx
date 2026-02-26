@@ -35,14 +35,16 @@ export const AttorneyProfile = ({ member }: AttorneyProfileProps) => {
         {/* Profile header */}
         <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
           {member.photo ? (
-            <img
-              src={assetPath(member.photo!)}
-              alt={member.name}
-              className="w-32 h-32 md:w-40 md:h-40 rounded-lg object-cover shadow-md border-2 border-gold/20"
-            />
+            <div className="w-40 h-52 md:w-48 md:h-64 flex-shrink-0 rounded-lg overflow-hidden shadow-md border-2 border-gold/20">
+              <img
+                src={assetPath(member.photo!)}
+                alt={member.name}
+                className="w-full h-full object-cover object-[center_20%]"
+              />
+            </div>
           ) : (
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-lg bg-deepGreen flex items-center justify-center shadow-md">
-              <span className="text-4xl font-display font-bold text-cream">{member.initials}</span>
+            <div className="w-40 h-52 md:w-48 md:h-64 flex-shrink-0 rounded-lg bg-deepGreen flex items-center justify-center shadow-md">
+              <span className="text-5xl font-display font-bold text-cream">{member.initials}</span>
             </div>
           )}
           <div>

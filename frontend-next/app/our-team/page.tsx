@@ -35,16 +35,18 @@ export default function OurTeamPage() {
                 href={`/our-team/${member.slug}`}
                 className="group block rounded-lg border border-charcoal/10 bg-white p-6 shadow-sm hover:shadow-lg hover:border-gold/30 transition-all"
               >
-                <div className="mb-4 flex justify-center">
+                <div className="mb-5 flex justify-center">
                   {member.photo ? (
-                    <img
-                      src={assetPath(member.photo!)}
-                      alt={member.name}
-                      className="w-28 h-28 rounded-full object-cover border-2 border-gold/20 group-hover:border-gold/50 transition-colors"
-                    />
+                    <div className="w-36 h-44 rounded-xl overflow-hidden border-2 border-gold/20 group-hover:border-gold/50 transition-colors shadow-sm">
+                      <img
+                        src={assetPath(member.photo!)}
+                        alt={member.name}
+                        className="w-full h-full object-cover object-[center_15%]"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-28 h-28 rounded-full bg-deepGreen flex items-center justify-center border-2 border-gold/20">
-                      <span className="text-3xl font-display font-bold text-cream">{member.initials}</span>
+                    <div className="w-36 h-44 rounded-xl bg-deepGreen flex items-center justify-center border-2 border-gold/20">
+                      <span className="text-4xl font-display font-bold text-cream">{member.initials}</span>
                     </div>
                   )}
                 </div>

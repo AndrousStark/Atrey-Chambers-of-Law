@@ -94,21 +94,25 @@ export default function OurFirmPage() {
             className="grid gap-8 md:grid-cols-3 mb-16"
           >
             <a href="/our-team/abhishek-atrey" className="group rounded-lg border border-gold/20 bg-white p-6 text-center hover:shadow-lg hover:border-gold/40 transition-all">
-              <img src={assetPath("/dr-abhishek-atrey.jpg")} alt="Dr. Abhishek Atrey" className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-gold/20 group-hover:border-gold/50 transition-colors" />
+              <div className="w-32 h-40 rounded-xl mx-auto mb-4 overflow-hidden border-2 border-gold/20 group-hover:border-gold/50 transition-colors shadow-sm">
+                <img src={assetPath("/dr-abhishek-atrey.jpg")} alt="Dr. Abhishek Atrey" className="w-full h-full object-cover object-[center_15%]" />
+              </div>
               <h3 className="font-display font-bold text-deepGreen">Dr. Abhishek Atrey</h3>
               <p className="text-sm text-gold">Founder & Managing Partner</p>
               <p className="text-xs text-charcoal/50 mt-1">LL.D., AOR Supreme Court</p>
             </a>
             <a href="/our-team/ambika-atrey" className="group rounded-lg border border-gold/20 bg-white p-6 text-center hover:shadow-lg hover:border-gold/40 transition-all">
-              <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-deepGreen flex items-center justify-center border-2 border-gold/20">
-                <span className="text-2xl font-display font-bold text-cream">AA</span>
+              <div className="w-32 h-40 rounded-xl mx-auto mb-4 bg-deepGreen flex items-center justify-center border-2 border-gold/20">
+                <span className="text-3xl font-display font-bold text-cream">AA</span>
               </div>
               <h3 className="font-display font-bold text-deepGreen">Mrs. Ambika Atrey</h3>
               <p className="text-sm text-gold">Partner</p>
               <p className="text-xs text-charcoal/50 mt-1">M.Com., LL.M.</p>
             </a>
             <a href="/our-team/aniruddh-atrey" className="group rounded-lg border border-gold/20 bg-white p-6 text-center hover:shadow-lg hover:border-gold/40 transition-all">
-              <img src={assetPath("/aniruddh-atrey.png")} alt="Aniruddh Atrey" className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-gold/20 group-hover:border-gold/50 transition-colors" />
+              <div className="w-32 h-40 rounded-xl mx-auto mb-4 overflow-hidden border-2 border-gold/20 group-hover:border-gold/50 transition-colors shadow-sm">
+                <img src={assetPath("/aniruddh-atrey.png")} alt="Aniruddh Atrey" className="w-full h-full object-cover object-[center_15%]" />
+              </div>
               <h3 className="font-display font-bold text-deepGreen">Aniruddh Atrey</h3>
               <p className="text-sm text-gold">Director of Technology</p>
               <p className="text-xs text-charcoal/50 mt-1">M.S. CS (UF), B.Tech</p>

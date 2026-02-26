@@ -98,15 +98,17 @@ export const AboutUs = () => {
         >
           {/* Dr. Atrey photo card */}
           <div className="rounded-xl overflow-hidden border border-gold/20 shadow-md">
-            <img
-              src={assetPath("/dr-abhishek-atrey.jpg")}
-              alt="Dr. Abhishek Atrey — Founder & Managing Partner"
-              className="w-full h-48 object-cover object-top"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-              }}
-            />
+            <div className="w-full aspect-[3/4] overflow-hidden bg-deepGreen/5">
+              <img
+                src={assetPath("/dr-abhishek-atrey.jpg")}
+                alt="Dr. Abhishek Atrey — Founder & Managing Partner"
+                className="w-full h-full object-cover object-[center_15%]"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            </div>
             <div className="p-4 bg-gradient-to-b from-white to-creamWarm/30">
               <p className="font-display font-semibold text-deepGreen">Dr. Abhishek Atrey</p>
               <p className="text-xs text-gold font-medium">Founder & Managing Partner</p>
