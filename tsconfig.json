@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./frontend-next"
+    },
+    {
+      "path": "./backend"
+    }
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "frontend",
+    "frontend/**/*"
+  ]
+}
+

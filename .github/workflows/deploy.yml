@@ -1,0 +1,270 @@
+name: Build, Verify & Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  WORKING_DIR: frontend-next
+  REPO_NAME: Atrey-Chambers-of-Law
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Step 1: Lint & Type Check
+  # ──────────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npx tsc --noEmit --pretty
+        continue-on-error: true
+
+      - name: Next.js lint
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npx next lint --quiet
+        continue-on-error: true
+
+      - name: Check for security issues in dependencies
+        run: npm audit --omit=dev --audit-level=critical
+        continue-on-error: true
+
+  # ──────────────────────────────────────────────
+  # Step 2: Build Static Site
+  # ──────────────────────────────────────────────
+  build:
+    name: Build Static Export
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare for static export
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          echo "── Moving API routes out of build context ──"
+          mv app/api app/_api_backup
+
+          echo "── Patching dynamic pages for static export ──"
+          # Replace force-dynamic with force-static in resources page
+          sed -i "s/dynamic = 'force-dynamic'/dynamic = 'force-static'/g" app/resources/page.tsx || true
+          sed -i "s/revalidate = 0/revalidate = false/g" app/resources/page.tsx || true
+
+          echo "── Verifying next.config.mjs ──"
+          cat next.config.mjs
+
+      - name: Build Next.js static export
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          GITHUB_PAGES: 'true'
+          REPO_NAME: ${{ env.REPO_NAME }}
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npx next build
+
+      - name: Verify build output
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          echo "── Checking build output ──"
+          if [ ! -d "out" ]; then
+            echo "ERROR: out/ directory not found!"
+            exit 1
+          fi
+
+          echo "── Counting generated pages ──"
+          HTML_COUNT=$(find out -name "*.html" | wc -l)
+          echo "Generated $HTML_COUNT HTML pages"
+
+          if [ "$HTML_COUNT" -lt 10 ]; then
+            echo "WARNING: Fewer than 10 pages generated. Build may be incomplete."
+          fi
+
+          echo ""
+          echo "── Verifying critical pages exist ──"
+          CRITICAL_PAGES=(
+            "out/index.html"
+            "out/our-firm/index.html"
+            "out/our-team/index.html"
+            "out/practice-area/index.html"
+            "out/publications/index.html"
+            "out/awards/index.html"
+            "out/schedule/index.html"
+            "out/signin/index.html"
+          )
+
+          MISSING=0
+          for page in "${CRITICAL_PAGES[@]}"; do
+            if [ -f "$page" ]; then
+              echo "  ✓ $page"
+            else
+              echo "  ✗ MISSING: $page"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo ""
+            echo "ERROR: $MISSING critical pages are missing!"
+            exit 1
+          fi
+
+          echo ""
+          echo "── Checking for empty pages ──"
+          for page in "${CRITICAL_PAGES[@]}"; do
+            SIZE=$(wc -c < "$page")
+            if [ "$SIZE" -lt 500 ]; then
+              echo "  WARNING: $page is only $SIZE bytes (possibly empty)"
+            fi
+          done
+
+          echo ""
+          echo "── Build output size ──"
+          du -sh out/
+
+      - name: Add .nojekyll file
+        working-directory: ${{ env.WORKING_DIR }}
+        run: touch out/.nojekyll
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.WORKING_DIR }}/out
+
+  # ──────────────────────────────────────────────
+  # Step 3: Deploy to GitHub Pages
+  # ──────────────────────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ──────────────────────────────────────────────
+  # Step 4: Post-Deploy Verification
+  # ──────────────────────────────────────────────
+  verify:
+    name: Post-Deploy Verification
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment propagation
+        run: sleep 30
+
+      - name: Verify site is live
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ env.REPO_NAME }}"
+          echo "── Verifying deployment at $SITE_URL ──"
+
+          # Check homepage
+          HTTP_CODE=$(curl -sS --ssl-no-revoke -o /dev/null -w "%{http_code}" "$SITE_URL/" || echo "000")
+          echo "Homepage: HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "WARNING: Homepage returned $HTTP_CODE (may still be propagating)"
+          fi
+
+      - name: Verify critical routes
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ env.REPO_NAME }}"
+          echo "── Checking critical routes ──"
+
+          ROUTES=(
+            "/"
+            "/our-firm/"
+            "/our-team/"
+            "/practice-area/"
+            "/publications/"
+            "/awards/"
+            "/schedule/"
+          )
+
+          PASS=0
+          FAIL=0
+
+          for route in "${ROUTES[@]}"; do
+            HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" "${SITE_URL}${route}" 2>/dev/null || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "  ✓ ${route} → HTTP $HTTP_CODE"
+              PASS=$((PASS + 1))
+            else
+              echo "  ✗ ${route} → HTTP $HTTP_CODE"
+              FAIL=$((FAIL + 1))
+            fi
+          done
+
+          echo ""
+          echo "── Results: $PASS passed, $FAIL failed out of ${#ROUTES[@]} routes ──"
+
+          if [ "$FAIL" -gt 3 ]; then
+            echo "ERROR: Too many routes failed verification!"
+            exit 1
+          fi
+
+      - name: Check page content integrity
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ env.REPO_NAME }}"
+
+          echo "── Checking homepage content ──"
+          CONTENT=$(curl -sS "${SITE_URL}/" 2>/dev/null || echo "")
+
+          # Verify key content strings exist
+          CHECKS=(
+            "Atrey Chambers"
+            "Practice Area"
+            "deepGreen"
+          )
+
+          for check in "${CHECKS[@]}"; do
+            if echo "$CONTENT" | grep -qi "$check"; then
+              echo "  ✓ Found: '$check'"
+            else
+              echo "  ✗ Missing: '$check'"
+            fi
+          done
+
+      - name: Deployment summary
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ env.REPO_NAME }}"
+          echo ""
+          echo "════════════════════════════════════════════"
+          echo "  DEPLOYMENT COMPLETE"
+          echo "  URL: $SITE_URL"
+          echo "════════════════════════════════════════════"
