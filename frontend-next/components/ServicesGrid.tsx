@@ -3,7 +3,7 @@
 import { PRACTICE_AREAS } from '@/lib/data/practice-areas';
 import { assetPath } from '@/lib/utils';
 
-const topPracticeAreas = PRACTICE_AREAS.slice(0, 8);
+const topPracticeAreas = PRACTICE_AREAS.slice(0, 10);
 
 const practiceIcons: Record<string, JSX.Element> = {
   'constitutional-law-pil': <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10"><path d="M3 21h18M3 10h18M5 6l7-3 7 3" /><line x1="7" y1="10" x2="7" y2="21" /><line x1="12" y1="10" x2="12" y2="21" /><line x1="17" y1="10" x2="17" y2="21" /></svg>,

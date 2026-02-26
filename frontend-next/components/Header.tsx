@@ -22,7 +22,10 @@ const navItems: NavItem[] = [
       { label: 'Environmental Law & NGT', href: assetPath('/practice-area/environmental-law-ngt'), description: 'NGT & environmental compliance' },
       { label: 'Government Litigation', href: assetPath('/practice-area/government-litigation'), description: 'Union & State representation' },
       { label: 'Criminal Law & Defense', href: assetPath('/practice-area/criminal-law'), description: 'Defense & criminal appeals' },
-      { label: 'View All Practice Areas →', href: assetPath('/practice-area') },
+      { label: 'Arbitration & ADR', href: assetPath('/practice-area/arbitration-adr'), description: 'Domestic & international arbitration' },
+      { label: 'Corporate & Commercial', href: assetPath('/practice-area/corporate-commercial-law'), description: 'Governance, NCLT & transactions' },
+      { label: 'Family Law', href: assetPath('/practice-area/family-law'), description: 'Divorce, custody & succession' },
+      { label: 'View All 24 Practice Areas →', href: assetPath('/practice-area') },
     ],
   },
   {
