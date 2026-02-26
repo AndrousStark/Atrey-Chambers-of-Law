@@ -104,6 +104,16 @@ export const Header = () => {
     return () => clearTimeout(timer);
   }, [prefersReducedMotion]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const handleDropdownEnter = (label: string) => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
     setOpenDropdown(label);
@@ -241,10 +251,10 @@ export const Header = () => {
 
         {/* Mobile Hamburger */}
         <motion.button
-          custom={navItems.length + 1}
-          variants={headerItemVariant}
-          initial="hidden"
-          animate="visible"
+          custom={1}
+          variants={prefersReducedMotion ? {} : headerItemVariant}
+          initial={prefersReducedMotion ? {} : 'hidden'}
+          animate={prefersReducedMotion ? {} : 'visible'}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="flex flex-col items-center justify-center gap-1.5 md:hidden w-11 h-11 rounded-md"
           aria-label="Toggle menu"
@@ -254,68 +264,79 @@ export const Header = () => {
           <motion.span className="h-0.5 w-6 bg-charcoal block" animate={mobileMenuOpen ? { opacity: 0 } : { opacity: 1 }} transition={{ duration: 0.2 }} />
           <motion.span className="h-0.5 w-6 bg-charcoal block" animate={mobileMenuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }} transition={{ duration: 0.2 }} />
         </motion.button>
-
-        {/* Mobile Menu — Full-screen drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9998] bg-cream/98 backdrop-blur-md md:hidden overflow-y-auto"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <motion.nav
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -20, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center gap-6 pt-24 pb-12 px-8"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {navItems.map((item, index) => (
-                  <div key={item.label} className="w-full text-center">
-                    <motion.a
-                      href={item.href}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.06 }}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-lg font-display text-charcoal hover:text-deepGreen transition-colors block py-2"
-                    >
-                      {item.label}
-                    </motion.a>
-                    {item.children && (
-                      <div className="mt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <a
-                            key={child.label}
-                            href={child.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block text-sm text-charcoal/60 hover:text-deepGreen py-1 transition-colors"
-                          >
-                            {child.label}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <motion.a
-                  href={assetPath("/schedule")}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: navItems.length * 0.06 }}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="mt-4 rounded bg-deepGreen px-8 py-3 text-base text-cream font-semibold hover:bg-deepGreenLight transition-colors"
-                >
-                  Schedule Call
-                </motion.a>
-              </motion.nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.header>
+
+      {/* Mobile Menu — Full-screen drawer (OUTSIDE header to avoid backdrop-filter containing block) */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10002] bg-cream/98 backdrop-blur-md md:hidden overflow-y-auto"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {/* Close button at top-right */}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute top-5 right-4 w-11 h-11 flex items-center justify-center rounded-md z-10"
+              aria-label="Close menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-charcoal">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+
+            <motion.nav
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-6 pt-24 pb-12 px-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {navItems.map((item, index) => (
+                <div key={item.label} className="w-full text-center">
+                  <motion.a
+                    href={item.href}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.06 }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-lg font-display text-charcoal hover:text-deepGreen transition-colors block py-2"
+                  >
+                    {item.label}
+                  </motion.a>
+                  {item.children && (
+                    <div className="mt-1 space-y-1">
+                      {item.children.map((child) => (
+                        <a
+                          key={child.label}
+                          href={child.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block text-sm text-charcoal/60 hover:text-deepGreen py-1 transition-colors"
+                        >
+                          {child.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <motion.a
+                href={assetPath("/schedule")}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: navItems.length * 0.06 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="mt-4 rounded bg-deepGreen px-8 py-3 text-base text-cream font-semibold hover:bg-deepGreenLight transition-colors"
+              >
+                Schedule Call
+              </motion.a>
+            </motion.nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

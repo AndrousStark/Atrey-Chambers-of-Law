@@ -149,6 +149,10 @@ export const PageTransition = ({ children }: { children: React.ReactNode }) => {
     return () => {
       links.forEach((link) => link.removeEventListener('click', onAnchorClick as EventListener));
       if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+      // Safety: ensure overlays don't block interaction on cleanup
+      isTransitioning.current = false;
+      if (overlayRef.current) overlayRef.current.style.pointerEvents = 'none';
+      if (logoOverlayRef.current) logoOverlayRef.current.style.pointerEvents = 'none';
     };
   }, [pathname, onAnchorClick, revealPage, prefersReducedMotion]);
 
