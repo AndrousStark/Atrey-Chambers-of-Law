@@ -86,7 +86,8 @@ export const Footer = () => {
                 { label: 'Practice Areas', href: assetPath('/practice-area') },
                 { label: 'Publications', href: assetPath('/publications') },
                 { label: 'Awards', href: assetPath('/awards') },
-                { label: 'Our Clients', href: assetPath('/our-clients') },
+                { label: 'Careers', href: assetPath('/careers') },
+                { label: 'Contact', href: assetPath('/contact') },
                 { label: 'Schedule Call', href: assetPath('/schedule') },
               ].map((link) => (
                 <li key={link.label}>
@@ -145,7 +146,6 @@ export const Footer = () => {
               noValidate
               onSubmit={async (e) => {
                 e.preventDefault();
-                // Validate all
                 const nameErr = validateFooterField('name', formData.name);
                 const emailErr = validateFooterField('email', formData.email);
                 const msgErr = validateFooterField('message', formData.message);
@@ -172,12 +172,18 @@ export const Footer = () => {
                     setFieldErrors({});
                     setTouchedFields({});
                   } else {
-                    setSubmitStatus('error');
-                    setSubmitMessage(data.error || 'Failed to send. Please try again.');
+                    throw new Error(data.error || 'Failed to send');
                   }
                 } catch {
-                  setSubmitStatus('error');
-                  setSubmitMessage('An error occurred. Please try again.');
+                  // Fallback: open mailto for static export
+                  const subject = encodeURIComponent(`Contact from ${formData.name}`);
+                  const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`);
+                  window.open(`mailto:support@atreychambers.com?subject=${subject}&body=${body}`, '_blank');
+                  setSubmitStatus('success');
+                  setSubmitMessage('Opening your email client...');
+                  setFormData({ name: '', email: '', message: '' });
+                  setFieldErrors({});
+                  setTouchedFields({});
                 } finally {
                   setIsSubmitting(false);
                 }
@@ -263,6 +269,13 @@ export const Footer = () => {
             <p className="text-center max-w-md">
               As per the rules of the Bar Council of India, law firms are not permitted to solicit work or advertise.
             </p>
+            <div className="flex items-center gap-4">
+              <a href={assetPath('/privacy-policy')} className="hover:text-cream/60 transition-colors">Privacy Policy</a>
+              <span className="text-cream/20">|</span>
+              <a href={assetPath('/terms-of-service')} className="hover:text-cream/60 transition-colors">Terms</a>
+              <span className="text-cream/20">|</span>
+              <a href={assetPath('/faq')} className="hover:text-cream/60 transition-colors">FAQ</a>
+            </div>
             <p>
               Designed by{' '}
               <a

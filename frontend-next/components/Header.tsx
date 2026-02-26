@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
       { label: 'Arbitration & ADR', href: assetPath('/practice-area/arbitration-adr'), description: 'Domestic & international arbitration' },
       { label: 'Corporate & Commercial', href: assetPath('/practice-area/corporate-commercial-law'), description: 'Governance, NCLT & transactions' },
       { label: 'Family Law', href: assetPath('/practice-area/family-law'), description: 'Divorce, custody & succession' },
-      { label: 'View All 24 Practice Areas →', href: assetPath('/practice-area') },
+      { label: 'View All 32 Practice Areas →', href: assetPath('/practice-area') },
     ],
   },
   {
@@ -49,7 +49,8 @@ const navItems: NavItem[] = [
     ],
   },
   { label: 'Media', href: assetPath('/publications') + '#media' },
-  { label: 'Contact', href: assetPath('/') + '#contact' },
+  { label: 'Careers', href: assetPath('/careers') },
+  { label: 'Contact', href: assetPath('/contact') },
 ];
 
 export const Header = () => {

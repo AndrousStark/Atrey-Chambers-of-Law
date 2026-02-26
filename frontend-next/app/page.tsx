@@ -14,15 +14,28 @@ import { Footer } from '@/components/Footer';
 import { BCIDisclaimer } from '@/components/BCIDisclaimer';
 import { StatsSection } from '@/components/StatsSection';
 import { AwardsMarquee } from '@/components/AwardsMarquee';
+import { HowWeWork } from '@/components/HowWeWork';
 import { useScrollTimeline } from '@/hooks/useScrollTimeline';
 import { useState } from 'react';
+import { generateWebSiteSchema, generateSiteNavigationSchema } from '@/lib/schema';
 
 export default function Page() {
   const [demoMode] = useState(false);
   useScrollTimeline(demoMode);
 
+  const websiteSchema = generateWebSiteSchema();
+  const navSchema = generateSiteNavigationSchema();
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(navSchema) }}
+      />
       <BCIDisclaimer />
       <Hero />
       <Section id="our-firm" className="bg-white">
@@ -31,6 +44,9 @@ export default function Page() {
       <StatsSection />
       <Section id="features" className="bg-cream">
         <FeaturesSection />
+      </Section>
+      <Section id="how-we-work" className="bg-white">
+        <HowWeWork />
       </Section>
       <Section id="practice-area" className="services-section">
         <ServicesGrid />

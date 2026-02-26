@@ -903,6 +903,105 @@ p, li {
   100% { transform: translateY(-10vh) scale(1); opacity: 0; }
 }
 
+/* ===== PREMIUM GLASS MORPHISM UTILITIES ===== */
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(14, 59, 47, 0.06);
+}
+
+.glass-card-dark {
+  background: rgba(14, 59, 47, 0.8);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(242, 235, 221, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F2EBDD;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(14, 59, 47, 0.25);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 59, 47, 0.45);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(14, 59, 47, 0.25) #F2EBDD;
+}
+
+/* ===== FOCUS VISIBLE RINGS ===== */
+*:focus-visible {
+  outline: 2px solid rgba(14, 59, 47, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(184, 134, 11, 0.6);
+  outline-offset: 2px;
+}
+
+/* ===== DETAILS/SUMMARY ANIMATION ===== */
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ===== PRINT STYLESHEET ===== */
+@media print {
+  header, footer, .scroll-indicator, .transition-overlay, .logo-overlay {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .hero {
+    display: none !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+}
+
+/* ===== REDUCED MOTION SAFETY ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Line separator with gold accent */
 .gold-line {
   height: 1px;
