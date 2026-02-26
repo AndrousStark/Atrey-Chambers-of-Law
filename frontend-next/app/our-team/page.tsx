@@ -2,6 +2,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { TEAM_MEMBERS } from '@/lib/data/team';
 import { Badge } from '@/components/ui/Badge';
+import { assetPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -37,7 +38,7 @@ export default function OurTeamPage() {
                 <div className="mb-4 flex justify-center">
                   {member.photo ? (
                     <img
-                      src={member.photo}
+                      src={assetPath(member.photo!)}
                       alt={member.name}
                       className="w-28 h-28 rounded-full object-cover border-2 border-gold/20 group-hover:border-gold/50 transition-colors"
                     />

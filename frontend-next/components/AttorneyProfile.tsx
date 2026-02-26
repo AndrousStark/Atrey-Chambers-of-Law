@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { type TeamMember } from '@/lib/data/team';
+import { assetPath } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { Divider } from '@/components/ui/Divider';
 
@@ -35,7 +36,7 @@ export const AttorneyProfile = ({ member }: AttorneyProfileProps) => {
         <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
           {member.photo ? (
             <img
-              src={member.photo}
+              src={assetPath(member.photo!)}
               alt={member.name}
               className="w-32 h-32 md:w-40 md:h-40 rounded-lg object-cover shadow-md border-2 border-gold/20"
             />

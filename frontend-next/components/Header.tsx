@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, useSpring, useTransform, useScroll } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { headerContainerVariant, headerItemVariant, logoVariant } from '@/lib/animations';
+import { assetPath } from '@/lib/utils';
 
 interface NavItem {
   label: string;
@@ -148,14 +149,14 @@ export const Header = () => {
         role="banner"
       >
         <motion.a
-          href="/"
+          href={assetPath("/")}
           variants={prefersReducedMotion ? {} : logoVariant}
           initial="hidden"
           animate="visible"
           className="flex items-center gap-2.5 md:gap-3 md:mr-8"
         >
           <img
-            src="/logo ac.png"
+            src={assetPath("/logo ac.png")}
             alt="Atrey Chambers Logo"
             className="h-7 w-7 md:h-9 md:w-9 object-contain flex-shrink-0"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

@@ -92,8 +92,32 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
           REPO_NAME: ${{ env.REPO_NAME }}
+          NEXT_PUBLIC_BASE_PATH: /${{ env.REPO_NAME }}
           NEXT_TELEMETRY_DISABLED: '1'
         run: npx next build
+
+      - name: Fix asset paths for GitHub Pages subpath
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          BASE="/${{ env.REPO_NAME }}"
+          echo "── Rewriting paths with basePath: $BASE ──"
+
+          # Rewrite src="/..." and href="/..." in all HTML files to include basePath
+          # But skip external URLs (http/https), anchors (#), and already-prefixed paths
+          find out -name "*.html" -exec sed -i \
+            -e "s|src=\"/|src=\"${BASE}/|g" \
+            -e "s|href=\"/\"|href=\"${BASE}/\"|g" \
+            -e "s|href=\"/\([a-z]\)|href=\"${BASE}/\1|g" \
+            {} +
+
+          # Fix double-prefixed paths (if basePath was already applied by Next.js)
+          find out -name "*.html" -exec sed -i \
+            -e "s|${BASE}${BASE}|${BASE}|g" \
+            {} +
+
+          # Verify a sample file
+          echo "── Sample path check (index.html) ──"
+          grep -oE '(src|href)="[^"]*"' out/index.html | head -15
 
       - name: Verify build output
         working-directory: ${{ env.WORKING_DIR }}

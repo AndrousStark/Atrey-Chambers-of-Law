@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Divider } from '@/components/ui/Divider';
+import { assetPath } from '@/lib/utils';
 
 export const Footer = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -51,7 +52,7 @@ export const Footer = () => {
           <div>
             <div className="flex items-center gap-3 mb-5">
               <img
-                src="/logo ac.png"
+                src={assetPath("/logo ac.png")}
                 alt="Atrey Chambers Logo"
                 className="h-10 w-10 object-contain"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

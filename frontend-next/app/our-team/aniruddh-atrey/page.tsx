@@ -6,6 +6,7 @@ import { getTeamMember } from '@/lib/data/team';
 import { Badge } from '@/components/ui/Badge';
 import { Divider } from '@/components/ui/Divider';
 import { notFound } from 'next/navigation';
+import { assetPath } from '@/lib/utils';
 
 export default function AniruddhAtreyPage() {
   const member = getTeamMember('aniruddh-atrey');
@@ -23,7 +24,7 @@ export default function AniruddhAtreyPage() {
               <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
                 {member.photo && (
                   <img
-                    src={member.photo}
+                    src={assetPath(member.photo)}
                     alt={member.name}
                     className="w-32 h-32 md:w-40 md:h-40 rounded-lg object-cover shadow-md border-2 border-gold/20"
                   />

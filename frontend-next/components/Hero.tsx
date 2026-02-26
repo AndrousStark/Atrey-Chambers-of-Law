@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { CTAButton } from '@/components/CTAButton';
 import { heroLineVariant } from '@/lib/animations';
+import { assetPath } from '@/lib/utils';
 
 const credentials = [
   'Advocate-on-Record, Supreme Court',
@@ -69,7 +70,7 @@ export const Hero = () => {
       <div className="hero__cnt">
         <div className="hero__logo-wrapper">
           <img
-            src="/ChatGPT Image Dec 24, 2025, 09_56_01 PM.png"
+            src={assetPath("/ChatGPT Image Dec 24, 2025, 09_56_01 PM.png")}
             alt="Atrey Chambers Logo"
             className="hero__logo"
             onError={(e) => {

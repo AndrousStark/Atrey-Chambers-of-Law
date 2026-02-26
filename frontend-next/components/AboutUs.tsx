@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { fadeUp, slideInFromLeft, slideInFromRight } from '@/lib/animations';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { assetPath } from '@/lib/utils';
 
 const highlights = [
   {
@@ -98,7 +99,7 @@ export const AboutUs = () => {
           {/* Dr. Atrey photo card */}
           <div className="rounded-xl overflow-hidden border border-gold/20 shadow-md">
             <img
-              src="/dr-abhishek-atrey.jpg"
+              src={assetPath("/dr-abhishek-atrey.jpg")}
               alt="Dr. Abhishek Atrey — Founder & Managing Partner"
               className="w-full h-48 object-cover object-top"
               onError={(e) => {
