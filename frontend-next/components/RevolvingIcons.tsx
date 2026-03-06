@@ -52,7 +52,7 @@ export const RevolvingIcons = () => {
     const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
     return (
-        <div ref={containerRef} className="h-[60vh] flex items-center justify-center relative perspective-1000 overflow-hidden">
+        <div ref={containerRef} className="h-[40vh] md:h-[60vh] flex items-center justify-center relative perspective-1000 overflow-hidden">
             <motion.div
                 style={{ opacity, scale }}
                 className="relative w-64 h-64 md:w-96 md:h-96 preserve-3d"

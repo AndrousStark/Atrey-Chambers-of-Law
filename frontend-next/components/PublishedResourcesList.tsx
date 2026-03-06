@@ -287,22 +287,22 @@ export const PublishedResourcesList = ({ resourceType }: PublishedResourcesListP
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                            className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] md:max-h-[90vh] overflow-y-auto"
                         >
-                            <div className="sticky top-0 bg-white border-b border-charcoal/20 px-6 py-4 flex justify-between items-center">
-                                <h2 
-                                    className="text-2xl font-bold text-deepGreen"
+                            <div className="sticky top-0 bg-white border-b border-charcoal/20 px-4 py-3 md:px-6 md:py-4 flex justify-between items-start gap-3">
+                                <h2
+                                    className="text-lg md:text-2xl font-bold text-deepGreen"
                                     dangerouslySetInnerHTML={{ __html: selectedResource.heading }}
                                 />
                                 <button
                                     onClick={() => setSelectedResource(null)}
-                                    className="text-charcoal/60 hover:text-charcoal text-2xl font-bold"
+                                    className="text-charcoal/60 hover:text-charcoal text-2xl font-bold flex-shrink-0 w-10 h-10 flex items-center justify-center"
                                 >
                                     ×
                                 </button>
                             </div>
                             
-                            <div className="p-6">
+                            <div className="p-4 md:p-6">
                                 {selectedResource.images && selectedResource.images.length > 0 && (() => {
                                     const coverIndex = (selectedResource as any).coverImageIndex !== undefined 
                                         ? (selectedResource as any).coverImageIndex 

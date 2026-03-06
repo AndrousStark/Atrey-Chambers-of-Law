@@ -36,7 +36,7 @@ export const BCIDisclaimer = () => {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-lg rounded-lg bg-cream p-8 shadow-2xl"
+            className="w-full max-w-lg rounded-lg bg-cream p-5 md:p-8 shadow-2xl max-h-[85vh] overflow-y-auto"
           >
             <h2
               id="bci-title"

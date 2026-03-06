@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { list } from '@vercel/blob';
+import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic';
@@ -9,13 +10,13 @@ const TESTIMONIALS_BLOB_KEY = 'testimonials.json';
 
 async function readTestimonials() {
   try {
-    const { blobs } = await list({ 
-      prefix: TESTIMONIALS_BLOB_KEY, 
-      token: process.env.BLOB_READ_WRITE_TOKEN 
+    const { blobs } = await list({
+      prefix: TESTIMONIALS_BLOB_KEY,
+      token: process.env.BLOB_READ_WRITE_TOKEN
     });
-    
+
     const testimonialBlob = blobs.find(blob => blob.pathname === TESTIMONIALS_BLOB_KEY);
-    
+
     if (!testimonialBlob) {
       return { testimonials: [] };
     }
@@ -28,7 +29,7 @@ async function readTestimonials() {
     if (!response.ok) {
       return { testimonials: [] };
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -37,11 +38,18 @@ async function readTestimonials() {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Rate limit: 60 requests per minute per IP
+  const ip = getClientIp(req);
+  const rateCheck = checkRateLimit(`testimonials-published:${ip}`, RATE_LIMITS.publicRead);
+  if (!rateCheck.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+  }
+
   try {
     const data = await readTestimonials();
-    const publishedTestimonials = data.testimonials.filter((t: any) => t.published);
-    
+    const publishedTestimonials = data.testimonials.filter((t: Record<string, unknown>) => t.published);
+
     // Disable caching to ensure fresh data
     return NextResponse.json(publishedTestimonials, {
       headers: {
@@ -55,4 +63,3 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to read published testimonials' }, { status: 500 });
   }
 }
-

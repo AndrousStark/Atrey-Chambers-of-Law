@@ -36,7 +36,7 @@ export const Hero = () => {
 
   return (
     <main id="main-content" className="hero">
-      <Header />
+      <Header variant="hero" />
 
       <div className="hero__bg">
         <picture>
@@ -70,7 +70,7 @@ export const Hero = () => {
       <div className="hero__cnt">
         <div className="hero__logo-wrapper">
           <img
-            src={assetPath("/ChatGPT Image Dec 24, 2025, 09_56_01 PM.png")}
+            src={assetPath("/logo.png")}
             alt="Atrey Chambers Logo"
             className="hero__logo"
             onError={(e) => {
@@ -100,7 +100,7 @@ export const Hero = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5, ease: [0.2, 0.9, 0.3, 1] }}
               className="text-cream/80 text-base md:text-lg font-accent italic tracking-wide absolute inset-x-0"
-              style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.25rem)' }}
+              style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.25rem)' }}
             >
               of Law LLP — {taglines[taglineIndex]}
             </motion.p>
@@ -112,7 +112,7 @@ export const Hero = () => {
           variants={prefersReducedMotion ? {} : heroLineVariant}
           initial="hidden"
           animate="visible"
-          className="mt-8 flex flex-wrap gap-3 justify-center"
+          className="mt-5 md:mt-8 flex flex-wrap gap-3 justify-center px-2"
         >
           <CTAButton
             type="button"
@@ -136,11 +136,11 @@ export const Hero = () => {
           variants={prefersReducedMotion ? {} : heroLineVariant}
           initial="hidden"
           animate="visible"
-          className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4"
+          className="mt-6 md:mt-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 px-3 md:px-4"
           style={{ textTransform: 'none' }}
         >
           {credentials.map((cred, i) => (
-            <span key={cred} className="flex items-center gap-5 text-cream text-sm md:text-base tracking-wide font-medium" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>
+            <span key={cred} className="flex items-center gap-3 md:gap-5 text-cream text-xs md:text-base tracking-wide font-medium" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>
               <span>{cred}</span>
               {i < credentials.length - 1 && (
                 <span className="hidden md:inline h-1.5 w-1.5 rounded-full bg-gold" />

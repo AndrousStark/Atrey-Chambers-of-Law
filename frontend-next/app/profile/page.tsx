@@ -11,18 +11,34 @@ export default function ProfilePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
+  const [adminEmail, setAdminEmail] = useState('');
+
   useEffect(() => {
-    const admin = localStorage.getItem('isAdmin');
-    if (!admin) {
-      router.push(assetPath('/signin'));
-    } else {
-      setIsAuthenticated(true);
-    }
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.role === 'admin') {
+            setIsAuthenticated(true);
+            setAdminEmail(data.email || '');
+            return;
+          }
+        }
+        router.push(assetPath('/signin'));
+      } catch {
+        router.push(assetPath('/signin'));
+      }
+    };
+    checkSession();
   }, [router]);
 
-  const handleSignOut = () => {
-    localStorage.removeItem('isAdmin');
-    // Dispatch custom event to update Header
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Sign out even if the API call fails
+    }
     window.dispatchEvent(new Event('authChange'));
     router.push(assetPath('/'));
   };
@@ -47,6 +63,16 @@ export default function ProfilePage() {
                 Account Information
               </h2>
               <div className="space-y-4">
+                {adminEmail && (
+                  <div>
+                    <label className="block text-sm font-medium text-charcoal mb-2">
+                      Email
+                    </label>
+                    <div className="w-full rounded border border-charcoal/30 bg-cream/50 px-4 py-3 text-charcoal">
+                      {adminEmail}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-2">
                     Role

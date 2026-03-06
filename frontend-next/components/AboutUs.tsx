@@ -48,7 +48,7 @@ export const AboutUs = () => {
         subtitle="Where legal excellence meets unwavering commitment to justice"
       />
 
-      <div className="grid gap-12 lg:grid-cols-[1fr_1px_380px] items-start">
+      <div className="grid gap-8 md:gap-12 lg:grid-cols-[1fr_1px_380px] items-start">
         {/* Main content */}
         <motion.div
           variants={prefersReducedMotion ? {} : slideInFromLeft}

@@ -20,31 +20,38 @@ export function generateMetadata({ params }: Props): Metadata {
   const area = getPracticeArea(params.slug);
   if (!area) return { title: 'Practice Area' };
 
-  const title = `${area.title} — Expert Legal Services`;
-  const description = area.description.length > 155
-    ? area.description.slice(0, 155) + '…'
+  const title = `${area.title} — Dr. Abhishek Atrey | Expert Legal Services`;
+  const descBase = area.description.length > 120
+    ? area.description.slice(0, 120) + '…'
     : area.description;
+  const description = `${descBase} Consult Dr. Abhishek Atrey (Abhishek Atrey), Advocate-on-Record, Supreme Court of India, at Atrey Chambers of Law LLP for expert ${area.shortTitle} representation.`;
 
   return {
     title,
     description,
     keywords: [
+      `Dr. Abhishek Atrey ${area.shortTitle}`,
+      `Abhishek Atrey ${area.shortTitle}`,
+      `Dr. Atrey ${area.shortTitle}`,
       area.title,
       area.shortTitle,
-      'lawyer India',
-      'advocate Delhi',
+      `${area.shortTitle} lawyer India`,
+      `${area.shortTitle} advocate Delhi`,
+      'Dr. Abhishek Atrey',
+      'Abhishek Atrey',
+      'Atrey Chambers',
       ...area.keyMatters.slice(0, 4),
     ],
     openGraph: {
-      title,
-      description,
+      title: `${area.title} — Dr. Abhishek Atrey, Atrey Chambers`,
+      description: `${area.shortTitle} expertise by Advocate Abhishek Atrey, AOR Supreme Court. ${descBase}`,
       url: `https://www.atreychambers.com/practice-area/${area.slug}`,
       type: 'website',
     },
     twitter: {
       card: 'summary',
-      title: area.title,
-      description,
+      title: `${area.title} — Dr. Abhishek Atrey`,
+      description: `Consult Abhishek Atrey for ${area.shortTitle}. ${descBase}`,
     },
     alternates: {
       canonical: `https://www.atreychambers.com/practice-area/${area.slug}`,
@@ -122,7 +129,7 @@ export default function PracticeAreaDetailPage({ params }: Props) {
             ]}
           />
 
-          <div className="grid gap-10 lg:grid-cols-[1fr_300px]">
+          <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
             {/* Main content */}
             <div>
               <h1 className="text-3xl md:text-4xl font-display font-bold text-deepGreen mb-4">

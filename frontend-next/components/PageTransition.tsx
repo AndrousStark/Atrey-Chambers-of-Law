@@ -165,9 +165,9 @@ export const PageTransition = ({ children }: { children: React.ReactNode }) => {
       <div ref={overlayRef} className="transition-overlay" />
       <div ref={logoOverlayRef} className="logo-overlay">
         <div className="logo-overlay-container">
-          <div className="relative w-[180px] h-[180px] rounded-full overflow-hidden mb-6 border-2 border-gold/30">
+          <div className="relative w-[120px] h-[120px] md:w-[180px] md:h-[180px] rounded-full overflow-hidden mb-6 border-2 border-gold/30">
             <img
-              src={assetPath('/logo ac.png')}
+              src={assetPath('/logo.png')}
               alt="Atrey Chambers"
               className="w-full h-full object-contain p-4"
             />

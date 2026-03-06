@@ -29,7 +29,7 @@ export const AttorneyProfile = ({ member }: AttorneyProfileProps) => {
   const visibleTabs = tabs.filter((t) => t.show);
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_320px] overflow-x-hidden">
+    <div className="grid gap-8 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_320px] overflow-x-hidden">
       {/* Main content */}
       <div>
         {/* Profile header */}

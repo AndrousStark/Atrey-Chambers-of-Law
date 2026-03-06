@@ -1,9 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { sanitizeForEmail, isValidEmail } from '@/lib/sanitize';
+import { validateOrigin } from '@/lib/csrf';
+import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+    // CSRF protection
+    if (!validateOrigin(req)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Rate limiting: 5 submissions per 10 minutes per IP
+    const ip = getClientIp(req);
+    const rateCheck = checkRateLimit(`contact:${ip}`, RATE_LIMITS.contactForm);
+    if (!rateCheck.allowed) {
+        return NextResponse.json(
+            { error: 'Too many submissions. Please try again later.' },
+            {
+                status: 429,
+                headers: { 'Retry-After': String(Math.ceil((rateCheck.resetAt - Date.now()) / 1000)) },
+            }
+        );
+    }
+
     try {
         const body = await req.json();
         const { name, email, message } = body;
@@ -11,6 +32,16 @@ export async function POST(req: NextRequest) {
         if (!name || !email || !message) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
+
+        // Validate email format
+        if (!isValidEmail(email)) {
+            return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+        }
+
+        // Sanitize all user inputs for safe HTML insertion
+        const safeName = sanitizeForEmail(name);
+        const safeEmail = sanitizeForEmail(email);
+        const safeMessage = sanitizeForEmail(message);
 
         // Configure Nodemailer
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -27,51 +58,50 @@ export async function POST(req: NextRequest) {
         });
 
         const adminEmail = process.env.ADMIN_EMAIL || 'atreychambersoflaw@gmail.com';
-        // Construct schedule URL from request origin
-        const origin = req.headers.get('origin') || req.headers.get('referer') || 'https://atrey-chambers.com';
-        const baseUrl = origin.replace(/\/$/, ''); // Remove trailing slash
+        const origin = req.headers.get('origin') || req.headers.get('referer') || 'https://www.atreychambers.com';
+        const baseUrl = origin.replace(/\/$/, '');
         const scheduleUrl = `${baseUrl}/schedule`;
 
-        // Send Email to Admin
+        // Send Email to Admin (using sanitized values)
         await transporter.sendMail({
             from: 'atreychambersoflaw@gmail.com',
             to: adminEmail,
-            subject: `New Contact Form Submission from ${name}`,
+            subject: `New Contact Form Submission from ${safeName}`,
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #0E3B2F;">New Contact Form Submission</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Name:</strong> ${safeName}</p>
+            <p><strong>Email:</strong> ${safeEmail}</p>
             <p><strong>Message:</strong></p>
             <div style="background-color: #F2EBDD; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <p style="white-space: pre-wrap;">${message}</p>
+                <p style="white-space: pre-wrap;">${safeMessage}</p>
             </div>
         </div>
       `,
             text: `
         New contact form submission.
-        
-        Name: ${name}
-        Email: ${email}
-        Message: ${message}
+
+        Name: ${safeName}
+        Email: ${safeEmail}
+        Message: ${safeMessage}
       `,
         });
 
-        // Send Thank You Email to User with promotional content and schedule link
+        // Send Thank You Email to User (using sanitized values)
         await transporter.sendMail({
             from: 'atreychambersoflaw@gmail.com',
-            to: email,
+            to: email.trim(),
             subject: 'Thank You for Contacting Atrey Chambers of Law LLP',
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
                 <h1 style="color: #0E3B2F; margin: 0;">Atrey Chambers of Law LLP</h1>
             </div>
-            
-            <h2 style="color: #0E3B2F;">Thank You for Reaching Out, ${name}!</h2>
-            
+
+            <h2 style="color: #0E3B2F;">Thank You for Reaching Out, ${safeName}!</h2>
+
             <p>We have received your message and truly appreciate you taking the time to contact us. Our team of highly experienced and talented legal professionals is committed to providing exceptional legal services tailored to your unique needs.</p>
-            
+
             <div style="background-color: #0E3B2F; color: #F2EBDD; padding: 20px; border-radius: 8px; margin: 30px 0;">
                 <h3 style="margin-top: 0; color: #F2EBDD;">Why Choose Atrey Chambers?</h3>
                 <ul style="line-height: 1.8;">
@@ -82,29 +112,29 @@ export async function POST(req: NextRequest) {
                     <li><strong>Esteemed Clientele:</strong> We are proud to serve government entities, major corporations, and distinguished organizations across India</li>
                 </ul>
             </div>
-            
+
             <p style="font-size: 18px; font-weight: bold; color: #0E3B2F; text-align: center; margin: 30px 0;">
                 Ready to take the next step? Schedule a consultation with our expert team!
             </p>
-            
+
             <div style="text-align: center; margin: 30px 0;">
                 <a href="${scheduleUrl}" style="background-color: #0E3B2F; color: #F2EBDD; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
                     Schedule a Call with Us
                 </a>
             </div>
-            
+
             <p>Our team will review your message and get back to you within 24-48 hours. In the meantime, feel free to explore our website to learn more about our services and expertise.</p>
-            
+
             <div style="background-color: #F2EBDD; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <p style="margin: 5px 0;"><strong>Address:</strong> 24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092</p>
                 <p style="margin: 5px 0;"><strong>Phone:</strong> +91-11-22053080, 22023821</p>
                 <p style="margin: 5px 0;"><strong>Email:</strong> support@atreychambers.com</p>
             </div>
-            
+
             <p style="margin-top: 30px;">
                 We look forward to the opportunity to serve you and help you achieve your legal objectives.
             </p>
-            
+
             <p style="margin-top: 30px;">
                 Best regards,<br>
                 <strong>The Team at Atrey Chambers of Law LLP</strong>
@@ -112,30 +142,30 @@ export async function POST(req: NextRequest) {
         </div>
       `,
             text: `
-        Thank You for Reaching Out, ${name}!
-        
+        Thank You for Reaching Out, ${safeName}!
+
         We have received your message and truly appreciate you taking the time to contact us. Our team of highly experienced and talented legal professionals is committed to providing exceptional legal services tailored to your unique needs.
-        
+
         Why Choose Atrey Chambers?
         - Expert Legal Team: Our attorneys bring decades of combined experience across diverse practice areas
         - Proven Track Record: We have successfully represented clients in complex legal matters, including cases before the Supreme Court of India, High Courts, and various tribunals
         - Client-Focused Approach: We understand that every case is unique and requires personalized attention and strategic solutions
         - Comprehensive Services: From corporate law to intellectual property, from infrastructure projects to international arbitration, we cover all aspects of legal practice
         - Esteemed Clientele: We are proud to serve government entities, major corporations, and distinguished organizations across India
-        
+
         Ready to take the next step? Schedule a consultation with our expert team!
-        
+
         Schedule a Call: ${scheduleUrl}
-        
+
         Our team will review your message and get back to you within 24-48 hours. In the meantime, feel free to explore our website to learn more about our services and expertise.
-        
+
         Contact Information:
         Address: 24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092
         Phone: +91-11-22053080, 22023821
         Email: support@atreychambers.com
-        
+
         We look forward to the opportunity to serve you and help you achieve your legal objectives.
-        
+
         Best regards,
         The Team at Atrey Chambers of Law LLP
       `,
@@ -147,4 +177,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
-

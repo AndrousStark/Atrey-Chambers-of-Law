@@ -162,16 +162,29 @@ export default function AdminResourcesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [uploadingVideoIndex, setUploadingVideoIndex] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const admin = localStorage.getItem('isAdmin');
-    if (!admin) {
-      router.push(assetPath('/signin'));
-    } else {
-      setIsAuthenticated(true);
-      fetchResources();
-    }
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.role === 'admin') {
+            setIsAuthenticated(true);
+            fetchResources();
+            return;
+          }
+        }
+        router.push(assetPath('/signin'));
+      } catch {
+        router.push(assetPath('/signin'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkSession();
   }, [router]);
 
   const fetchResources = async () => {
@@ -601,10 +614,23 @@ export default function AdminResourcesPage() {
     setEditingResource(null);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAdmin');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Logout even if the API call fails
+    }
+    window.dispatchEvent(new Event('authChange'));
     router.push(assetPath('/'));
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-cream flex items-center justify-center">
+        <p className="text-charcoal/60">Loading...</p>
+      </main>
+    );
+  }
 
   if (!isAuthenticated) return null;
 
@@ -616,11 +642,11 @@ export default function AdminResourcesPage() {
       
       <div className="relative z-10 pt-32 pb-20 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-deepGreen font-display">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h1 className="text-3xl md:text-5xl font-bold text-deepGreen font-display">
               Manage Resources
             </h1>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-2 sm:gap-4">
               <a
                 href={assetPath("/admin")}
                 className="px-4 py-2 bg-charcoal/80 text-cream rounded hover:bg-charcoal transition-colors"

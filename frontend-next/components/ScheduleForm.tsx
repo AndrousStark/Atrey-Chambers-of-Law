@@ -140,11 +140,11 @@ export const ScheduleForm = () => {
       <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-deepGreen/10 rounded-full blur-3xl group-hover:bg-deepGreen/20 transition-all duration-1000" />
 
       <div className="card__content text-left relative z-10">
-        <motion.div variants={itemVariants} className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-deepGreen mb-3 font-poppins tracking-tight">
+        <motion.div variants={itemVariants} className="text-center mb-6 md:mb-10">
+          <h2 className="text-2xl md:text-4xl font-bold text-deepGreen mb-3 font-poppins tracking-tight">
             Schedule a Consultation
           </h2>
-          <p className="text-charcoal/70 text-lg">
+          <p className="text-charcoal/70 text-base md:text-lg">
             Secure your slot with our legal experts.
           </p>
         </motion.div>
@@ -186,8 +186,8 @@ export const ScheduleForm = () => {
               </button>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid md:grid-cols-2 gap-8">
+            <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
+              <div className="grid md:grid-cols-2 gap-5 md:gap-8">
                 <motion.div variants={itemVariants} className="space-y-2 group/input">
                   <label htmlFor="schedule-name" className="block text-sm font-bold text-deepGreen uppercase tracking-wider ml-1 group-focus-within/input:text-deepGreen/80 transition-colors">
                     Full Name
@@ -235,7 +235,7 @@ export const ScheduleForm = () => {
                 </motion.div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-5 md:gap-8">
                 <motion.div variants={itemVariants} className="space-y-2">
                   <label className="block text-sm font-bold text-deepGreen uppercase tracking-wider ml-1">
                     Service Type
@@ -315,7 +315,7 @@ export const ScheduleForm = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="relative overflow-hidden group bg-deepGreen text-cream px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                  className="relative overflow-hidden group bg-deepGreen text-cream px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     {loading ? (

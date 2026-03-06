@@ -17,24 +17,19 @@ import { AwardsMarquee } from '@/components/AwardsMarquee';
 import { HowWeWork } from '@/components/HowWeWork';
 import { useScrollTimeline } from '@/hooks/useScrollTimeline';
 import { useState } from 'react';
-import { generateWebSiteSchema, generateSiteNavigationSchema } from '@/lib/schema';
+import { generateHowToSchema } from '@/lib/schema';
 
 export default function Page() {
   const [demoMode] = useState(false);
   useScrollTimeline(demoMode);
 
-  const websiteSchema = generateWebSiteSchema();
-  const navSchema = generateSiteNavigationSchema();
+  const howToSchema = generateHowToSchema();
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(navSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <BCIDisclaimer />
       <Hero />

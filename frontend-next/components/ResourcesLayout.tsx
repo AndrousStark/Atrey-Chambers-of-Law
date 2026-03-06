@@ -132,7 +132,7 @@ export const ResourcesLayout = () => {
             </div>
 
             {/* Fixed Card Container - Only shows active card */}
-            <div className="fixed inset-0 z-10 flex items-center px-4 md:px-16">
+            <div className="fixed inset-0 z-10 flex items-center px-4 sm:px-8 md:px-16">
                 <div className={`w-full flex ${isRight ? 'justify-end' : 'justify-start'}`}>
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -143,7 +143,7 @@ export const ResourcesLayout = () => {
                             transition={{ duration: 0.5, ease: "easeOut" }}
                             className="w-full max-w-md"
                         >
-                            <div className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-xl p-5 md:p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                                         <h3 className="text-xl font-bold text-deepGreen mb-2">
                                             {activeSection.subtitle}
                                         </h3>

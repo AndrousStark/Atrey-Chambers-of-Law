@@ -50,7 +50,7 @@ export const LegalInsights = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 md:px-10">
       <motion.h2
-        className="mb-3 text-4xl font-semibold text-charcoal md:text-5xl font-display text-center"
+        className="mb-3 text-3xl font-semibold text-charcoal md:text-4xl lg:text-5xl font-display text-center"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}

@@ -17,7 +17,7 @@ const defaultIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 export const ServicesGrid = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 md:px-10">
-      <h2 className="mb-4 text-4xl font-display font-bold text-cream md:text-5xl text-center">
+      <h2 className="mb-4 text-3xl font-display font-bold text-cream md:text-4xl lg:text-5xl text-center">
         Our <span className="text-gold">Practice Areas</span>
       </h2>
       <p className="text-center text-cream/60 mb-12 max-w-2xl mx-auto font-accent italic">

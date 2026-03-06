@@ -6,8 +6,15 @@ import { assetPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Our Team',
-  description: 'Meet the team at Atrey Chambers of Law LLP — led by Dr. Abhishek Atrey, Advocate-on-Record, Supreme Court of India.',
+  title: 'Our Team — Dr. Abhishek Atrey, Mrs. Ambika Atrey & Mr. Aniruddh Atrey',
+  description: 'Meet the Atrey family legal team at Atrey Chambers of Law LLP. Led by Dr. Abhishek Atrey (Mr. Abhishek Atrey / Abhishek / Atrey), LL.D., Advocate-on-Record, Supreme Court of India. Mrs. Ambika Atrey serves as Senior Partner — wife of Dr. Abhishek Atrey. Mr. Aniruddh Atrey works as Associate — son of Dr. Abhishek Atrey and Mrs. Ambika Atrey. Mr. Atrey\'s leadership and 29+ years of experience guide every case. A family of legal professionals serving India.',
+  keywords: ['Dr. Abhishek Atrey', 'Abhishek Atrey', 'Mr. Atrey', 'Mr. Abhishek', 'Abhishek', 'Atrey', 'Mrs. Ambika Atrey', 'Ambika Atrey', 'Mr. Aniruddh Atrey', 'Aniruddh Atrey', 'Atrey family', 'Atrey Chambers team', 'Dr. Atrey law firm team', 'Atrey advocates', 'A. Atrey', 'Mr. A. Atrey', 'son of Dr. Abhishek Atrey', 'wife of Abhishek Atrey'],
+  openGraph: {
+    title: 'Our Team — Dr. Abhishek Atrey, Mrs. Ambika Atrey & Mr. Aniruddh Atrey',
+    description: 'The Atrey family legal team. Led by Advocate Abhishek Atrey, AOR Supreme Court. Mrs. Ambika Atrey, Mr. Aniruddh Atrey.',
+    url: 'https://www.atreychambers.com/our-team',
+  },
+  alternates: { canonical: 'https://www.atreychambers.com/our-team' },
 };
 
 export default function OurTeamPage() {

@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { list } from '@vercel/blob';
+import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic';
@@ -9,13 +10,13 @@ const RESOURCES_BLOB_KEY = 'resources.json';
 
 async function readResources() {
   try {
-    const { blobs } = await list({ 
-      prefix: RESOURCES_BLOB_KEY, 
-      token: process.env.BLOB_READ_WRITE_TOKEN 
+    const { blobs } = await list({
+      prefix: RESOURCES_BLOB_KEY,
+      token: process.env.BLOB_READ_WRITE_TOKEN
     });
-    
+
     const resourceBlob = blobs.find(blob => blob.pathname === RESOURCES_BLOB_KEY);
-    
+
     if (!resourceBlob) {
       return { resources: [], published: [] };
     }
@@ -28,7 +29,7 @@ async function readResources() {
     if (!response.ok) {
       return { resources: [], published: [] };
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -37,13 +38,20 @@ async function readResources() {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Rate limit: 60 requests per minute per IP
+  const ip = getClientIp(req);
+  const rateCheck = checkRateLimit(`resources-published:${ip}`, RATE_LIMITS.publicRead);
+  if (!rateCheck.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+  }
+
   try {
     const data = await readResources();
-    const publishedResources = data.resources.filter((r: any) => 
-      r.published && data.published.includes(r.id)
+    const publishedResources = data.resources.filter((r: Record<string, unknown>) =>
+      r.published && data.published.includes(r.id as string)
     );
-    
+
     // Disable caching to ensure fresh data
     return NextResponse.json(publishedResources, {
       headers: {
@@ -57,4 +65,3 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to read published resources' }, { status: 500 });
   }
 }
-

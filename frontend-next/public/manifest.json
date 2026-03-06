@@ -1,0 +1,36 @@
+{
+  "name": "Atrey Chambers of Law LLP",
+  "short_name": "Atrey Chambers",
+  "description": "Atrey Chambers of Law LLP — Premier Indian law firm founded by Dr. Abhishek Atrey (Abhishek Atrey), LL.D., Advocate-on-Record, Supreme Court of India. Dr. Atrey brings 29+ years of practice across 32 areas. Consult Advocate Abhishek Atrey.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2EBDD",
+  "theme_color": "#0E3B2F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "legal"],
+  "lang": "en-IN",
+  "dir": "ltr"
+}

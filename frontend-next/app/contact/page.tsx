@@ -90,7 +90,7 @@ export default function ContactPage() {
 
           {/* 3-Column Info Cards */}
           <div className="grid gap-6 md:grid-cols-3 mb-16">
-            <div className="rounded-lg border border-charcoal/10 bg-white p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
+            <div className="rounded-lg border border-charcoal/10 bg-white p-5 md:p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
               <div className="w-14 h-14 rounded-full bg-deepGreen/5 flex items-center justify-center mx-auto mb-4">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-deepGreen">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -100,7 +100,7 @@ export default function ContactPage() {
               <a href="tel:+911122053080" className="block text-charcoal/70 hover:text-deepGreen transition-colors">+91-11-22053080</a>
               <a href="tel:+911122023821" className="block text-charcoal/70 hover:text-deepGreen transition-colors">+91-11-22023821</a>
             </div>
-            <div className="rounded-lg border border-charcoal/10 bg-white p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
+            <div className="rounded-lg border border-charcoal/10 bg-white p-5 md:p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
               <div className="w-14 h-14 rounded-full bg-deepGreen/5 flex items-center justify-center mx-auto mb-4">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-deepGreen">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -113,7 +113,7 @@ export default function ContactPage() {
               </a>
               <p className="text-xs text-charcoal/40 mt-2">Typically respond within 24 hours</p>
             </div>
-            <div className="rounded-lg border border-charcoal/10 bg-white p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
+            <div className="rounded-lg border border-charcoal/10 bg-white p-5 md:p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
               <div className="w-14 h-14 rounded-full bg-deepGreen/5 flex items-center justify-center mx-auto mb-4">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-deepGreen">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -132,7 +132,7 @@ export default function ContactPage() {
           {/* Contact Form + Map */}
           <div className="grid gap-10 lg:grid-cols-2">
             {/* Form */}
-            <div className="rounded-lg border border-charcoal/10 bg-white p-8">
+            <div className="rounded-lg border border-charcoal/10 bg-white p-5 md:p-8">
               <h2 className="text-xl font-display font-semibold text-deepGreen mb-6">Send Us a Message</h2>
               <form onSubmit={handleSubmit} noValidate className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
@@ -209,7 +209,7 @@ export default function ContactPage() {
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3502.1234567890!2d77.2773!3d28.6304!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDM3JzQ5LjQiTiA3N8KwMTYnMzguMyJF!5e0!3m2!1sen!2sin!4v1234567890"
                 width="100%"
                 height="100%"
-                style={{ border: 0, minHeight: 400 }}
+                style={{ border: 0, minHeight: 300 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

@@ -45,14 +45,14 @@ export const Footer = () => {
       {/* Decorative top gold line */}
       <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 md:px-10 md:py-20">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-10 md:px-10 md:py-20">
         {/* 4-column grid */}
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4 mb-14">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-14">
           {/* Logo & Description */}
           <div>
             <div className="flex items-center gap-3 mb-5">
               <img
-                src={assetPath("/logo ac.png")}
+                src={assetPath("/logo.png")}
                 alt="Atrey Chambers Logo"
                 className="h-10 w-10 object-contain"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

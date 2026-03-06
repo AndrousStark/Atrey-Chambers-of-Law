@@ -5,8 +5,8 @@ import { assetPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy',
-  description: 'Privacy Policy of Atrey Chambers of Law LLP. Learn how we collect, use, and protect your personal information.',
+  title: 'Privacy Policy — Dr. Abhishek Atrey\'s Atrey Chambers of Law LLP',
+  description: 'Privacy Policy of Atrey Chambers of Law LLP, the law firm founded by Dr. Abhishek Atrey. Learn how Abhishek Atrey\'s firm collects, uses, and protects your personal information in accordance with Indian data protection laws.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://www.atreychambers.com/privacy-policy' },
 };

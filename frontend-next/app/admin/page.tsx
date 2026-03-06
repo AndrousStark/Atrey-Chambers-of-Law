@@ -9,23 +9,50 @@ import { assetPath } from '@/lib/utils';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const admin = localStorage.getItem('isAdmin');
-    if (!admin) {
-      router.push(assetPath('/signin'));
-    } else {
-      setIsAuthenticated(true);
-    }
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.role === 'admin') {
+            setIsAuthenticated(true);
+          } else {
+            router.push(assetPath('/signin'));
+          }
+        } else {
+          router.push(assetPath('/signin'));
+        }
+      } catch {
+        router.push(assetPath('/signin'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAdmin');
-    // Dispatch custom event to update Header
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Logout even if the API call fails
+    }
     window.dispatchEvent(new Event('authChange'));
     router.push(assetPath('/'));
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-cream flex items-center justify-center">
+        <p className="text-charcoal/60">Checking authentication...</p>
+      </main>
+    );
+  }
 
   if (!isAuthenticated) return null;
 
@@ -34,11 +61,11 @@ export default function AdminPage() {
       <div className="grain-overlay absolute inset-0 z-0 pointer-events-none" />
       <TechBackground />
       <Header />
-      
+
       <div className="relative z-10 pt-32 pb-20 px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-deepGreen font-display">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h1 className="text-3xl md:text-5xl font-bold text-deepGreen font-display">
               Admin Dashboard
             </h1>
             <button
@@ -71,9 +98,8 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </main>
   );
 }
-

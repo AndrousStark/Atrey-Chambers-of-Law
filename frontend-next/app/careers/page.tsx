@@ -7,20 +7,31 @@ import { generateWebPageSchema, generateBreadcrumbSchema, generateJobPostingSche
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Careers — Join Our Legal Team',
+  title: 'Careers — Work with Dr. Abhishek Atrey at Atrey Chambers',
   description:
-    'Explore career opportunities at Atrey Chambers of Law LLP. Join a premier Indian law firm with Supreme Court practice, mentorship by Dr. Abhishek Atrey, and 29+ years of legal excellence.',
+    'Explore career opportunities at Atrey Chambers of Law LLP, the firm headed by Dr. Abhishek Atrey (Mr. Abhishek Atrey / Mr. Atrey / Abhishek / Atrey), AOR Supreme Court. Join Abhishek Atrey\'s team for direct Supreme Court practice exposure, mentorship from Dr. Atrey with 29+ years of legal excellence, and hands-on experience in constitutional, environmental, and criminal law. Dr. Abhishek Atrey, father of Mr. Aniruddh Atrey and husband of Mrs. Ambika Atrey, personally mentors associates and interns at Atrey Chambers.',
   keywords: [
+    'work with Dr. Abhishek Atrey',
+    'Abhishek Atrey law firm careers',
+    'Mr. Atrey careers',
+    'Mr. Abhishek jobs',
+    'Atrey careers',
+    'Abhishek careers',
+    'Dr. Atrey mentorship',
+    'A. Atrey internship',
+    'Atrey Chambers careers',
+    'Abhishek Atrey internship',
+    'Dr. Abhishek Atrey team',
+    'Mr. A. Atrey mentorship',
     'law firm careers India',
     'legal jobs Delhi',
     'advocate vacancy Supreme Court',
     'law firm internship Delhi',
-    'legal career opportunities',
-    'Atrey Chambers careers',
+    'Atrey law firm jobs',
   ],
   openGraph: {
-    title: 'Careers at Atrey Chambers of Law LLP',
-    description: 'Join a premier Indian law firm with direct Supreme Court exposure and mentorship.',
+    title: 'Careers at Dr. Abhishek Atrey\'s Atrey Chambers of Law LLP',
+    description: 'Join Advocate Abhishek Atrey\'s team. Direct Supreme Court exposure, mentorship, and 32 practice areas.',
     url: 'https://www.atreychambers.com/careers',
   },
   alternates: { canonical: 'https://www.atreychambers.com/careers' },
@@ -175,7 +186,7 @@ export default function CareersPage() {
           </section>
 
           {/* General Application CTA */}
-          <div className="rounded-lg bg-deepGreen p-8 md:p-12 text-center">
+          <div className="rounded-lg bg-deepGreen p-6 md:p-12 text-center">
             <h3 className="text-xl md:text-2xl font-display font-bold text-cream mb-3">
               Don&apos;t See a Fit?
             </h3>

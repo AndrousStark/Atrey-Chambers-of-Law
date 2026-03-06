@@ -5,8 +5,8 @@ import { assetPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Terms of Service for the Atrey Chambers of Law LLP website. Please read these terms carefully before using our website.',
+  title: 'Terms of Service — Dr. Abhishek Atrey\'s Atrey Chambers of Law LLP',
+  description: 'Terms of Service for the Atrey Chambers of Law LLP website, the firm headed by Dr. Abhishek Atrey. Please read these terms carefully before using Abhishek Atrey\'s legal services platform.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://www.atreychambers.com/terms-of-service' },
 };

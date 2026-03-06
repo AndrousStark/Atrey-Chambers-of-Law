@@ -24,7 +24,7 @@ export const AwardsMarquee = () => {
 
       <div className="flex animate-marquee whitespace-nowrap">
         {duplicated.map((award, i) => (
-          <span key={i} className="mx-10 inline-flex items-center gap-4 text-sm md:text-base text-cream/80 tracking-wide">
+          <span key={i} className="mx-5 md:mx-10 inline-flex items-center gap-3 md:gap-4 text-xs md:text-base text-cream/80 tracking-wide">
             <span className="h-1.5 w-1.5 rounded-full bg-gold flex-shrink-0" />
             {award}
           </span>

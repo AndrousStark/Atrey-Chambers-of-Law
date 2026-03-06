@@ -28,7 +28,7 @@ html {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100svh;
   display: flex;
   pointer-events: none;
@@ -47,7 +47,7 @@ html {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100svh;
   z-index: 9999;
   display: flex;
@@ -124,9 +124,8 @@ html.lenis, html.lenis body {
 .hero {
   display: grid;
   position: relative;
-  grid-template-columns: 100vw;
-  /* Increased hero height slightly beyond viewport for more breathing room */
-  grid-template-rows: 100vh;
+  grid-template-columns: 100%;
+  grid-template-rows: 100svh;
   place-items: center;
   overflow: hidden;
   animation: clip-hero-anim 1.25s cubic-bezier(0.29, 0.8, 0.8, 0.98);
@@ -167,9 +166,8 @@ html.lenis, html.lenis body {
 
 .hero__bg picture {
   display: flex;
-  /* Match hero height */
-  height: 100vh;
-  width: 100vw;
+  height: 100svh;
+  width: 100%;
   animation: scaling-hero-anim 4s 0.25s cubic-bezier(0, 0.71, 0.4, 0.97) forwards;
   will-change: transform;
 }
@@ -202,10 +200,10 @@ html.lenis, html.lenis body {
   margin-bottom: 1.5rem;
   background: linear-gradient(135deg, rgba(242, 235, 221, 0.5) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(242, 235, 221, 0.5) 100%);
   border-radius: 50%;
-  padding: 2rem;
+  padding: 2.5rem;
   width: fit-content;
   height: fit-content;
-  box-shadow: 
+  box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.3),
     0 10px 25px rgba(0, 0, 0, 0.25),
     0 5px 15px rgba(0, 0, 0, 0.2),
@@ -213,10 +211,13 @@ html.lenis, html.lenis body {
     inset 0 -4px 8px rgba(0, 0, 0, 0.15),
     inset 2px 2px 4px rgba(255, 255, 255, 0.8),
     inset -2px -2px 4px rgba(0, 0, 0, 0.1);
-  transform: perspective(1200px) rotateY(-10deg) rotateX(10deg) translateZ(30px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform: perspective(1200px) rotateY(-5deg) rotateX(5deg) translateZ(30px);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.8);
+  /* Zoom-in entrance for the wrapper */
+  animation: wrapper-zoom-in 1.2s 1.3s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  opacity: 0;
 }
 
 .hero__logo-wrapper::before {
@@ -247,8 +248,8 @@ html.lenis, html.lenis body {
 }
 
 .hero__logo-wrapper:hover {
-  transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateZ(40px) scale(1.05);
-  box-shadow: 
+  transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateZ(40px) scale(1.08);
+  box-shadow:
     0 25px 60px rgba(0, 0, 0, 0.4),
     0 15px 35px rgba(0, 0, 0, 0.3),
     0 8px 20px rgba(0, 0, 0, 0.25),
@@ -259,27 +260,44 @@ html.lenis, html.lenis body {
 }
 
 .hero__logo {
-  height: 15vw;
-  max-height: 280px;
-  min-height: 180px;
+  height: 22vw;
+  max-height: 380px;
+  min-height: 120px;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(4px 4px 20px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
-  animation: logo-fade-in 1s 1.5s ease-out forwards;
+  animation: logo-zoom-in 1s 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   opacity: 0;
   transform: translateZ(15px);
   position: relative;
   z-index: 1;
 }
 
-@keyframes logo-fade-in {
+/* Wrapper zoom-in entrance */
+@keyframes wrapper-zoom-in {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: perspective(1200px) rotateY(-5deg) rotateX(5deg) translateZ(30px) scale(0.5);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: perspective(1200px) rotateY(-5deg) rotateX(5deg) translateZ(30px) scale(1);
+  }
+}
+
+/* Logo zoom-in with scale effect */
+@keyframes logo-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6) translateY(-10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -330,14 +348,25 @@ html.lenis, html.lenis body {
     font-size: 4vw;
     padding: 0 1rem;
   }
-  
+
   .hero__cnt svg {
     height: 20vw;
     max-height: 100px;
   }
-  
+
   .hero__cnt h1 {
     font-size: clamp(1.5rem, 6vw, 3rem);
+  }
+
+  .hero__logo {
+    height: 30vw;
+    max-height: 180px;
+    min-height: 100px;
+  }
+
+  .hero__logo-wrapper {
+    padding: 1.25rem;
+    margin-bottom: 1rem;
   }
 }
 
@@ -392,7 +421,7 @@ html.lenis, html.lenis body {
 }
 
 .card__title {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
   font-weight: 600;
   color: #333333;
   margin-bottom: 1rem;
@@ -543,8 +572,8 @@ html.lenis, html.lenis body {
 
 .services-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 1.5rem;
   align-items: center;
 }
 
@@ -643,8 +672,8 @@ html.lenis, html.lenis body {
   height: 100%;
   max-width: 400px;
   max-height: 400px;
-  min-width: 250px;
-  min-height: 250px;
+  min-width: 80px;
+  min-height: 80px;
   object-fit: contain;
   filter: brightness(0) invert(1);
   opacity: 1;
@@ -1028,28 +1057,57 @@ details > summary::-webkit-details-marker {
   width: 100%;
 }
 
+/* Touch device support: tap to flip cards */
+@media (hover: none) {
+  .services-row .card:active .cover,
+  .services-row .card:focus-within .cover {
+    transform: rotateY(-180deg);
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .services-row .card:active .card-back,
+  .services-row .card:focus-within .card-back {
+    transform: rotateY(0deg) translateZ(0px) scale(1);
+    visibility: visible;
+    opacity: 1;
+    background: rgba(242, 235, 221, 0.25);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(14, 59, 47, 0.2);
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  .services-row .card:active .card-back a,
+  .services-row .card:focus-within .card-back a {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .services-row {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .services-row .card {
     height: 180px;
   }
-  
+
   .services-row .cover h1 {
     font-size: 1.2em;
     bottom: 40px;
     left: 30px;
   }
-  
+
   .services-row .cover .price {
     font-size: 1.5em;
     top: 40px;
     right: 30px;
   }
-  
+
   .services-row .card-back a {
     font-size: 1em;
     padding: 12px 24px;

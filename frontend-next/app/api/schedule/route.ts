@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import * as ics from 'ics';
 import { google } from 'googleapis';
+import { sanitizeForEmail, isValidEmail } from '@/lib/sanitize';
+import { validateOrigin } from '@/lib/csrf';
+import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 
-// Initialize Google Calendar API
 function getCalendarClient() {
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-    const calendarId = process.env.GOOGLE_CALENDAR_ID || serviceAccountEmail;
 
     if (!serviceAccountEmail || !privateKey) {
         return null;
@@ -23,6 +24,24 @@ function getCalendarClient() {
 }
 
 export async function POST(req: NextRequest) {
+    // CSRF protection
+    if (!validateOrigin(req)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Rate limiting: 5 submissions per 10 minutes per IP
+    const ip = getClientIp(req);
+    const rateCheck = checkRateLimit(`schedule:${ip}`, RATE_LIMITS.contactForm);
+    if (!rateCheck.allowed) {
+        return NextResponse.json(
+            { error: 'Too many submissions. Please try again later.' },
+            {
+                status: 429,
+                headers: { 'Retry-After': String(Math.ceil((rateCheck.resetAt - Date.now()) / 1000)) },
+            }
+        );
+    }
+
     try {
         const formData = await req.formData();
         const name = formData.get('name') as string;
@@ -36,18 +55,32 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const date = new Date(dateStr);
-        const endDate = new Date(date);
-        endDate.setHours(endDate.getHours() + 1); // 1 hour duration
+        // Validate email format
+        if (!isValidEmail(email)) {
+            return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+        }
 
-        // Create ICS Event
+        // Sanitize all user inputs for safe HTML insertion
+        const safeName = sanitizeForEmail(name);
+        const safeEmail = sanitizeForEmail(email);
+        const safeService = sanitizeForEmail(service);
+        const safeMessage = message ? sanitizeForEmail(message) : '';
+
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+            return NextResponse.json({ error: 'Invalid date' }, { status: 400 });
+        }
+        const endDate = new Date(date);
+        endDate.setHours(endDate.getHours() + 1);
+
+        // Create ICS Event (using raw values — ICS is plain text, not HTML)
         const event: ics.EventAttributes = {
             start: [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes()],
             duration: { hours: 1 },
             title: `Consultation: ${service} with ${name}`,
-            description: `Service: ${service}\nClient: ${name} (${email})\nMessage: ${message}`,
+            description: `Service: ${service}\nClient: ${name} (${email})\nMessage: ${message || 'No message provided'}`,
             location: 'Online Meeting',
-            url: 'https://atrey-chambers.com', // Replace with actual URL
+            url: 'https://www.atreychambers.com',
             organizer: { name: 'Atrey Chambers', email: 'atreychambersoflaw@gmail.com' },
             attendees: [
                 { name: name, email: email, rsvp: true, partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT' },
@@ -55,31 +88,25 @@ export async function POST(req: NextRequest) {
             ]
         };
 
-        const { error, value: icsContent } = ics.createEvent(event);
-        if (error) {
-            console.error('Error creating ICS:', error);
+        const { error: icsError, value: icsContent } = ics.createEvent(event);
+        if (icsError) {
+            console.error('Error creating ICS:', icsError);
             return NextResponse.json({ error: 'Failed to create calendar event' }, { status: 500 });
         }
 
         // Create event in Google Calendar
         let calendarEventId = null;
         const calendar = getCalendarClient();
-        
+
         if (calendar) {
             try {
                 const calendarId = process.env.GOOGLE_CALENDAR_ID || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-                
+
                 const googleEvent = {
                     summary: `Consultation: ${service} with ${name}`,
                     description: `Service: ${service}\nClient: ${name} (${email})\nMessage: ${message || 'No message provided'}`,
-                    start: {
-                        dateTime: date.toISOString(),
-                        timeZone: 'UTC',
-                    },
-                    end: {
-                        dateTime: endDate.toISOString(),
-                        timeZone: 'UTC',
-                    },
+                    start: { dateTime: date.toISOString(), timeZone: 'UTC' },
+                    end: { dateTime: endDate.toISOString(), timeZone: 'UTC' },
                     location: 'Online Meeting',
                     attendees: [
                         { email: email, displayName: name },
@@ -88,8 +115,8 @@ export async function POST(req: NextRequest) {
                     reminders: {
                         useDefault: false,
                         overrides: [
-                            { method: 'email', minutes: 24 * 60 }, // 1 day before
-                            { method: 'popup', minutes: 30 }, // 30 minutes before
+                            { method: 'email' as const, minutes: 24 * 60 },
+                            { method: 'popup' as const, minutes: 30 },
                         ],
                     },
                     conferenceData: {
@@ -104,14 +131,12 @@ export async function POST(req: NextRequest) {
                     calendarId: calendarId!,
                     requestBody: googleEvent,
                     conferenceDataVersion: 1,
-                    sendUpdates: 'all', // Send invites to all attendees
+                    sendUpdates: 'all',
                 });
 
                 calendarEventId = response.data.id;
-                console.log('Google Calendar event created:', calendarEventId);
-            } catch (calendarError: any) {
+            } catch (calendarError) {
                 console.error('Error creating Google Calendar event:', calendarError);
-                // Continue with email even if calendar creation fails
             }
         }
 
@@ -129,76 +154,68 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // Prepare attachments
-        const attachments: any[] = [
-            {
-                filename: 'invite.ics',
-                content: icsContent,
-                contentType: 'text/calendar',
-            }
+        const attachments: { filename: string; content: string | Buffer; contentType?: string }[] = [
+            { filename: 'invite.ics', content: icsContent!, contentType: 'text/calendar' }
         ];
 
         if (file) {
             const buffer = Buffer.from(await file.arrayBuffer());
-            attachments.push({
-                filename: file.name,
-                content: buffer,
-            });
+            attachments.push({ filename: file.name, content: buffer });
         }
 
         const adminEmail = process.env.ADMIN_EMAIL || 'atreychambersoflaw@gmail.com';
-        const meetingLink = calendarEventId 
+        const meetingLink = calendarEventId
             ? `https://calendar.google.com/calendar/event?eid=${calendarEventId}`
             : 'Check your Google Calendar';
 
-        // Send Email to Admin
+        // Send Email to Admin (using sanitized values in HTML)
         await transporter.sendMail({
             from: 'atreychambersoflaw@gmail.com',
             to: adminEmail,
-            subject: `New Consultation Request: ${service} - ${name}`,
+            subject: `New Consultation Request: ${safeName} - ${safeService}`,
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #0E3B2F;">New Consultation Request Received</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Service:</strong> ${service}</p>
+            <p><strong>Name:</strong> ${safeName}</p>
+            <p><strong>Email:</strong> ${safeEmail}</p>
+            <p><strong>Service:</strong> ${safeService}</p>
             <p><strong>Date:</strong> ${date.toLocaleString()}</p>
-            ${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
+            ${safeMessage ? `<p><strong>Message:</strong> ${safeMessage}</p>` : ''}
             ${calendarEventId ? `<p><strong>Calendar Event:</strong> <a href="${meetingLink}">View in Google Calendar</a></p>` : ''}
             <p>A calendar invite has been sent to the client.</p>
         </div>
       `,
             text: `
         New consultation request received.
-        
+
         Name: ${name}
         Email: ${email}
         Service: ${service}
         Date: ${date.toLocaleString()}
         Message: ${message || 'No message provided'}
-        
+
         ${calendarEventId ? `Calendar Event: ${meetingLink}` : 'Calendar event created in Google Calendar'}
       `,
             attachments,
         });
 
-        // Send Confirmation to User
-        const calendarLink = calendarEventId 
+        // Send Confirmation to User (using sanitized values in HTML)
+        const calendarLink = calendarEventId
             ? `https://calendar.google.com/calendar/event?eid=${calendarEventId}`
             : null;
 
         await transporter.sendMail({
             from: 'atreychambersoflaw@gmail.com',
-            to: email,
+            to: email.trim(),
             subject: `Consultation Confirmed: ${service} - Atrey Chambers`,
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #0E3B2F;">Consultation Confirmed</h2>
-            <p>Dear ${name},</p>
+            <p>Dear ${safeName},</p>
             <p>Thank you for scheduling a consultation with Atrey Chambers of Law LLP.</p>
             <div style="background-color: #F2EBDD; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Service:</strong> ${service}</p>
-                <p><strong>Date & Time:</strong> ${date.toLocaleString()}</p>
+                <p><strong>Service:</strong> ${safeService}</p>
+                <p><strong>Date &amp; Time:</strong> ${date.toLocaleString()}</p>
                 <p><strong>Duration:</strong> 1 hour</p>
                 <p><strong>Location:</strong> Online Meeting</p>
             </div>
@@ -219,27 +236,23 @@ export async function POST(req: NextRequest) {
       `,
             text: `
         Dear ${name},
-        
+
         Thank you for scheduling a consultation with Atrey Chambers of Law LLP.
-        
+
         Service: ${service}
         Date & Time: ${date.toLocaleString()}
         Duration: 1 hour
         Location: Online Meeting
-        
+
         ${calendarLink ? `Add to Google Calendar: ${calendarLink}` : 'A calendar invitation has been sent to your email.'}
-        
+
         If you need to reschedule or have any questions, please don't hesitate to contact us.
-        
+
         Best regards,
         Atrey Chambers of Law LLP
       `,
             attachments: [
-                {
-                    filename: 'invite.ics',
-                    content: icsContent,
-                    contentType: 'text/calendar',
-                }
+                { filename: 'invite.ics', content: icsContent!, contentType: 'text/calendar' }
             ],
         });
 

@@ -53,7 +53,11 @@ const navItems: NavItem[] = [
   { label: 'Contact', href: assetPath('/contact') },
 ];
 
-export const Header = () => {
+interface HeaderProps {
+  variant?: 'default' | 'hero';
+}
+
+export const Header = ({ variant = 'default' }: HeaderProps) => {
   const prefersReducedMotion = useReducedMotion();
   const [entranceComplete, setEntranceComplete] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -78,6 +82,21 @@ export const Header = () => {
     }
   );
   const backdropFilter = useTransform(backdropBlur, (blur) => `blur(${blur}px)`);
+
+  // Scroll-based text color for hero variant
+  // White text over dark hero → charcoal text over cream background
+  const navTextColor = useTransform(
+    scrollY,
+    [0, 80],
+    variant === 'hero' ? ['#FFFFFF', '#333333'] : ['#333333', '#333333']
+  );
+  const navTextShadow = useTransform(
+    scrollY,
+    [0, 80],
+    variant === 'hero'
+      ? ['0 1px 8px rgba(0,0,0,0.5)', '0 0px 0px rgba(0,0,0,0)']
+      : ['none', 'none']
+  );
 
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
@@ -170,14 +189,18 @@ export const Header = () => {
           className="flex items-center gap-2.5 md:gap-3 md:mr-8"
         >
           <img
-            src={assetPath("/logo ac.png")}
+            src={assetPath("/logo.png")}
             alt="Atrey Chambers Logo"
             className="h-7 w-7 md:h-9 md:w-9 object-contain flex-shrink-0"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
-          <span className="font-display font-semibold text-sm md:text-base tracking-wider" aria-label="Atrey Chambers">
+          <motion.span
+            className="font-display font-semibold text-sm md:text-base tracking-wider"
+            style={{ color: navTextColor, textShadow: navTextShadow }}
+            aria-label="Atrey Chambers"
+          >
             Atrey Chambers
-          </span>
+          </motion.span>
         </motion.a>
 
         {/* Desktop Nav */}
@@ -196,7 +219,8 @@ export const Header = () => {
                 initial={prefersReducedMotion ? {} : 'hidden'}
                 animate={prefersReducedMotion ? {} : 'visible'}
                 whileHover={{ opacity: 1, y: -2 }}
-                className="relative text-[0.65rem] text-charcoal font-sans font-semibold tracking-nav focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deepGreen/60 focus-visible:ring-offset-2 after:absolute after:left-0 after:-bottom-1 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-deepGreen after:transition-transform after:duration-200 hover:after:scale-x-100 flex items-center gap-1"
+                style={{ color: navTextColor, textShadow: navTextShadow }}
+                className="relative text-[0.65rem] font-sans font-semibold tracking-nav focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deepGreen/60 focus-visible:ring-offset-2 after:absolute after:left-0 after:-bottom-1 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-200 hover:after:scale-x-100 flex items-center gap-1"
                 aria-label={`Navigate to ${item.label}`}
               >
                 {item.label}
@@ -260,9 +284,9 @@ export const Header = () => {
           aria-label="Toggle menu"
           aria-expanded={mobileMenuOpen}
         >
-          <motion.span className="h-0.5 w-6 bg-charcoal block" animate={mobileMenuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }} transition={{ duration: 0.2 }} />
-          <motion.span className="h-0.5 w-6 bg-charcoal block" animate={mobileMenuOpen ? { opacity: 0 } : { opacity: 1 }} transition={{ duration: 0.2 }} />
-          <motion.span className="h-0.5 w-6 bg-charcoal block" animate={mobileMenuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }} transition={{ duration: 0.2 }} />
+          <motion.span className="h-0.5 w-6 block" style={{ backgroundColor: navTextColor }} animate={mobileMenuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }} transition={{ duration: 0.2 }} />
+          <motion.span className="h-0.5 w-6 block" style={{ backgroundColor: navTextColor }} animate={mobileMenuOpen ? { opacity: 0 } : { opacity: 1 }} transition={{ duration: 0.2 }} />
+          <motion.span className="h-0.5 w-6 block" style={{ backgroundColor: navTextColor }} animate={mobileMenuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }} transition={{ duration: 0.2 }} />
         </motion.button>
       </motion.header>
 
@@ -292,7 +316,7 @@ export const Header = () => {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-6 pt-24 pb-12 px-8"
+              className="flex flex-col items-center gap-4 pt-16 pb-8 px-5"
               onClick={(e) => e.stopPropagation()}
             >
               {navItems.map((item, index) => (
