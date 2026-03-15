@@ -5,12 +5,12 @@ import { fadeUp } from '@/lib/animations';
 import { NumberTicker } from '@/components/ui/NumberTicker';
 
 const stats = [
-  { value: 29, suffix: '+', label: 'Years of Practice', icon: '⚖' },
-  { value: 500, suffix: '+', label: 'Cases Argued', icon: '📋' },
-  { value: 3, suffix: '', label: 'Books Authored', icon: '📚' },
-  { value: 20, suffix: '+', label: 'Articles Published', icon: '✍' },
-  { value: 30, suffix: '+', label: 'TV Appearances', icon: '📺' },
-  { value: 40, suffix: '+', label: 'Clients Served', icon: '🤝' },
+  { value: 5000, suffix: '+', label: 'Cases Handled Successfully', icon: '📋' },
+  { value: 50, suffix: '+', label: 'Articles Published', icon: '✍' },
+  { value: 50, suffix: '+', label: 'TV Appearances', icon: '📺' },
+  { value: 50, suffix: '+', label: 'Guest Lectures & University Appearances', icon: '🎓' },
+  { value: 200, suffix: '+', label: 'Reported Judgments', icon: '⚖' },
+  { value: 2000, suffix: '+', label: 'Clients Served', icon: '🤝' },
 ];
 
 export const StatsSection = () => {

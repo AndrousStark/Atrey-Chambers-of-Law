@@ -7,7 +7,7 @@ import { TechBackground } from '@/components/TechBackground';
 
 export const metadata: Metadata = {
   title: 'Legal Insights by Dr. Abhishek Atrey — Expert Analysis & Commentary',
-  description: 'Expert legal analysis, insights, and commentary by Dr. Abhishek Atrey (Mr. Abhishek Atrey / Mr. Atrey / Abhishek / Atrey), Advocate-on-Record, Supreme Court of India. Abhishek Atrey provides authoritative perspectives on Constitutional Law, Supreme Court rulings, Environmental Law developments, and landmark judicial decisions. Dr. Atrey\'s insights draw from 29+ years of frontline practice at Atrey Chambers of Law LLP, alongside Mrs. Ambika Atrey and Mr. Aniruddh Atrey.',
+  description: 'Expert legal analysis, insights, and commentary by Dr. Abhishek Atrey (Mr. Abhishek Atrey / Mr. Atrey / Abhishek / Atrey), Advocate-on-Record, Supreme Court of India. Abhishek Atrey provides authoritative perspectives on Constitutional Law, Supreme Court rulings, Environmental Law developments, and landmark judicial decisions. Dr. Atrey\'s insights draw from distinguished frontline practice since 1997 at Atrey Chambers of Law LLP, alongside Mrs. Ambika Atrey and Mr. Aniruddh Atrey.',
   keywords: ['Dr. Abhishek Atrey legal insights', 'Abhishek Atrey analysis', 'Mr. Atrey commentary', 'Mr. Abhishek insights', 'Atrey insights', 'Abhishek insights', 'Dr. Atrey commentary', 'A. Atrey legal opinion', 'Atrey legal opinion', 'Abhishek Atrey Supreme Court analysis', 'Dr. Abhishek Atrey constitutional law insight', 'Mr. A. Atrey analysis', 'Atrey Chambers insights', 'Indian law expert analysis'],
   openGraph: {
     title: 'Legal Insights by Dr. Abhishek Atrey — Atrey Chambers of Law LLP',

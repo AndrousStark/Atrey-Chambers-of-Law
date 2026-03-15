@@ -18,7 +18,7 @@ export const FAQ_DATA: FAQItem[] = [
   },
   {
     question: 'Where is your office located?',
-    answer: 'Our office is located at 24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092. We also regularly appear at the Supreme Court of India and Delhi High Court.',
+    answer: 'Our office is located at 32 & 33, 4th Floor, C-Block, Technopark, Plot No.5, Noida, UP – 201313. We also regularly appear at the Supreme Court of India and Delhi High Court.',
     category: 'general',
   },
   {
@@ -65,7 +65,7 @@ export const FAQ_DATA: FAQItem[] = [
   // Process
   {
     question: 'How do I schedule a consultation?',
-    answer: 'You can schedule a consultation through our website using the "Schedule Call" feature, by calling +91-11-22053080, or by emailing support@atreychambers.com. We will confirm a convenient time within 24 hours.',
+    answer: 'You can schedule a consultation through our website using the "Schedule Call" feature, by calling +91 120 4587083, or by emailing support@atreychambers.com. We will confirm a convenient time within 24 hours.',
     category: 'process',
   },
   {

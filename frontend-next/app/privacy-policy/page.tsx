@@ -100,9 +100,9 @@ export default function PrivacyPolicyPage() {
               <p className="text-charcoal/70 leading-relaxed">
                 If you have questions about this Privacy Policy, please contact us:<br />
                 Atrey Chambers of Law LLP<br />
-                24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092<br />
+                32 & 33, 4th Floor, C-Block, Technopark, Plot No.5, Noida, UP – 201313<br />
                 Email: <a href="mailto:support@atreychambers.com" className="text-gold hover:underline">support@atreychambers.com</a><br />
-                Phone: <a href="tel:+911122053080" className="text-gold hover:underline">+91-11-22053080</a>
+                Phone: <a href="tel:+911204587083" className="text-gold hover:underline">+91 120 4587083</a> | Mobile: <a href="tel:+919810047556" className="text-gold hover:underline">9810047556</a>
               </p>
             </section>
           </div>

@@ -9,7 +9,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Careers — Work with Dr. Abhishek Atrey at Atrey Chambers',
   description:
-    'Explore career opportunities at Atrey Chambers of Law LLP, the firm headed by Dr. Abhishek Atrey (Mr. Abhishek Atrey / Mr. Atrey / Abhishek / Atrey), AOR Supreme Court. Join Abhishek Atrey\'s team for direct Supreme Court practice exposure, mentorship from Dr. Atrey with 29+ years of legal excellence, and hands-on experience in constitutional, environmental, and criminal law. Dr. Abhishek Atrey, father of Mr. Aniruddh Atrey and husband of Mrs. Ambika Atrey, personally mentors associates and interns at Atrey Chambers.',
+    'Explore career opportunities at Atrey Chambers of Law LLP, the firm headed by Dr. Abhishek Atrey (Mr. Abhishek Atrey / Mr. Atrey / Abhishek / Atrey), AOR Supreme Court. Join Abhishek Atrey\'s team for direct Supreme Court practice exposure, mentorship from Dr. Atrey with distinguished legal excellence since 1997, and hands-on experience in constitutional, environmental, and criminal law. Dr. Abhishek Atrey, father of Mr. Aniruddh Atrey and husband of Mrs. Ambika Atrey, personally mentors associates and interns at Atrey Chambers.',
   keywords: [
     'work with Dr. Abhishek Atrey',
     'Abhishek Atrey law firm careers',
@@ -78,7 +78,7 @@ export default function CareersPage() {
             </h1>
             <div className="h-0.5 w-16 bg-gold mx-auto mb-4" />
             <p className="max-w-2xl mx-auto text-lg text-charcoal/70 font-accent italic">
-              Build your legal career at a firm with 29+ years of Supreme Court excellence
+              Build your legal career at a firm with Supreme Court excellence since 1997
             </p>
           </div>
 

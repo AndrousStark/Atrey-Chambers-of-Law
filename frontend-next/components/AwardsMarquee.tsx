@@ -8,7 +8,7 @@ const awards = [
   'Sr. Panel Counsel, CAQM — Delhi HC & NGT',
   'Panel Counsel, Association of Indian Universities',
   'Nyaymurti Prem Shankar Gupt Hindi Sahitya Samman (2021)',
-  '3 Books Authored | 20+ Articles | 30+ TV Appearances',
+  '3 Books Authored | 50+ Articles | 50+ TV Appearances | 50+ Guest Lectures | 200+ Reported Judgments',
   '2025 Webby Awards Winner — Best Home Page',
   'GSAP Site of the Month — Oct & Nov 2024',
 ];

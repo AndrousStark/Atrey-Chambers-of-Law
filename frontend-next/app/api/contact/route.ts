@@ -126,8 +126,8 @@ export async function POST(req: NextRequest) {
             <p>Our team will review your message and get back to you within 24-48 hours. In the meantime, feel free to explore our website to learn more about our services and expertise.</p>
 
             <div style="background-color: #F2EBDD; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 5px 0;"><strong>Address:</strong> 24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092</p>
-                <p style="margin: 5px 0;"><strong>Phone:</strong> +91-11-22053080, 22023821</p>
+                <p style="margin: 5px 0;"><strong>Address:</strong> 32 & 33, 4th Floor, C-Block, Technopark, Plot No.5, Noida, UP – 201313</p>
+                <p style="margin: 5px 0;"><strong>Phone:</strong> +91 120 4587083 | <strong>Mobile:</strong> 9810047556</p>
                 <p style="margin: 5px 0;"><strong>Email:</strong> support@atreychambers.com</p>
             </div>
 
@@ -160,8 +160,8 @@ export async function POST(req: NextRequest) {
         Our team will review your message and get back to you within 24-48 hours. In the meantime, feel free to explore our website to learn more about our services and expertise.
 
         Contact Information:
-        Address: 24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092
-        Phone: +91-11-22053080, 22023821
+        Address: 32 & 33, 4th Floor, C-Block, Technopark, Plot No.5, Noida, UP – 201313
+        Phone: +91 120 4587083 | Mobile: 9810047556
         Email: support@atreychambers.com
 
         We look forward to the opportunity to serve you and help you achieve your legal objectives.

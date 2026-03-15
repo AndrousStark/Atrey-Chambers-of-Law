@@ -16,7 +16,7 @@ export const PRACTICE_AREAS: PracticeArea[] = [
     shortTitle: 'Constitutional Law & PIL',
     description: 'Expert representation in fundamental rights, constitutional challenges, and public interest litigation before the Supreme Court and High Courts of India.',
     fullDescription: [
-      'Our constitutional law practice is at the core of what we do. With Dr. Abhishek Atrey\'s 29+ years of experience as an Advocate-on-Record, we handle matters involving fundamental rights, constitutional validity of legislation, and landmark public interest litigation.',
+      'Our constitutional law practice is at the core of what we do. With Dr. Abhishek Atrey\'s distinguished experience as an Advocate-on-Record since 1997, we handle matters involving fundamental rights, constitutional validity of legislation, and landmark public interest litigation.',
       'We have represented the Government of India, State Governments, and private parties in significant constitutional matters before the Supreme Court of India. Our expertise covers Articles 12 through 35 (Fundamental Rights), writs under Articles 32 and 226, and challenges to legislative and executive action.',
     ],
     icon: 'Scale',
@@ -41,7 +41,7 @@ export const PRACTICE_AREAS: PracticeArea[] = [
     description: 'As an Advocate-on-Record since 2006, Dr. Atrey provides direct filing and comprehensive representation before the Supreme Court of India.',
     fullDescription: [
       'As one of the select Advocates-on-Record designated by the Supreme Court of India, Dr. Abhishek Atrey holds the exclusive right to file cases and appear directly before the apex court. This designation, obtained in 2006 after rigorous examination, represents the highest tier of Supreme Court practice.',
-      'Our Supreme Court practice covers the full spectrum of original, appellate, and advisory jurisdiction, including Special Leave Petitions, Civil Appeals, Criminal Appeals, Transfer Petitions, and Review Petitions. With 500+ cases argued, we bring unmatched depth of experience.',
+      'Our Supreme Court practice covers the full spectrum of original, appellate, and advisory jurisdiction, including Special Leave Petitions, Civil Appeals, Criminal Appeals, Transfer Petitions, and Review Petitions. With 5000+ cases handled successfully, we bring unmatched depth of experience.',
     ],
     icon: 'Landmark',
     keyMatters: [

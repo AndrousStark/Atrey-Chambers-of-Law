@@ -9,10 +9,10 @@ import { assetPath } from '@/lib/utils';
 
 const credentials = [
   'Advocate-on-Record, Supreme Court',
-  '29+ Years of Practice',
-  '500+ Cases Argued',
-  "3 Books Authored",
-  "'A' Panel Counsel, Govt. of India",
+  'Since 1997',
+  '5000+ Cases Handled Successfully',
+  "More than 50 Articles Published",
+  'More than 200 Reported Judgments',
 ];
 
 const taglines = [

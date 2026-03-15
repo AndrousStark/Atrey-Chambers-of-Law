@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: '%s | Atrey Chambers of Law LLP — Dr. Abhishek Atrey',
   },
   description:
-    'Atrey Chambers of Law LLP is a premier Indian law firm founded and headed by Dr. Abhishek Atrey (Abhishek Atrey / Mr. Abhishek Atrey), LL.D., Advocate-on-Record (AOR), Supreme Court of India. Abhishek brings 29+ years of distinguished legal practice with 500+ landmark cases across 32 practice areas. Dr. Atrey — father of Mr. Aniruddh Atrey (Associate) and husband of Mrs. Ambika Atrey (Senior Partner) — leads a family of legal professionals. Mr. Atrey is a constitutional law expert, environmental law advocate at NGT, and former Standing Counsel for Government of Uttarakhand. Consult Atrey for Supreme Court litigation, PIL, criminal defence, corporate advisory, arbitration, and family law.',
+    'Atrey Chambers of Law LLP is a premier Indian law firm founded and headed by Dr. Abhishek Atrey (Abhishek Atrey / Mr. Abhishek Atrey), LL.D., Advocate-on-Record (AOR), Supreme Court of India. Abhishek brings distinguished legal practice since 1997 with 5000+ cases handled successfully across 32 practice areas. More than 50 articles published, 50+ TV appearances, 50+ guest lectures, and more than 200 reported judgments. Dr. Atrey — father of Mr. Aniruddh Atrey (Associate) and husband of Mrs. Ambika Atrey (Senior Partner) — leads a family of legal professionals. Mr. Atrey is a constitutional law expert, environmental law advocate at NGT, and former Standing Counsel for Government of Uttarakhand. Also serves as Panel Counsel for Association of Indian Universities (AIU) and Commission for Air Quality Management (CAQM). Consult Atrey for Supreme Court litigation, PIL, criminal defence, corporate advisory, arbitration, and family law.',
   keywords: [
     'Dr. Abhishek Atrey',
     'Abhishek Atrey',
@@ -116,7 +116,7 @@ export const metadata: Metadata = {
     siteName: 'Atrey Chambers of Law LLP — Dr. Abhishek Atrey',
     title: 'Atrey Chambers of Law LLP | Dr. Abhishek Atrey | Premier Indian Law Firm',
     description:
-      'Premier Indian law firm founded by Dr. Abhishek Atrey, LL.D., Advocate-on-Record, Supreme Court of India. Abhishek Atrey — 29+ years, 500+ cases, 32 practice areas. Constitutional Law, Environmental Law, Supreme Court Litigation.',
+      'Premier Indian law firm founded by Dr. Abhishek Atrey, LL.D., Advocate-on-Record, Supreme Court of India. Abhishek Atrey — since 1997, 5000+ cases handled, 200+ reported judgments, 32 practice areas. Constitutional Law, Environmental Law, Supreme Court Litigation.',
     url: 'https://www.atreychambers.com',
     images: [
       {
@@ -131,7 +131,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Dr. Abhishek Atrey | Atrey Chambers of Law LLP | Supreme Court AOR',
     description:
-      'Dr. Abhishek Atrey, Advocate-on-Record, Supreme Court of India. Founder of Atrey Chambers of Law LLP. 29+ years, 500+ cases across 32 practice areas.',
+      'Dr. Abhishek Atrey, Advocate-on-Record, Supreme Court of India. Founder of Atrey Chambers of Law LLP. Since 1997, 5000+ cases, 200+ reported judgments across 32 practice areas.',
     images: ['/og-image.png'],
   },
   robots: {

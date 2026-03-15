@@ -153,7 +153,7 @@ export const BENEFITS = [
   },
   {
     title: 'Mentorship by Dr. Atrey',
-    description: 'Learn from 29+ years of expertise. Direct mentorship in constitutional law, government litigation, and courtroom advocacy.',
+    description: 'Learn from distinguished expertise since 1997. Direct mentorship in constitutional law, government litigation, and courtroom advocacy.',
     icon: 'GraduationCap',
   },
   {

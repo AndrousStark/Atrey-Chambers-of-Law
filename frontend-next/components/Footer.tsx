@@ -113,20 +113,20 @@ export const Footer = () => {
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
-                  Delhi Office
+                  Noida Office
                 </p>
-                <p className="leading-relaxed">24, Gyan Kunj, Basement,<br />Laxmi Nagar, Delhi - 110092</p>
+                <p className="leading-relaxed">32 & 33, 4th Floor, C-Block,<br />Technopark, Plot No.5,<br />Noida, UP – 201313</p>
               </div>
               <div>
                 <p className="text-cream/70 font-medium mb-1.5">Contact</p>
                 <p>
-                  <a href="tel:+911122053080" className="hover:text-cream transition-colors">
-                    +91-11-22053080
+                  <a href="tel:+911204587083" className="hover:text-cream transition-colors">
+                    Phone: +91 120 4587083
                   </a>
                 </p>
                 <p>
-                  <a href="tel:+911122023821" className="hover:text-cream transition-colors">
-                    +91-11-22023821
+                  <a href="tel:+919810047556" className="hover:text-cream transition-colors">
+                    Mobile: 9810047556
                   </a>
                 </p>
                 <p className="mt-1">

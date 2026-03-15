@@ -62,7 +62,7 @@ export function generateMetadata({ params }: Props): Metadata {
 const PRACTICE_AREA_FAQS: Record<string, { question: string; answer: string }[]> = {
   'constitutional-law-pil': [
     { question: 'What is Public Interest Litigation (PIL) in India?', answer: 'PIL is a legal action initiated in a court of law for the enforcement of public interest. Any citizen can file a PIL in the Supreme Court under Article 32 or in a High Court under Article 226 for the enforcement of fundamental rights of any person or group.' },
-    { question: 'How can Atrey Chambers help with constitutional law matters?', answer: 'With 29+ years of Supreme Court practice and AOR designation, Dr. Abhishek Atrey provides expert representation in fundamental rights challenges, constitutional validity disputes, writs, and PILs before the Supreme Court and High Courts.' },
+    { question: 'How can Atrey Chambers help with constitutional law matters?', answer: 'With distinguished Supreme Court practice since 1997 and AOR designation, Dr. Abhishek Atrey provides expert representation in fundamental rights challenges, constitutional validity disputes, writs, and PILs before the Supreme Court and High Courts.' },
     { question: 'What types of writ petitions can be filed?', answer: 'Five types of writs can be filed: Habeas Corpus (unlawful detention), Mandamus (duty enforcement), Certiorari (quashing orders), Prohibition (preventing excess jurisdiction), and Quo Warranto (challenging authority to hold office).' },
   ],
   'supreme-court-litigation': [
@@ -266,10 +266,11 @@ export default function PracticeAreaDetailPage({ params }: Props) {
               <div className="rounded-lg border border-gold/20 bg-gradient-to-b from-creamWarm to-cream p-6">
                 <h3 className="font-display font-semibold text-deepGreen mb-3">Contact Us</h3>
                 <p className="text-sm text-charcoal/70 mb-4">
-                  24, Gyan Kunj, Basement,<br />
-                  Laxmi Nagar, Delhi - 110092
+                  32 & 33, 4th Floor, C-Block,<br />
+                  Technopark, Plot No.5,<br />
+                  Noida, UP – 201313
                 </p>
-                <p className="text-sm text-charcoal/70">+91-11-22053080</p>
+                <p className="text-sm text-charcoal/70">Phone: +91 120 4587083</p>
                 <p className="text-sm text-charcoal/70">support@atreychambers.com</p>
                 <a
                   href={assetPath("/schedule")}

@@ -17,7 +17,7 @@ const highlights = [
   },
   {
     title: 'Government Counsel',
-    description: "'A' Panel Counsel for Government of India, Standing Counsel for Uttarakhand and MoEFCC.",
+    description: "'A' Panel Counsel for Government of India, Standing Counsel for Uttarakhand and MoEFCC. Also serves as Panel Counsel for Association of Indian Universities (AIU) and Commission for Air Quality Management (CAQM).",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
         <path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z" />
@@ -27,7 +27,7 @@ const highlights = [
   },
   {
     title: 'Published Authority',
-    description: '3 books, 20+ articles, and 30+ TV appearances on Sansad TV, Rajya Sabha TV, and APN News.',
+    description: '3 books, 50+ articles, 50+ TV appearances, and 50+ guest lectures and appearances in different Universities and other platforms.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -57,7 +57,7 @@ export const AboutUs = () => {
           viewport={{ once: true }}
         >
           <p className="mb-6 text-lg leading-relaxed text-charcoal/80">
-            <strong className="font-display text-deepGreen">Atrey Chambers of Law LLP</strong> stands as a beacon of legal excellence in India. Registered under the Limited Liability Partnership Act, 2008, we are a premier full-service law firm led by <strong className="font-display text-deepGreen">Dr. Abhishek Atrey, LL.D., Advocate-on-Record</strong>, whose distinguished career spans over 29 years of exceptional legal practice since 1997.
+            <strong className="font-display text-deepGreen">Atrey Chambers of Law LLP</strong> stands as a beacon of legal excellence in India. Registered under the Limited Liability Partnership Act, 2008, we are a premier full-service law firm led by <strong className="font-display text-deepGreen">Dr. Abhishek Atrey, LL.D., Advocate-on-Record</strong>, whose distinguished career spans exceptional legal practice since 1997.
           </p>
           <p className="mb-6 text-base leading-relaxed text-charcoal/70">
             Dr. Atrey&apos;s exceptional expertise earned him the prestigious designation of Advocate-on-Record by the Supreme Court of India in 2006. His distinguished service includes appointments as Standing Counsel for the Government of Uttarakhand (2007), &apos;A&apos; Panel Counsel for the Government of India at the Supreme Court (2014), and Standing Counsel for the Ministry of Environment, Forest &amp; Climate Change at the National Green Tribunal (2015).

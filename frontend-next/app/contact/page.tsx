@@ -97,8 +97,8 @@ export default function ContactPage() {
                 </svg>
               </div>
               <h3 className="font-display font-semibold text-deepGreen mb-2">Call Us</h3>
-              <a href="tel:+911122053080" className="block text-charcoal/70 hover:text-deepGreen transition-colors">+91-11-22053080</a>
-              <a href="tel:+911122023821" className="block text-charcoal/70 hover:text-deepGreen transition-colors">+91-11-22023821</a>
+              <a href="tel:+911204587083" className="block text-charcoal/70 hover:text-deepGreen transition-colors">Phone: +91 120 4587083</a>
+              <a href="tel:+919810047556" className="block text-charcoal/70 hover:text-deepGreen transition-colors">Mobile: 9810047556</a>
             </div>
             <div className="rounded-lg border border-charcoal/10 bg-white p-5 md:p-8 text-center hover:shadow-md hover:border-gold/30 transition-all">
               <div className="w-14 h-14 rounded-full bg-deepGreen/5 flex items-center justify-center mx-auto mb-4">
@@ -122,8 +122,9 @@ export default function ContactPage() {
               </div>
               <h3 className="font-display font-semibold text-deepGreen mb-2">Visit Us</h3>
               <p className="text-charcoal/70 text-sm">
-                24, Gyan Kunj, Basement,<br />
-                Laxmi Nagar, Delhi - 110092
+                32 & 33, 4th Floor, C-Block,<br />
+                Technopark, Plot No.5,<br />
+                Noida, UP – 201313
               </p>
               <p className="text-xs text-charcoal/40 mt-2">Mon–Sat, 10 AM – 6 PM</p>
             </div>
@@ -213,7 +214,7 @@ export default function ContactPage() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Atrey Chambers Office Location — Laxmi Nagar, Delhi"
+                title="Atrey Chambers Office Location — Noida, Uttar Pradesh"
               />
             </div>
           </div>

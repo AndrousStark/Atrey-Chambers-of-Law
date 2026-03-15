@@ -119,28 +119,6 @@ export default function OurFirmPage() {
             </a>
           </motion.div>
 
-          {/* Timeline */}
-          <motion.div
-            variants={prefersReducedMotion ? {} : fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="mb-16"
-          >
-            <h2 className="text-2xl font-display font-bold text-deepGreen text-center mb-8">Our History</h2>
-            <div className="max-w-3xl mx-auto">
-              {timeline.map((item, i) => (
-                <div key={i} className="flex gap-6 mb-4 last:mb-0">
-                  <div className="flex flex-col items-center">
-                    <span className="text-sm font-bold text-gold w-12 text-right">{item.year}</span>
-                    {i < timeline.length - 1 && <div className="w-px flex-1 bg-gold/20 mt-2" />}
-                  </div>
-                  <p className="text-charcoal/80 pb-4">{item.event}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
           {/* Client categories */}
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
@@ -177,9 +155,9 @@ export default function OurFirmPage() {
           >
             <h2 className="text-2xl font-display font-bold text-deepGreen text-center mb-8">Our Office</h2>
             <div className="max-w-lg mx-auto rounded-lg border border-charcoal/10 bg-white p-6 text-center">
-              <h3 className="font-display font-semibold text-deepGreen mb-2">Delhi Office</h3>
-              <p className="text-charcoal/70">24, Gyan Kunj, Basement, Laxmi Nagar, Delhi - 110092</p>
-              <p className="text-charcoal/70 mt-1">+91-11-22053080, 22023821</p>
+              <h3 className="font-display font-semibold text-deepGreen mb-2">Noida Office</h3>
+              <p className="text-charcoal/70">32 & 33, 4th Floor, C-Block, Technopark, Plot No.5, Noida, UP – 201313</p>
+              <p className="text-charcoal/70 mt-1">Phone: +91 120 4587083 | Mobile: 9810047556</p>
               <p className="text-charcoal/70 mt-1">support@atreychambers.com</p>
             </div>
           </motion.div>

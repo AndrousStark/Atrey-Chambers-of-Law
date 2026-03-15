@@ -159,7 +159,7 @@ export default async function Image() {
             display: 'flex',
           }}
         >
-          Dr. Abhishek Atrey, LL.D. • Advocate-on-Record • 29+ Years
+          Dr. Abhishek Atrey, LL.D. • Advocate-on-Record • Since 1997
         </div>
 
         {/* Bottom stats */}
@@ -173,7 +173,7 @@ export default async function Image() {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: '#C8AA6E', display: 'flex' }}>500+</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: '#C8AA6E', display: 'flex' }}>5000+</div>
             <div style={{ fontSize: 12, color: '#F2EBDD', opacity: 0.7, display: 'flex' }}>Cases</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -181,8 +181,8 @@ export default async function Image() {
             <div style={{ fontSize: 12, color: '#F2EBDD', opacity: 0.7, display: 'flex' }}>Practice Areas</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: '#C8AA6E', display: 'flex' }}>29+</div>
-            <div style={{ fontSize: 12, color: '#F2EBDD', opacity: 0.7, display: 'flex' }}>Years</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: '#C8AA6E', display: 'flex' }}>200+</div>
+            <div style={{ fontSize: 12, color: '#F2EBDD', opacity: 0.7, display: 'flex' }}>Reported Judgments</div>
           </div>
         </div>
       </div>

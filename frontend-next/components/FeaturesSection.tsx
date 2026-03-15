@@ -13,7 +13,7 @@ const features = [
         <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M8 10v11M12 10v11M16 10v11M20 10v11" />
       </svg>
     ),
-    stat: '500+',
+    stat: '5000+',
     statLabel: 'Cases',
   },
   {
@@ -32,7 +32,7 @@ const features = [
   {
     id: 3,
     title: 'Published Legal Scholar',
-    description: '3 books, 20+ articles in India Legal and national publications, and 30+ television appearances on Sansad TV, Rajya Sabha TV, and APN News.',
+    description: '3 books, 50+ articles in India Legal and national publications, 50+ television appearances on Sansad TV, Rajya Sabha TV, and APN News, and 50+ guest lectures and appearances in different Universities and other platforms.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -52,8 +52,8 @@ const features = [
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
       </svg>
     ),
-    stat: '29+',
-    statLabel: 'Years',
+    stat: '1997',
+    statLabel: 'Since',
   },
 ];
 

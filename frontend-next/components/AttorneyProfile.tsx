@@ -297,11 +297,12 @@ export const AttorneyProfile = ({ member }: AttorneyProfileProps) => {
         <div className="rounded-lg border border-charcoal/10 p-6">
           <h3 className="font-display font-semibold text-deepGreen mb-3">Office</h3>
           <p className="text-sm text-charcoal/70 leading-relaxed">
-            24, Gyan Kunj, Basement,<br />
-            Laxmi Nagar, Delhi - 110092
+            32 & 33, 4th Floor, C-Block,<br />
+            Technopark, Plot No.5,<br />
+            Noida, UP – 201313
           </p>
           <p className="text-sm text-charcoal/70 mt-2">
-            +91-11-22053080, 22023821
+            Phone: +91 120 4587083 | Mobile: 9810047556
           </p>
         </div>
       </aside>

@@ -43,14 +43,15 @@ const navItems: NavItem[] = [
     href: assetPath('/publications'),
     children: [
       { label: 'Books', href: assetPath('/publications') + '#books', description: '3 authored books' },
-      { label: 'Articles', href: assetPath('/publications') + '#articles', description: '20+ legal articles' },
-      { label: 'TV Appearances', href: assetPath('/publications') + '#media', description: '30+ national TV shows' },
+      { label: 'Articles', href: assetPath('/publications') + '#articles', description: '50+ legal articles' },
+      { label: 'TV Appearances', href: assetPath('/publications') + '#media', description: '50+ national TV shows' },
       { label: 'Blog', href: assetPath('/our-blog'), description: 'Legal insights & updates' },
     ],
   },
   { label: 'Media', href: assetPath('/publications') + '#media' },
   { label: 'Careers', href: assetPath('/careers') },
   { label: 'Contact', href: assetPath('/contact') },
+  { label: '\u2696 Case Management', href: assetPath('/case-management/dashboard') },
 ];
 
 interface HeaderProps {
@@ -148,9 +149,9 @@ export const Header = ({ variant = 'default' }: HeaderProps) => {
       <div className="hidden md:block fixed inset-x-0 top-0 z-[10000] bg-deepGreen text-cream/80 text-[0.65rem] tracking-wider uppercase">
         <div className="mx-auto max-w-7xl flex items-center justify-between px-10 py-1.5">
           <div className="flex items-center gap-6">
-            <a href="tel:+911122053080" className="hover:text-cream transition-colors flex items-center gap-1.5">
+            <a href="tel:+911204587083" className="hover:text-cream transition-colors flex items-center gap-1.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              +91-11-22053080
+              +91 120 4587083
             </a>
             <a href="mailto:support@atreychambers.com" className="hover:text-cream transition-colors flex items-center gap-1.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
