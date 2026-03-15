@@ -111,6 +111,20 @@ export default function AddCaseModal({ isOpen, onClose, onSave, initialData }: A
     }
   }, [isOpen, initialData]);
 
+  // ESC key to close + lock body scroll
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
   const handleField = useCallback((key: keyof Case, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value || null }));
   }, []);
@@ -141,11 +155,12 @@ export default function AddCaseModal({ isOpen, onClose, onSave, initialData }: A
   const isEdit = !!initialData;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}

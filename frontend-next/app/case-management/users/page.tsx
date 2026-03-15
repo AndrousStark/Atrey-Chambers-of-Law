@@ -104,23 +104,32 @@ function ConfirmDialog({
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onCancel} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
         <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">{title}</h3>
         <p className="text-sm text-[#666] mb-6">{message}</p>
         <div className="flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="h-9 px-4 rounded-md text-sm font-medium text-[#333333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+            className="h-9 min-h-[44px] px-4 rounded-md text-sm font-medium text-[#333333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="h-9 px-4 rounded-md text-sm font-medium text-white bg-[#FF4444] border border-[#FF4444] hover:bg-[#E63939] transition-colors"
+            className="h-9 min-h-[44px] px-4 rounded-md text-sm font-medium text-white bg-[#FF4444] border border-[#FF4444] hover:bg-[#E63939] transition-colors"
           >
             {confirmLabel}
           </button>
@@ -182,6 +191,20 @@ function UserModal({
     setErrors({});
   }, [editUser, isOpen]);
 
+  // ESC to close + lock body scroll
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
   function validate(): boolean {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = 'Name is required';
@@ -205,8 +228,8 @@ function UserModal({
   const title = isEdit ? 'Edit User' : 'Add User';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-xl">
           <div className="flex items-center justify-between">

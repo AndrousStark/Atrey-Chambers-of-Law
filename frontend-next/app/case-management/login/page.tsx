@@ -102,17 +102,11 @@ export default function CmsLoginPage() {
               value={form.email}
               onChange={(e) => updateField('email', e.target.value)}
               disabled={form.loading}
-              className="w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors duration-200 focus:ring-2 disabled:opacity-60"
+              className="w-full px-4 py-3 rounded-lg border text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[#4472C4]/30 focus:border-[#4472C4] disabled:opacity-60"
               style={{
                 borderColor: '#D1D5DB',
                 color: '#1B2A4A',
                 backgroundColor: '#FAFAFA',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#4472C4';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#D1D5DB';
               }}
             />
           </div>
@@ -133,17 +127,11 @@ export default function CmsLoginPage() {
               value={form.password}
               onChange={(e) => updateField('password', e.target.value)}
               disabled={form.loading}
-              className="w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors duration-200 focus:ring-2 disabled:opacity-60"
+              className="w-full px-4 py-3 rounded-lg border text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[#4472C4]/30 focus:border-[#4472C4] disabled:opacity-60"
               style={{
                 borderColor: '#D1D5DB',
                 color: '#1B2A4A',
                 backgroundColor: '#FAFAFA',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#4472C4';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#D1D5DB';
               }}
             />
           </div>
@@ -159,14 +147,8 @@ export default function CmsLoginPage() {
           <button
             type="submit"
             disabled={form.loading}
-            className="w-full py-3 rounded-lg text-white text-sm font-semibold transition-opacity duration-200 disabled:opacity-60 cursor-pointer mt-2"
+            className="w-full py-3 rounded-lg text-white text-sm font-semibold transition-all duration-200 disabled:opacity-60 cursor-pointer mt-2 hover:brightness-110 active:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#4472C4]/50 focus:ring-offset-2"
             style={{ backgroundColor: '#4472C4' }}
-            onMouseEnter={(e) => {
-              if (!form.loading) e.currentTarget.style.opacity = '0.9';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
-            }}
           >
             {form.loading ? (
               <span className="flex items-center justify-center gap-2">

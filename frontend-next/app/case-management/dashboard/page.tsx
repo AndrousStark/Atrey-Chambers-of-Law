@@ -123,7 +123,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ backgroundColor: '#F0F2F5' }}>
+    <div className="p-4 md:p-6 lg:p-8">
       {/* Page header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold" style={{ color: '#1B2A4A' }}>

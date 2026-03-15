@@ -35,9 +35,15 @@ export default function CmsNavTabs({ activeTab, userRole }: CmsNavTabsProps) {
 
   return (
     <nav
-      className="sticky top-0 z-30 w-full bg-white shadow-sm overflow-x-auto"
-      style={{ fontFamily: "'Segoe UI', system-ui, sans-serif" }}
+      className="cms-nav-tabs sticky top-0 z-30 w-full bg-white shadow-sm overflow-x-auto"
+      style={{
+        fontFamily: "'Segoe UI', system-ui, sans-serif",
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}
     >
+      {/* Hide scrollbar for WebKit browsers */}
+      <style>{`.cms-nav-tabs::-webkit-scrollbar { display: none; }`}</style>
       <div className="flex min-w-max">
         {visibleTabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -45,11 +51,12 @@ export default function CmsNavTabs({ activeTab, userRole }: CmsNavTabsProps) {
             <Link
               key={tab.key}
               href={tab.href}
-              className="flex items-center gap-1.5 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 border-b-[3px] hover:bg-gray-50"
+              className="flex items-center gap-1.5 px-4 sm:px-5 py-3 sm:py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 border-b-[3px] hover:bg-gray-50 min-h-[44px]"
               style={{
-                color: isActive ? '#1B2A4A' : '#333333',
+                color: isActive ? '#1B2A4A' : '#6C757D',
                 borderBottomColor: isActive ? '#4472C4' : 'transparent',
                 textDecoration: 'none',
+                fontWeight: isActive ? 600 : 500,
               }}
             >
               <span className="text-base" role="img" aria-hidden="true">

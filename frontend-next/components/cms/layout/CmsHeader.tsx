@@ -17,7 +17,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 export default function CmsHeader({ userName, userRole, onLogout }: CmsHeaderProps) {
   return (
     <header
-      className="w-full px-6 py-8 sm:px-10 sm:py-9 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      className="w-full px-5 py-5 sm:px-8 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4"
       style={{
         background: 'linear-gradient(135deg, #1B2A4A, #2E5090)',
         fontFamily: "'Segoe UI', system-ui, sans-serif",
@@ -25,14 +25,14 @@ export default function CmsHeader({ userName, userRole, onLogout }: CmsHeaderPro
     >
       <div className="flex flex-col gap-1">
         <h1
-          className="text-white font-semibold leading-tight"
-          style={{ fontSize: '2em', fontWeight: 600 }}
+          className="text-white font-semibold leading-tight text-xl sm:text-2xl"
+          style={{ fontWeight: 600 }}
         >
           Case Management System
         </h1>
         <p
-          className="leading-snug"
-          style={{ fontSize: '0.9em', color: 'rgba(255, 255, 255, 0.9)' }}
+          className="leading-snug text-xs sm:text-sm"
+          style={{ color: 'rgba(255, 255, 255, 0.8)' }}
         >
           Dr. Abhishek Atrey &mdash; Advocate on Record, Supreme Court of India
         </p>
@@ -53,7 +53,7 @@ export default function CmsHeader({ userName, userRole, onLogout }: CmsHeaderPro
         <button
           type="button"
           onClick={onLogout}
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-gray-100 cursor-pointer"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-gray-100 cursor-pointer min-h-[44px] flex items-center focus:outline-none focus:ring-2 focus:ring-white/50"
           style={{
             backgroundColor: '#FFFFFF',
             color: '#1B2A4A',
