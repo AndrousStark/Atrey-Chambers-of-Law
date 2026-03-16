@@ -64,7 +64,7 @@ function setStoredUser(user: CmsUser): void {
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
 
-  const res = await fetch(`${CMS_API_URL}/api${endpoint}`, {
+  const res = await fetch(`${CMS_API_URL}/api/v1${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -86,7 +86,12 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     throw new Error(err.error || `API error: ${res.status}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  // Backend wraps responses in { success, data }. Unwrap if present.
+  if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+    return json.data as T;
+  }
+  return json as T;
 }
 
 // --- Auth ---
@@ -169,7 +174,7 @@ export const cmsCases = {
 
   async bulkUpdate(ids: string[], updates: Partial<Case>): Promise<void> {
     if (USE_MOCK) return mockCases.bulkUpdate(ids, updates);
-    await apiFetch('/cases/bulk', { method: 'POST', body: JSON.stringify({ ids, updates }) });
+    await apiFetch('/cases/bulk-update', { method: 'POST', body: JSON.stringify({ ids, updates }) });
   },
 };
 
@@ -183,17 +188,17 @@ export const cmsDashboard = {
 
   async upcoming(): Promise<Case[]> {
     if (USE_MOCK) return mockDashboard.upcoming();
-    return apiFetch('/dashboard/upcoming');
+    return apiFetch('/dashboard/upcoming-hearings');
   },
 
   async overdue(): Promise<ComplianceItem[]> {
     if (USE_MOCK) return mockDashboard.overdue();
-    return apiFetch('/dashboard/overdue');
+    return apiFetch('/dashboard/overdue-compliance');
   },
 
   async activity(): Promise<AuditEntry[]> {
     if (USE_MOCK) return mockDashboard.activity();
-    return apiFetch('/dashboard/activity');
+    return apiFetch('/dashboard/recent-activity');
   },
 };
 
@@ -207,7 +212,7 @@ export const cmsCompliance = {
 
   async forCase(caseId: string): Promise<ComplianceItem[]> {
     if (USE_MOCK) return mockCompliance.forCase(caseId);
-    return apiFetch(`/compliance/case/${caseId}`);
+    return apiFetch(`/compliance/by-case/${caseId}`);
   },
 
   async create(data: Partial<ComplianceItem>): Promise<ComplianceItem> {
@@ -236,7 +241,7 @@ export const cmsFilings = {
 
   async forCase(caseId: string): Promise<FilingItem[]> {
     if (USE_MOCK) return mockFilings.forCase(caseId);
-    return apiFetch(`/filings/case/${caseId}`);
+    return apiFetch(`/filings/by-case/${caseId}`);
   },
 
   async create(data: Partial<FilingItem>): Promise<FilingItem> {
@@ -260,7 +265,7 @@ export const cmsFilings = {
 export const cmsHearings = {
   async forCase(caseId: string): Promise<HearingRecord[]> {
     if (USE_MOCK) return mockHearings.forCase(caseId);
-    return apiFetch(`/hearings/case/${caseId}`);
+    return apiFetch(`/hearings/by-case/${caseId}`);
   },
 
   async create(data: Partial<HearingRecord>): Promise<HearingRecord> {
