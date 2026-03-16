@@ -18,6 +18,7 @@ const TABS: readonly TabDefinition[] = [
   { key: 'calendar', label: 'Calendar', icon: '\uD83D\uDDD3', href: '/case-management/calendar', adminOnly: false },
   { key: 'compliance', label: 'Compliance', icon: '\u2713', href: '/case-management/compliance', adminOnly: false },
   { key: 'filings', label: 'Filings', icon: '\uD83D\uDCC4', href: '/case-management/filings', adminOnly: false },
+  { key: 'auto-fetch', label: 'Auto-Fetch', icon: '\uD83D\uDD04', href: '/case-management/auto-fetch', adminOnly: true },
   { key: 'users', label: 'Users', icon: '\uD83D\uDC65', href: '/case-management/users', adminOnly: true },
   { key: 'audit', label: 'Audit', icon: '\uD83D\uDCCB', href: '/case-management/audit', adminOnly: true },
   { key: 'settings', label: 'Settings', icon: '\u2699', href: '/case-management/settings', adminOnly: true },

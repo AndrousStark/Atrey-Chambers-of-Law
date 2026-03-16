@@ -325,6 +325,54 @@ export const cmsAudit = {
   },
 };
 
+// --- Scraper / Auto-Fetch ---
+
+export interface ScraperStatus {
+  readonly lastRun: string | null;
+  readonly casesUpdated: number;
+  readonly errors: number;
+  readonly isRunning: boolean;
+}
+
+export interface ScraperConflict {
+  readonly caseId: string;
+  readonly caseNo: string;
+  readonly field: string;
+  readonly manualValue: string;
+  readonly autoValue: string;
+  readonly fetchedAt: string;
+}
+
+export const cmsScraper = {
+  async fetchCase(caseId: string): Promise<{ success: boolean; message: string }> {
+    if (USE_MOCK) return mockScraper.fetchCase(caseId);
+    return apiFetch(`/scraper/fetch-case/${caseId}`, { method: 'POST' });
+  },
+
+  async fetchAll(): Promise<{ message: string }> {
+    if (USE_MOCK) return mockScraper.fetchAll();
+    return apiFetch('/scraper/fetch-all', { method: 'POST' });
+  },
+
+  async getStatus(): Promise<ScraperStatus> {
+    if (USE_MOCK) return mockScraper.getStatus();
+    return apiFetch('/scraper/status');
+  },
+
+  async getConflicts(): Promise<ScraperConflict[]> {
+    if (USE_MOCK) return mockScraper.getConflicts();
+    return apiFetch('/scraper/conflicts');
+  },
+
+  async resolveConflict(caseId: string, field: string, acceptAuto: boolean): Promise<void> {
+    if (USE_MOCK) return mockScraper.resolveConflict(caseId, field, acceptAuto);
+    await apiFetch('/scraper/resolve-conflict', {
+      method: 'POST',
+      body: JSON.stringify({ caseId, field, acceptAuto }),
+    });
+  },
+};
+
 // --- Export ---
 
 export const cmsExport = {
@@ -986,5 +1034,61 @@ const mockAudit = {
       limit,
       totalPages: Math.ceil(sorted.length / limit),
     });
+  },
+};
+
+// --- Mock Scraper ---
+
+let mockScraperStatus: { lastRun: string | null; casesUpdated: number; errors: number; isRunning: boolean } = {
+  lastRun: null,
+  casesUpdated: 0,
+  errors: 0,
+  isRunning: false,
+};
+
+let mockConflictStore: Array<{ caseId: string; caseNo: string; field: string; manualValue: string; autoValue: string; fetchedAt: string }> = [];
+
+const mockScraper = {
+  fetchCase: (caseId: string): Promise<{ success: boolean; message: string }> => {
+    initMockData();
+    const c = mockCaseStore.find(x => x.id === caseId);
+    if (!c) return Promise.resolve({ success: false, message: 'Case not found' });
+    // Simulate successful fetch
+    mockScraperStatus = {
+      ...mockScraperStatus,
+      lastRun: new Date().toISOString(),
+      casesUpdated: mockScraperStatus.casesUpdated + 1,
+    };
+    return Promise.resolve({ success: true, message: `Case ${c.caseNo} updated from SCI` });
+  },
+
+  fetchAll: (): Promise<{ message: string }> => {
+    initMockData();
+    mockScraperStatus = {
+      lastRun: new Date().toISOString(),
+      casesUpdated: mockCaseStore.filter(c => c.status !== 'Disposed' && c.status !== 'Dismissed').length,
+      errors: 0,
+      isRunning: false,
+    };
+    return new Promise((resolve) => {
+      mockScraperStatus = { ...mockScraperStatus, isRunning: true };
+      setTimeout(() => {
+        mockScraperStatus = { ...mockScraperStatus, isRunning: false };
+        resolve({ message: `Batch fetch complete. ${mockScraperStatus.casesUpdated} cases processed.` });
+      }, 2000);
+    });
+  },
+
+  getStatus: (): Promise<{ lastRun: string | null; casesUpdated: number; errors: number; isRunning: boolean }> => {
+    return Promise.resolve({ ...mockScraperStatus });
+  },
+
+  getConflicts: (): Promise<Array<{ caseId: string; caseNo: string; field: string; manualValue: string; autoValue: string; fetchedAt: string }>> => {
+    return Promise.resolve([...mockConflictStore]);
+  },
+
+  resolveConflict: (_caseId: string, field: string, _acceptAuto: boolean): Promise<void> => {
+    mockConflictStore = mockConflictStore.filter(c => !(c.caseId === _caseId && c.field === field));
+    return Promise.resolve();
   },
 };

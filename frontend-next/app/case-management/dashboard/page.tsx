@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { cmsDashboard } from '@/lib/cms-api';
+import { cmsDashboard, cmsScraper, cmsAuth } from '@/lib/cms-api';
+import type { ScraperStatus } from '@/lib/cms-api';
 import type { DashboardStats, Case, ComplianceItem, AuditEntry } from '@/lib/cms-types';
 import StatCardsRow from '@/components/cms/dashboard/StatCardsRow';
 import UpcomingHearingsWidget from '@/components/cms/dashboard/UpcomingHearingsWidget';
@@ -92,10 +93,32 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
+function timeAgoShort(dateStr: string | null): string {
+  if (!dateStr) return 'Never run';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scraperStatus, setScraperStatus] = useState<ScraperStatus | null>(null);
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
+
+  useEffect(() => {
+    const user = cmsAuth.getUser();
+    if (user && user.role === 'superadmin') {
+      setIsSuperadmin(true);
+    }
+  }, []);
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -122,6 +145,12 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
+  // Fetch scraper status for superadmin
+  useEffect(() => {
+    if (!isSuperadmin) return;
+    cmsScraper.getStatus().then(setScraperStatus).catch(() => {});
+  }, [isSuperadmin]);
+
   return (
     <div className="p-4 md:p-6 lg:p-8">
       {/* Page header */}
@@ -145,8 +174,33 @@ export default function DashboardPage() {
       {/* Dashboard content */}
       {!loading && !error && data && (
         <div className="space-y-6">
-          {/* Stat cards — full width */}
+          {/* Stat cards -- full width */}
           <StatCardsRow stats={data.stats} />
+
+          {/* Auto-Fetch status banner -- superadmin only */}
+          {isSuperadmin && scraperStatus && (
+            <div
+              className="flex items-center gap-3 px-5 py-3 rounded-xl text-sm"
+              style={{
+                backgroundColor: scraperStatus.lastRun ? '#EDF2FA' : '#F0F2F5',
+                color: scraperStatus.lastRun ? '#4472C4' : '#6C757D',
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              <span>
+                <span className="font-semibold">Auto-Fetch:</span>
+                {scraperStatus.lastRun ? (
+                  <>{' '}Last run {timeAgoShort(scraperStatus.lastRun)} &mdash; {scraperStatus.casesUpdated} cases updated</>
+                ) : (
+                  <>{' '}Never run</>
+                )}
+              </span>
+            </div>
+          )}
 
           {/* Row 1: Upcoming Hearings (left) + Distribution Charts (right) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
