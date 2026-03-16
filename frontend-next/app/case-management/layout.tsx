@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import CmsLayoutShell from '@/components/cms/layout/CmsLayoutShell';
 
 export const metadata: Metadata = {
-  title: 'Case Management | Atrey Chambers',
+  title: 'ATREY CMS | Atrey Chambers',
   robots: { index: false, follow: false },
 };
 

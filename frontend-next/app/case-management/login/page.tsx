@@ -74,11 +74,17 @@ export default function CmsLoginPage() {
             {'\u2696\uFE0F'}
           </div>
           <h1
-            className="text-2xl font-semibold mb-1"
+            className="text-2xl font-bold mb-1"
             style={{ color: '#1B2A4A' }}
           >
-            Case Management System
+            ATREY CMS
           </h1>
+          <p
+            className="text-sm mb-1"
+            style={{ color: '#1B2A4A', opacity: 0.7 }}
+          >
+            (Case Management System)
+          </p>
           <p className="text-sm" style={{ color: '#666666' }}>
             Atrey Chambers of Law LLP
           </p>

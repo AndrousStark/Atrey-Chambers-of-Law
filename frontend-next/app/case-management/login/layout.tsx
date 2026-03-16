@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Login | Case Management — Atrey Chambers',
+  title: 'Login | ATREY CMS',
   robots: { index: false, follow: false },
 };
 

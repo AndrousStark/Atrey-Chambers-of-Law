@@ -25,16 +25,42 @@ export default function CmsHeader({ userName, userRole, onLogout }: CmsHeaderPro
     >
       <div className="flex flex-col gap-1">
         <h1
-          className="text-white font-semibold leading-tight text-xl sm:text-2xl"
-          style={{ fontWeight: 600 }}
+          className="text-white font-bold leading-tight text-xl sm:text-2xl"
+          style={{ fontWeight: 700 }}
         >
-          Case Management System
+          ATREY CMS
         </h1>
+        <p
+          className="leading-snug"
+          style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.6em', position: 'relative', top: '-2px' }}
+        >
+          (Case Management System)
+        </p>
         <p
           className="leading-snug text-xs sm:text-sm"
           style={{ color: 'rgba(255, 255, 255, 0.8)' }}
         >
           Dr. Abhishek Atrey &mdash; Advocate on Record, Supreme Court of India
+        </p>
+        <p
+          className="leading-snug"
+          style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75em' }}
+        >
+          Made by{' '}
+          <a
+            href="https://aniruddhatrey.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-all duration-200"
+            style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              textDecoration: 'none',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
+          >
+            Aniruddh Atrey
+          </a>
         </p>
       </div>
 
