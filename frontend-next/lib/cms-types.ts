@@ -57,6 +57,7 @@ export interface CmsUser {
   name: string;
   email: string;
   role: UserRole;
+  permissions: string[];
   isActive: boolean;
   departmentFilter: string | null;
   clientFilter: string | null;

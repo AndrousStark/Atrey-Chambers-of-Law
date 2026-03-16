@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { cmsUsers, cmsAuth } from '@/lib/cms-api';
-import type { CmsUser, UserRole } from '@/lib/cms-types';
+import { cmsUsers, cmsAuth, cmsAudit } from '@/lib/cms-api';
+import type { CmsUser, UserRole, AuditEntry } from '@/lib/cms-types';
 import { DEPARTMENTS } from '@/lib/cms-types';
 
 // ============================================================
@@ -13,7 +13,113 @@ const ACCENT = '#4472C4';
 const RED = '#FF4444';
 const GREEN = '#28A745';
 const GREY = '#6C757D';
-const BG = '#F0F2F5';
+
+// ============================================================
+// Permission definitions
+// ============================================================
+
+interface PermissionDef {
+  readonly key: string;
+  readonly label: string;
+}
+
+interface PermissionGroup {
+  readonly name: string;
+  readonly icon: string;
+  readonly items: readonly PermissionDef[];
+}
+
+const PERMISSION_GROUPS: readonly PermissionGroup[] = [
+  {
+    name: 'Dashboard',
+    icon: '\uD83D\uDCCA',
+    items: [
+      { key: 'page.dashboard', label: 'View Dashboard' },
+    ],
+  },
+  {
+    name: 'Cases',
+    icon: '\u2696',
+    items: [
+      { key: 'page.cases', label: 'View Cases' },
+      { key: 'page.cases.add', label: 'Add Cases' },
+      { key: 'page.cases.edit', label: 'Edit Cases' },
+      { key: 'page.cases.delete', label: 'Delete Cases' },
+    ],
+  },
+  {
+    name: 'Hearings & Calendar',
+    icon: '\uD83D\uDCC5',
+    items: [
+      { key: 'page.hearings', label: 'View Hearing Diary' },
+      { key: 'page.calendar', label: 'View Calendar' },
+    ],
+  },
+  {
+    name: 'Compliance',
+    icon: '\u2713',
+    items: [
+      { key: 'page.compliance', label: 'View Compliance' },
+      { key: 'page.compliance.edit', label: 'Add/Edit Compliance' },
+    ],
+  },
+  {
+    name: 'Filings',
+    icon: '\uD83D\uDCC4',
+    items: [
+      { key: 'page.filings', label: 'View Filings' },
+      { key: 'page.filings.edit', label: 'Add/Edit Filings' },
+    ],
+  },
+  {
+    name: 'Auto-Fetch',
+    icon: '\uD83D\uDD04',
+    items: [
+      { key: 'page.autofetch', label: 'View Auto-Fetch' },
+      { key: 'page.autofetch.trigger', label: 'Trigger Fetches' },
+    ],
+  },
+  {
+    name: 'Administration',
+    icon: '\uD83D\uDC65',
+    items: [
+      { key: 'page.users', label: 'View Users' },
+      { key: 'page.users.edit', label: 'Manage Users' },
+      { key: 'page.audit', label: 'View Audit Log' },
+      { key: 'page.settings', label: 'View Settings' },
+      { key: 'page.export', label: 'Export Data' },
+      { key: 'page.import', label: 'Import Data' },
+    ],
+  },
+] as const;
+
+const ALL_PERMISSION_KEYS = PERMISSION_GROUPS.flatMap(g => g.items.map(i => i.key));
+
+const DEFAULT_EDITOR_PERMISSIONS = [
+  'page.dashboard',
+  'page.cases', 'page.cases.add', 'page.cases.edit',
+  'page.hearings', 'page.calendar',
+  'page.compliance', 'page.compliance.edit',
+  'page.filings', 'page.filings.edit',
+];
+
+const DEFAULT_VIEWER_PERMISSIONS = [
+  'page.dashboard',
+  'page.cases',
+];
+
+function getDefaultPermissions(role: UserRole): string[] {
+  switch (role) {
+    case 'superadmin':
+      return [...ALL_PERMISSION_KEYS];
+    case 'editor':
+      return [...DEFAULT_EDITOR_PERMISSIONS];
+    case 'viewer':
+      return [...DEFAULT_VIEWER_PERMISSIONS];
+    default:
+      return [];
+  }
+}
 
 // ============================================================
 // Helpers
@@ -140,6 +246,372 @@ function ConfirmDialog({
 }
 
 // ============================================================
+// Permissions Checkboxes
+// ============================================================
+
+function PermissionsSection({
+  permissions,
+  onChange,
+  disabled,
+}: {
+  readonly permissions: string[];
+  readonly onChange: (perms: string[]) => void;
+  readonly disabled: boolean;
+}) {
+  const togglePermission = (key: string) => {
+    if (disabled) return;
+    if (permissions.includes(key)) {
+      onChange(permissions.filter(p => p !== key));
+    } else {
+      onChange([...permissions, key]);
+    }
+  };
+
+  const selectAll = () => {
+    if (disabled) return;
+    onChange([...ALL_PERMISSION_KEYS]);
+  };
+
+  const deselectAll = () => {
+    if (disabled) return;
+    onChange([]);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-semibold" style={{ color: NAVY }}>
+          Permissions
+        </label>
+        {!disabled && (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={selectAll}
+              className="text-[10px] font-medium px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
+              style={{ color: ACCENT }}
+            >
+              Select All
+            </button>
+            <button
+              type="button"
+              onClick={deselectAll}
+              className="text-[10px] font-medium px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
+              style={{ color: GREY }}
+            >
+              Deselect All
+            </button>
+          </div>
+        )}
+      </div>
+
+      {disabled && (
+        <p className="text-[11px] italic" style={{ color: GREY }}>
+          Superadmin always has all permissions.
+        </p>
+      )}
+
+      <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+        {PERMISSION_GROUPS.map((group) => (
+          <div key={group.name} className="rounded-lg border border-gray-200 p-2.5">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-sm" role="img" aria-hidden="true">{group.icon}</span>
+              <span className="text-xs font-semibold" style={{ color: NAVY }}>{group.name}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+              {group.items.map((item) => {
+                const checked = disabled || permissions.includes(item.key);
+                return (
+                  <label
+                    key={item.key}
+                    className={`flex items-center gap-1.5 text-[11px] py-0.5 ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:text-[#1B2A4A]'}`}
+                    style={{ color: '#555' }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={disabled}
+                      onChange={() => togglePermission(item.key)}
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-[#4472C4] focus:ring-[#4472C4]/30 disabled:opacity-50"
+                    />
+                    {item.label}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Password Created Dialog
+// ============================================================
+
+function PasswordCreatedDialog({
+  isOpen,
+  userName,
+  password,
+  onClose,
+}: {
+  readonly isOpen: boolean;
+  readonly userName: string;
+  readonly password: string;
+  readonly onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCopied(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(password);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: select the text
+    }
+  }, [password]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: `${GREEN}15` }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: NAVY }}>User Created</h3>
+            <p className="text-sm" style={{ color: GREY }}>{userName}</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+          <label className="block text-xs font-semibold mb-2" style={{ color: NAVY }}>Password</label>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 text-sm font-mono bg-white border border-gray-200 rounded px-3 py-2 select-all" style={{ color: NAVY }}>
+              {password}
+            </code>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="h-9 px-3 rounded-md text-sm font-medium border transition-colors flex items-center gap-1.5"
+              style={{
+                backgroundColor: copied ? `${GREEN}10` : 'white',
+                borderColor: copied ? GREEN : '#d1d5db',
+                color: copied ? GREEN : NAVY,
+              }}
+            >
+              {copied ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Copied
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                  Copy
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <p className="text-xs font-medium" style={{ color: '#92400E' }}>
+            Save this password -- it cannot be retrieved later.
+          </p>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="h-9 px-5 rounded-md text-sm font-medium text-white transition-colors"
+            style={{ backgroundColor: ACCENT }}
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Activity Modal
+// ============================================================
+
+function ActivityModal({
+  isOpen,
+  user,
+  onClose,
+}: {
+  readonly isOpen: boolean;
+  readonly user: CmsUser | null;
+  readonly onClose: () => void;
+}) {
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    setLoading(true);
+    setError(null);
+    cmsAudit.list(1, 50, user.id)
+      .then((result) => {
+        setEntries(result.data);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load activity.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [isOpen, user]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !user) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold" style={{ color: NAVY }}>User Activity</h2>
+              <p className="text-sm mt-0.5" style={{ color: GREY }}>
+                Recent activity for <strong>{user.name}</strong>
+              </p>
+            </div>
+            <button onClick={onClose} className="p-1 rounded hover:bg-gray-100 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C757D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-6 h-6 border-2 border-[#4472C4]/30 border-t-[#4472C4] rounded-full animate-spin" />
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-[#FF4444]/20 rounded-lg p-4 text-sm" style={{ color: RED }}>
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && entries.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-sm" style={{ color: GREY }}>No activity found for this user.</p>
+            </div>
+          )}
+
+          {!loading && !error && entries.length > 0 && (
+            <div className="space-y-2">
+              {entries.map((entry) => (
+                <div key={entry.id} className="rounded-lg border border-gray-200 p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold capitalize px-2 py-0.5 rounded-full" style={{ backgroundColor: `${ACCENT}15`, color: ACCENT }}>
+                      {entry.action}
+                    </span>
+                    <span className="text-[10px]" style={{ color: GREY }}>
+                      {new Date(entry.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-xs space-y-0.5" style={{ color: '#555' }}>
+                    <p><span className="font-medium" style={{ color: NAVY }}>Entity:</span> {entry.entityType}{entry.entityId ? ` (${entry.entityId.slice(0, 12)}...)` : ''}</p>
+                    {entry.fieldChanged && (
+                      <p><span className="font-medium" style={{ color: NAVY }}>Field:</span> {entry.fieldChanged}</p>
+                    )}
+                    {(entry.oldValue || entry.newValue) && (
+                      <p>
+                        <span className="font-medium" style={{ color: NAVY }}>Change:</span>{' '}
+                        <span style={{ color: RED }}>{entry.oldValue || '(empty)'}</span>
+                        {' -> '}
+                        <span style={{ color: GREEN }}>{entry.newValue || '(empty)'}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-100">
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="h-9 px-5 rounded-md text-sm font-medium text-white transition-colors"
+              style={{ backgroundColor: ACCENT }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // Add/Edit User Modal
 // ============================================================
 
@@ -150,6 +622,7 @@ interface UserFormData {
   role: UserRole;
   departmentFilter: string;
   isActive: boolean;
+  permissions: string[];
 }
 
 function UserModal({
@@ -172,6 +645,7 @@ function UserModal({
     role: 'viewer',
     departmentFilter: '',
     isActive: true,
+    permissions: [...DEFAULT_VIEWER_PERMISSIONS],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -184,9 +658,18 @@ function UserModal({
         role: editUser.role,
         departmentFilter: editUser.departmentFilter || '',
         isActive: editUser.isActive,
+        permissions: editUser.permissions ? [...editUser.permissions] : getDefaultPermissions(editUser.role),
       });
     } else {
-      setForm({ name: '', email: '', password: '', role: 'viewer', departmentFilter: '', isActive: true });
+      setForm({
+        name: '',
+        email: '',
+        password: '',
+        role: 'viewer',
+        departmentFilter: '',
+        isActive: true,
+        permissions: [...DEFAULT_VIEWER_PERMISSIONS],
+      });
     }
     setErrors({});
   }, [editUser, isOpen]);
@@ -204,6 +687,15 @@ function UserModal({
       document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
+
+  // When role changes, auto-set default permissions for that role
+  const handleRoleChange = (newRole: UserRole) => {
+    setForm({
+      ...form,
+      role: newRole,
+      permissions: getDefaultPermissions(newRole),
+    });
+  };
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
@@ -226,12 +718,13 @@ function UserModal({
 
   const isEdit = !!editUser;
   const title = isEdit ? 'Edit User' : 'Add User';
+  const isSuperadmin = form.role === 'superadmin';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-xl">
+        <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-xl z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold" style={{ color: NAVY }}>{title}</h2>
             <button onClick={onClose} className="p-1 rounded hover:bg-gray-100 transition-colors">
@@ -290,7 +783,7 @@ function UserModal({
             <label className="block text-xs font-semibold mb-1.5" style={{ color: NAVY }}>Role</label>
             <select
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
+              onChange={(e) => handleRoleChange(e.target.value as UserRole)}
               className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 bg-white"
             >
               <option value="editor">Editor</option>
@@ -329,6 +822,13 @@ function UserModal({
               <span className="text-xs" style={{ color: GREY }}>{form.isActive ? 'Active' : 'Inactive'}</span>
             </div>
           )}
+
+          {/* Permissions */}
+          <PermissionsSection
+            permissions={form.permissions}
+            onChange={(perms) => setForm({ ...form, permissions: perms })}
+            disabled={isSuperadmin}
+          />
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
@@ -558,6 +1058,12 @@ export default function UsersPage() {
   const [resetPasswordTarget, setResetPasswordTarget] = useState<CmsUser | null>(null);
   const [resettingPassword, setResettingPassword] = useState(false);
 
+  // Password created dialog
+  const [createdUserInfo, setCreatedUserInfo] = useState<{ name: string; password: string } | null>(null);
+
+  // Activity modal
+  const [activityTarget, setActivityTarget] = useState<CmsUser | null>(null);
+
   // Toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastIdRef = useRef(0);
@@ -628,18 +1134,24 @@ export default function UsersPage() {
           role: data.role,
           departmentFilter: data.departmentFilter || null,
           isActive: data.isActive,
+          permissions: data.permissions,
         });
         showToast('success', `User "${data.name}" updated successfully.`);
+        handleCloseModal();
       } else {
+        // Remember the password before sending (it gets hashed on server)
+        const plainPassword = data.password;
         await cmsUsers.create({
           name: data.name,
           email: data.email,
           password: data.password,
           role: data.role,
+          permissions: data.permissions,
         });
-        showToast('success', `User "${data.name}" created successfully.`);
+        handleCloseModal();
+        // Show password dialog
+        setCreatedUserInfo({ name: data.name, password: plainPassword });
       }
-      handleCloseModal();
       await fetchUsers();
     } catch (err) {
       showToast('error', err instanceof Error ? err.message : 'Operation failed.');
@@ -695,6 +1207,10 @@ export default function UsersPage() {
       setResettingPassword(false);
     }
   }, [resetPasswordTarget, showToast]);
+
+  const handleViewActivity = useCallback((user: CmsUser) => {
+    setActivityTarget(user);
+  }, []);
 
   // --- Access check ---
 
@@ -848,6 +1364,17 @@ export default function UsersPage() {
                                 </svg>
                               </button>
 
+                              {/* View Activity */}
+                              <button
+                                onClick={() => handleViewActivity(user)}
+                                className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                                title="View activity"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GREY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                                </svg>
+                              </button>
+
                               {/* Toggle Active */}
                               <button
                                 onClick={() => handleToggleActive(user)}
@@ -921,6 +1448,9 @@ export default function UsersPage() {
                         <button onClick={() => handleOpenEdit(user)} className="text-xs font-medium px-2 py-1 rounded hover:bg-gray-100" style={{ color: ACCENT }}>
                           Edit
                         </button>
+                        <button onClick={() => handleViewActivity(user)} className="text-xs font-medium px-2 py-1 rounded hover:bg-gray-100" style={{ color: GREY }}>
+                          Activity
+                        </button>
                         <button
                           onClick={() => handleToggleActive(user)}
                           disabled={isSelf}
@@ -968,6 +1498,21 @@ export default function UsersPage() {
         onClose={() => setResetPasswordTarget(null)}
         onSubmit={handleResetPasswordSubmit}
         saving={resettingPassword}
+      />
+
+      {/* Password Created Dialog */}
+      <PasswordCreatedDialog
+        isOpen={!!createdUserInfo}
+        userName={createdUserInfo?.name || ''}
+        password={createdUserInfo?.password || ''}
+        onClose={() => setCreatedUserInfo(null)}
+      />
+
+      {/* Activity Modal */}
+      <ActivityModal
+        isOpen={!!activityTarget}
+        user={activityTarget}
+        onClose={() => setActivityTarget(null)}
       />
 
       {/* Toasts */}

@@ -292,7 +292,7 @@ export const cmsUsers = {
     return apiFetch('/users');
   },
 
-  async create(data: { name: string; email: string; password: string; role: string }): Promise<CmsUser> {
+  async create(data: { name: string; email: string; password: string; role: string; permissions?: string[] }): Promise<CmsUser> {
     if (USE_MOCK) return mockUsers.create(data);
     return apiFetch('/users', { method: 'POST', body: JSON.stringify(data) });
   },
@@ -319,9 +319,11 @@ export const cmsUsers = {
 // --- Audit ---
 
 export const cmsAudit = {
-  async list(page = 1, limit = 50): Promise<PaginatedResponse<AuditEntry>> {
-    if (USE_MOCK) return mockAudit.list(page, limit);
-    return apiFetch(`/audit?page=${page}&limit=${limit}`);
+  async list(page = 1, limit = 50, userId?: string): Promise<PaginatedResponse<AuditEntry>> {
+    if (USE_MOCK) return mockAudit.list(page, limit, userId);
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (userId) params.set('userId', userId);
+    return apiFetch(`/audit?${params.toString()}`);
   },
 };
 
@@ -691,10 +693,10 @@ function initMockData() {
 
   // Seed users
   mockUserStore = [
-    { id: 'user_admin', name: 'Dr. Abhishek Atrey', email: 'abhishekatrey@gmail.com', role: 'superadmin', isActive: true, departmentFilter: null, clientFilter: null, lastLogin: now, createdAt: now },
-    { id: 'user_aniruddh', name: 'Aniruddh Atrey', email: 'aniruddh.atrey111101@gmail.com', role: 'editor', isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: now },
-    { id: 'user_atul', name: 'Atul Sharma', email: 'atul.sharma@example.com', role: 'editor', isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: now },
-    { id: 'user_aastha', name: 'Aastha Atrey', email: 'aasthaatrey14@gmail.com', role: 'editor', isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: now },
+    { id: 'user_admin', name: 'Dr. Abhishek Atrey', email: 'abhishekatrey@gmail.com', role: 'superadmin', permissions: [], isActive: true, departmentFilter: null, clientFilter: null, lastLogin: now, createdAt: now },
+    { id: 'user_aniruddh', name: 'Aniruddh Atrey', email: 'aniruddh.atrey111101@gmail.com', role: 'editor', permissions: ['page.dashboard','page.cases','page.cases.add','page.cases.edit','page.hearings','page.calendar','page.compliance','page.compliance.edit','page.filings','page.filings.edit'], isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: now },
+    { id: 'user_atul', name: 'Atul Sharma', email: 'atul.sharma@example.com', role: 'editor', permissions: ['page.dashboard','page.cases','page.cases.add','page.cases.edit','page.hearings','page.calendar','page.compliance','page.compliance.edit','page.filings','page.filings.edit'], isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: now },
+    { id: 'user_aastha', name: 'Aastha Atrey', email: 'aasthaatrey14@gmail.com', role: 'editor', permissions: ['page.dashboard','page.cases','page.cases.add','page.cases.edit','page.hearings','page.calendar','page.compliance','page.compliance.edit','page.filings','page.filings.edit'], isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: now },
   ];
 
   // Seed cases — imported from standalone seed data file (85 real cases)
@@ -1009,9 +1011,9 @@ const mockHearings = {
 
 const mockUsers = {
   list: () => { initMockData(); return Promise.resolve([...mockUserStore]); },
-  create: (data: { name: string; email: string; password: string; role: string }) => {
+  create: (data: { name: string; email: string; password: string; role: string; permissions?: string[] }) => {
     initMockData();
-    const user: CmsUser = { id: generateId(), name: data.name, email: data.email, role: data.role as CmsUser['role'], isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: new Date().toISOString() };
+    const user: CmsUser = { id: generateId(), name: data.name, email: data.email, role: data.role as CmsUser['role'], permissions: data.permissions || [], isActive: true, departmentFilter: null, clientFilter: null, lastLogin: null, createdAt: new Date().toISOString() };
     mockUserStore = [...mockUserStore, user];
     return Promise.resolve(user);
   },
@@ -1023,9 +1025,12 @@ const mockUsers = {
 };
 
 const mockAudit = {
-  list: (page: number, limit: number) => {
+  list: (page: number, limit: number, userId?: string) => {
     initMockData();
-    const sorted = [...mockAuditStore].reverse();
+    let sorted = [...mockAuditStore].reverse();
+    if (userId) {
+      sorted = sorted.filter(a => a.userId === userId);
+    }
     const start = (page - 1) * limit;
     return Promise.resolve({
       data: sorted.slice(start, start + limit).map(a => ({ ...a, user: mockUserStore.find(u => u.id === a.userId) })),
