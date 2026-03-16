@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { Case, CaseStatus, Priority, UserRole } from '@/lib/cms-types';
 import { CASE_STATUS_LABELS, PRIORITY_LABELS } from '@/lib/cms-types';
@@ -139,6 +139,49 @@ function TrashIcon() {
   );
 }
 
+// --- Inline Save Feedback Icon ---
+
+function InlineSaveIcon({ state }: { readonly state: 'idle' | 'success' | 'error' }) {
+  if (state === 'success') {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#28A745" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block ml-1 animate-in fade-in">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    );
+  }
+  if (state === 'error') {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block ml-1 animate-in fade-in">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    );
+  }
+  return null;
+}
+
+// --- Inline Editable Cell Hook ---
+
+type CellSaveState = 'idle' | 'success' | 'error';
+
+function useInlineSave(
+  caseId: string,
+  field: string,
+  onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>,
+) {
+  const [saveState, setSaveState] = useState<CellSaveState>('idle');
+
+  const handleChange = useCallback(async (value: string | null) => {
+    if (!onInlineUpdate) return;
+    setSaveState('idle');
+    const success = await onInlineUpdate(caseId, { [field]: value } as Partial<Case>);
+    setSaveState(success ? 'success' : 'error');
+    setTimeout(() => setSaveState('idle'), 1500);
+  }, [caseId, field, onInlineUpdate]);
+
+  return { saveState, handleChange };
+}
+
 // --- Props ---
 
 interface CaseTableProps {
@@ -152,6 +195,9 @@ interface CaseTableProps {
   readonly onEdit: (caseItem: Case) => void;
   readonly onDelete: (caseItem: Case) => void;
   readonly userRole: UserRole;
+  readonly editMode?: boolean;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+  readonly visibleColumns?: string[];
 }
 
 // --- Column Definitions ---
@@ -163,21 +209,218 @@ interface ColumnDef {
   readonly width?: string;
 }
 
-const COLUMNS: readonly ColumnDef[] = [
+const ALL_COLUMNS: readonly ColumnDef[] = [
   { key: 'checkbox', label: '', sortable: false, width: '40px' },
   { key: 'serialNo', label: 'S.No.', sortable: true, width: '60px' },
   { key: 'caseNo', label: 'Case No.', sortable: true, width: '200px' },
+  { key: 'cnrNumber', label: 'CNR Number', sortable: true, width: '160px' },
   { key: 'court', label: 'Court', sortable: true, width: '140px' },
+  { key: 'bench', label: 'Bench', sortable: true, width: '120px' },
   { key: 'client', label: 'Client', sortable: true, width: '130px' },
   { key: 'caseTitle', label: 'Title', sortable: true, width: '200px' },
+  { key: 'petitioner', label: 'Petitioner', sortable: true, width: '160px' },
+  { key: 'respondent', label: 'Respondent', sortable: true, width: '160px' },
   { key: 'ourRole', label: 'Role', sortable: true, width: '100px' },
+  { key: 'category', label: 'Category', sortable: true, width: '140px' },
+  { key: 'subjectMatter', label: 'Subject Matter', sortable: true, width: '160px' },
   { key: 'department', label: 'Department', sortable: true, width: '120px' },
+  { key: 'filingDate', label: 'Filing Date', sortable: true, width: '110px' },
+  { key: 'registrationDate', label: 'Registration Date', sortable: true, width: '130px' },
   { key: 'status', label: 'Status', sortable: true, width: '130px' },
   { key: 'ndoh', label: 'NDOH', sortable: true, width: '100px' },
+  { key: 'previousHearing', label: 'Previous Hearing', sortable: true, width: '130px' },
+  { key: 'benchNumber', label: 'Bench Number', sortable: true, width: '120px' },
+  { key: 'presidingJudge', label: 'Judge', sortable: true, width: '140px' },
   { key: 'priority', label: 'Priority', sortable: true, width: '90px' },
+  { key: 'linkedCases', label: 'Linked Cases', sortable: false, width: '140px' },
+  { key: 'isBatch', label: 'Batch', sortable: true, width: '80px' },
   { key: 'remarks', label: 'Remarks', sortable: false, width: '160px' },
   { key: 'actions', label: 'Actions', sortable: false, width: '110px' },
 ];
+
+/** Default visible column keys */
+export const DEFAULT_VISIBLE_COLUMNS: readonly string[] = [
+  'checkbox',
+  'serialNo',
+  'caseNo',
+  'court',
+  'client',
+  'caseTitle',
+  'ourRole',
+  'department',
+  'status',
+  'ndoh',
+  'priority',
+  'remarks',
+  'actions',
+];
+
+/** All column keys (excluding checkbox and actions which are always available) */
+export const TOGGLEABLE_COLUMNS: readonly { key: string; label: string }[] =
+  ALL_COLUMNS
+    .filter((c) => c.key !== 'checkbox' && c.key !== 'actions')
+    .map((c) => ({ key: c.key, label: c.label }));
+
+// --- Inline Editable Cells ---
+
+function InlineStatusSelect({
+  caseItem,
+  onInlineUpdate,
+}: {
+  readonly caseItem: Case;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, 'status', onInlineUpdate);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <select
+        defaultValue={caseItem.status}
+        onChange={(e) => handleChange(e.target.value)}
+        className="
+          h-7 px-1.5 pr-5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs font-medium text-[#333] appearance-none cursor-pointer
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          transition-colors
+        "
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234472C4' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 4px center',
+        }}
+      >
+        {(Object.entries(CASE_STATUS_LABELS) as [CaseStatus, string][]).map(([value, label]) => (
+          <option key={value} value={value}>{label}</option>
+        ))}
+      </select>
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
+
+function InlinePrioritySelect({
+  caseItem,
+  onInlineUpdate,
+}: {
+  readonly caseItem: Case;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, 'priority', onInlineUpdate);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <select
+        defaultValue={caseItem.priority}
+        onChange={(e) => handleChange(e.target.value)}
+        className="
+          h-7 px-1.5 pr-5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs font-medium text-[#333] appearance-none cursor-pointer
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          transition-colors
+        "
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234472C4' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 4px center',
+        }}
+      >
+        {(Object.entries(PRIORITY_LABELS) as [Priority, string][]).map(([value, label]) => (
+          <option key={value} value={value}>{label}</option>
+        ))}
+      </select>
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
+
+function InlineNdohInput({
+  caseItem,
+  onInlineUpdate,
+}: {
+  readonly caseItem: Case;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, 'ndoh', onInlineUpdate);
+  const [value, setValue] = useState(caseItem.ndoh || '');
+
+  const handleBlur = useCallback(() => {
+    const trimmed = value.trim();
+    if (trimmed !== (caseItem.ndoh || '')) {
+      handleChange(trimmed || null);
+    }
+  }, [value, caseItem.ndoh, handleChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  }, []);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder="DD.MM.YYYY"
+        className="
+          h-7 w-[90px] px-1.5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs text-[#333] placeholder:text-[#999]
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          transition-colors
+        "
+      />
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
+
+function InlineRemarksInput({
+  caseItem,
+  onInlineUpdate,
+}: {
+  readonly caseItem: Case;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, 'remarks', onInlineUpdate);
+  const [value, setValue] = useState(caseItem.remarks || '');
+
+  const handleBlur = useCallback(() => {
+    const trimmed = value.trim();
+    if (trimmed !== (caseItem.remarks || '')) {
+      handleChange(trimmed || null);
+    }
+  }, [value, caseItem.remarks, handleChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  }, []);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder="Add remarks..."
+        className="
+          h-7 w-full min-w-[100px] px-1.5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs text-[#333] placeholder:text-[#999]
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          focus:w-[200px] transition-all
+        "
+        title={caseItem.remarks || ''}
+      />
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
 
 // --- Component ---
 
@@ -192,9 +435,19 @@ export default function CaseTable({
   onEdit,
   onDelete,
   userRole,
+  editMode = false,
+  onInlineUpdate,
+  visibleColumns,
 }: CaseTableProps) {
   const allSelected = cases.length > 0 && cases.every((c) => selectedIds.has(c.id));
   const someSelected = cases.some((c) => selectedIds.has(c.id)) && !allSelected;
+
+  // Determine which columns to render
+  const visibleSet = visibleColumns ? new Set(visibleColumns) : new Set(DEFAULT_VISIBLE_COLUMNS);
+  // Always include checkbox and actions
+  visibleSet.add('checkbox');
+  visibleSet.add('actions');
+  const columns = ALL_COLUMNS.filter((col) => visibleSet.has(col.key));
 
   if (cases.length === 0) {
     return (
@@ -223,12 +476,18 @@ export default function CaseTable({
     );
   }
 
+  // Calculate min-width based on visible columns
+  const totalWidth = columns.reduce((sum, col) => {
+    const w = col.width ? parseInt(col.width, 10) : 120;
+    return sum + w;
+  }, 0);
+
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-      <table className="w-full border-collapse" style={{ minWidth: '1400px' }}>
+      <table className="w-full border-collapse" style={{ minWidth: `${totalWidth}px` }}>
         <thead>
           <tr className="bg-[#F0F2F5]">
-            {COLUMNS.map((col) => (
+            {columns.map((col) => (
               <th
                 key={col.key}
                 className={`
@@ -282,120 +541,258 @@ export default function CaseTable({
                 key={caseItem.id}
                 className={`border-b border-gray-100 transition-colors hover:bg-[#F0F2F5] ${rowBg}`}
               >
-                {/* Checkbox */}
-                <td className="px-3 py-2.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => onToggleSelect(caseItem.id)}
-                    className="w-4 h-4 rounded border-gray-300 text-[#4472C4] focus:ring-[#4472C4] cursor-pointer"
-                  />
-                </td>
+                {columns.map((col) => {
+                  switch (col.key) {
+                    case 'checkbox':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onToggleSelect(caseItem.id)}
+                            className="w-4 h-4 rounded border-gray-300 text-[#4472C4] focus:ring-[#4472C4] cursor-pointer"
+                          />
+                        </td>
+                      );
 
-                {/* S.No. */}
-                <td className="px-3 py-2.5 text-sm text-[#333333] font-medium">
-                  {caseItem.serialNo}
-                </td>
+                    case 'serialNo':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333] font-medium">
+                          {caseItem.serialNo}
+                        </td>
+                      );
 
-                {/* Case No. */}
-                <td className="px-3 py-2.5 text-sm">
-                  <Link
-                    href={`/case-management/cases/${caseItem.id}`}
-                    className="text-[#4472C4] hover:underline font-medium"
-                  >
-                    {truncate(caseItem.caseNo, 30)}
-                  </Link>
-                </td>
+                    case 'caseNo':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm">
+                          <Link
+                            href={`/case-management/cases/${caseItem.id}`}
+                            className="text-[#4472C4] hover:underline font-medium"
+                          >
+                            {truncate(caseItem.caseNo, 30)}
+                          </Link>
+                        </td>
+                      );
 
-                {/* Court */}
-                <td className="px-3 py-2.5 text-sm text-[#333333]">
-                  {truncate(caseItem.court, 20)}
-                </td>
+                    case 'cnrNumber':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.cnrNumber || '-'}
+                        </td>
+                      );
 
-                {/* Client */}
-                <td className="px-3 py-2.5 text-sm text-[#333333]">
-                  {truncate(caseItem.client, 20)}
-                </td>
+                    case 'court':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {truncate(caseItem.court, 20)}
+                        </td>
+                      );
 
-                {/* Title */}
-                <td className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.caseTitle}>
-                  {truncate(caseItem.caseTitle, 40)}
-                </td>
+                    case 'bench':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.bench || '-'}
+                        </td>
+                      );
 
-                {/* Role */}
-                <td className="px-3 py-2.5 text-sm text-[#333333]">
-                  {caseItem.ourRole || '-'}
-                </td>
+                    case 'client':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {truncate(caseItem.client, 20)}
+                        </td>
+                      );
 
-                {/* Department */}
-                <td className="px-3 py-2.5 text-sm text-[#333333]">
-                  {caseItem.department || '-'}
-                </td>
+                    case 'caseTitle':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.caseTitle}>
+                          {truncate(caseItem.caseTitle, 40)}
+                        </td>
+                      );
 
-                {/* Status */}
-                <td className="px-3 py-2.5">
-                  <StatusBadge status={caseItem.status} />
-                </td>
+                    case 'petitioner':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.petitioner}>
+                          {truncate(caseItem.petitioner, 25)}
+                        </td>
+                      );
 
-                {/* NDOH */}
-                <td className="px-3 py-2.5 text-sm">
-                  {caseItem.ndoh ? (
-                    <span className={days !== null && days <= 3 ? 'font-bold text-[#FF4444]' : days !== null && days <= 7 ? 'font-semibold text-[#D97706]' : 'text-[#333333]'}>
-                      {caseItem.ndoh}
-                      {days !== null && days >= 0 && (
-                        <span className="block text-[10px] text-[#6C757D]">
-                          {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}
-                        </span>
-                      )}
-                      {days !== null && days < 0 && (
-                        <span className="block text-[10px] text-[#FF4444]">
-                          {Math.abs(days)}d overdue
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="text-[#999]">-</span>
-                  )}
-                </td>
+                    case 'respondent':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.respondent}>
+                          {truncate(caseItem.respondent, 25)}
+                        </td>
+                      );
 
-                {/* Priority */}
-                <td className="px-3 py-2.5">
-                  <PriorityBadge priority={caseItem.priority} />
-                </td>
+                    case 'ourRole':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.ourRole || '-'}
+                        </td>
+                      );
 
-                {/* Remarks */}
-                <td className="px-3 py-2.5 text-sm text-[#666]" title={caseItem.remarks || ''}>
-                  {truncate(caseItem.remarks, 30)}
-                </td>
+                    case 'category':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.category || '-'}
+                        </td>
+                      );
 
-                {/* Actions */}
-                <td className="px-3 py-2.5">
-                  <div className="flex items-center gap-1">
-                    <Link
-                      href={`/case-management/cases/${caseItem.id}`}
-                      className="p-1.5 rounded-md text-[#4472C4] hover:bg-blue-50 transition-colors"
-                      title="View case"
-                    >
-                      <EyeIcon />
-                    </Link>
-                    <button
-                      onClick={() => onEdit(caseItem)}
-                      className="p-1.5 rounded-md text-[#6C757D] hover:bg-gray-100 hover:text-[#333333] transition-colors"
-                      title="Edit case"
-                    >
-                      <PencilIcon />
-                    </button>
-                    {userRole === 'superadmin' && (
-                      <button
-                        onClick={() => onDelete(caseItem)}
-                        className="p-1.5 rounded-md text-[#FF4444] hover:bg-red-50 transition-colors"
-                        title="Delete case"
-                      >
-                        <TrashIcon />
-                      </button>
-                    )}
-                  </div>
-                </td>
+                    case 'subjectMatter':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.subjectMatter || ''}>
+                          {truncate(caseItem.subjectMatter, 25)}
+                        </td>
+                      );
+
+                    case 'department':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.department || '-'}
+                        </td>
+                      );
+
+                    case 'filingDate':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.filingDate || '-'}
+                        </td>
+                      );
+
+                    case 'registrationDate':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.registrationDate || '-'}
+                        </td>
+                      );
+
+                    case 'status':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5">
+                          {editMode ? (
+                            <InlineStatusSelect caseItem={caseItem} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            <StatusBadge status={caseItem.status} />
+                          )}
+                        </td>
+                      );
+
+                    case 'ndoh':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm">
+                          {editMode ? (
+                            <InlineNdohInput caseItem={caseItem} onInlineUpdate={onInlineUpdate} />
+                          ) : caseItem.ndoh ? (
+                            <span className={days !== null && days <= 3 ? 'font-bold text-[#FF4444]' : days !== null && days <= 7 ? 'font-semibold text-[#D97706]' : 'text-[#333333]'}>
+                              {caseItem.ndoh}
+                              {days !== null && days >= 0 && (
+                                <span className="block text-[10px] text-[#6C757D]">
+                                  {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}
+                                </span>
+                              )}
+                              {days !== null && days < 0 && (
+                                <span className="block text-[10px] text-[#FF4444]">
+                                  {Math.abs(days)}d overdue
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-[#999]">-</span>
+                          )}
+                        </td>
+                      );
+
+                    case 'previousHearing':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.previousHearing || '-'}
+                        </td>
+                      );
+
+                    case 'benchNumber':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.benchNumber || '-'}
+                        </td>
+                      );
+
+                    case 'presidingJudge':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.presidingJudge || ''}>
+                          {truncate(caseItem.presidingJudge, 20)}
+                        </td>
+                      );
+
+                    case 'priority':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5">
+                          {editMode ? (
+                            <InlinePrioritySelect caseItem={caseItem} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            <PriorityBadge priority={caseItem.priority} />
+                          )}
+                        </td>
+                      );
+
+                    case 'linkedCases':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.linkedCases.length > 0 ? caseItem.linkedCases.join(', ') : '-'}
+                        </td>
+                      );
+
+                    case 'isBatch':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
+                          {caseItem.isBatch ? (caseItem.batchGroup || 'Yes') : '-'}
+                        </td>
+                      );
+
+                    case 'remarks':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#666]" title={caseItem.remarks || ''}>
+                          {editMode ? (
+                            <InlineRemarksInput caseItem={caseItem} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.remarks, 30)
+                          )}
+                        </td>
+                      );
+
+                    case 'actions':
+                      return (
+                        <td key={col.key} className="px-3 py-2.5">
+                          <div className="flex items-center gap-1">
+                            <Link
+                              href={`/case-management/cases/${caseItem.id}`}
+                              className="p-1.5 rounded-md text-[#4472C4] hover:bg-blue-50 transition-colors"
+                              title="View case"
+                            >
+                              <EyeIcon />
+                            </Link>
+                            <button
+                              onClick={() => onEdit(caseItem)}
+                              className="p-1.5 rounded-md text-[#6C757D] hover:bg-gray-100 hover:text-[#333333] transition-colors"
+                              title="Edit case"
+                            >
+                              <PencilIcon />
+                            </button>
+                            {userRole === 'superadmin' && (
+                              <button
+                                onClick={() => onDelete(caseItem)}
+                                className="p-1.5 rounded-md text-[#FF4444] hover:bg-red-50 transition-colors"
+                                title="Delete case"
+                              >
+                                <TrashIcon />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      );
+
+                    default:
+                      return null;
+                  }
+                })}
               </tr>
             );
           })}

@@ -6,6 +6,7 @@ import type { Case, CaseFilters as CaseFiltersType, CaseStatus, UserRole } from 
 import { CASE_STATUS_LABELS } from '@/lib/cms-types';
 import CaseFiltersBar from '@/components/cms/cases/CaseFilters';
 import CaseTable from '@/components/cms/cases/CaseTable';
+import { DEFAULT_VISIBLE_COLUMNS, TOGGLEABLE_COLUMNS } from '@/components/cms/cases/CaseTable';
 import CasePagination from '@/components/cms/cases/CasePagination';
 import AddCaseModal from '@/components/cms/cases/AddCaseModal';
 
@@ -206,6 +207,129 @@ function BulkActionsBar({
   );
 }
 
+// --- Column Visibility Dropdown ---
+
+function ColumnVisibilityDropdown({
+  visibleColumns,
+  onVisibleColumnsChange,
+}: {
+  readonly visibleColumns: string[];
+  readonly onVisibleColumnsChange: (columns: string[]) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isOpen]);
+
+  const visibleSet = new Set(visibleColumns);
+
+  const handleToggle = (key: string) => {
+    const next = new Set(visibleSet);
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    onVisibleColumnsChange(Array.from(next));
+  };
+
+  const handleShowAll = () => {
+    onVisibleColumnsChange(TOGGLEABLE_COLUMNS.map((c) => c.key));
+  };
+
+  const handleResetDefault = () => {
+    // Default columns without checkbox and actions (those are always shown)
+    onVisibleColumnsChange([...DEFAULT_VISIBLE_COLUMNS].filter((k) => k !== 'checkbox' && k !== 'actions'));
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={`
+          h-9 px-4 rounded-md text-sm font-medium
+          border transition-colors flex items-center gap-2
+          ${isOpen
+            ? 'text-[#4472C4] border-[#4472C4] bg-blue-50'
+            : 'text-[#6C757D] border-gray-300 bg-white hover:bg-gray-50'
+          }
+        `}
+        title="Toggle column visibility"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+        </svg>
+        Columns
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-lg border border-gray-200 shadow-xl z-50">
+          {/* Header actions */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+            <span className="text-xs font-semibold text-[#6C757D] uppercase tracking-wider">Columns</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleShowAll}
+                className="text-[10px] font-medium text-[#4472C4] hover:underline"
+              >
+                Show All
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={handleResetDefault}
+                className="text-[10px] font-medium text-[#4472C4] hover:underline"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {/* Column checkboxes */}
+          <div className="max-h-72 overflow-y-auto py-1">
+            {TOGGLEABLE_COLUMNS.map((col) => (
+              <label
+                key={col.key}
+                className="flex items-center gap-2.5 px-3 py-1.5 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={visibleSet.has(col.key)}
+                  onChange={() => handleToggle(col.key)}
+                  className="w-3.5 h-3.5 rounded border-gray-300 text-[#4472C4] focus:ring-[#4472C4] cursor-pointer"
+                />
+                <span className="text-sm text-[#333333]">{col.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // --- Main Page ---
 
 export default function AllCasesPage() {
@@ -225,6 +349,14 @@ export default function AllCasesPage() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [userRole, setUserRole] = useState<UserRole>('viewer');
+
+  // Edit Mode
+  const [editMode, setEditMode] = useState(false);
+
+  // Column Visibility — store only the toggleable column keys (exclude checkbox/actions)
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(
+    () => [...DEFAULT_VISIBLE_COLUMNS].filter((k) => k !== 'checkbox' && k !== 'actions')
+  );
 
   // Modals
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -369,6 +501,21 @@ export default function AllCasesPage() {
     }
   }, [deleteTarget, filters, fetchCases, showToast]);
 
+  // Inline update (for edit mode)
+  const handleInlineUpdate = useCallback(async (id: string, data: Partial<Case>): Promise<boolean> => {
+    try {
+      await cmsCases.update(id, data);
+      // Update local state immutably so UI reflects the change without re-fetching
+      setCases((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c))
+      );
+      return true;
+    } catch (err) {
+      showToast('error', err instanceof Error ? err.message : 'Failed to save inline edit.');
+      return false;
+    }
+  }, [showToast]);
+
   // Bulk status update
   const handleBulkStatusUpdate = useCallback(async (status: CaseStatus) => {
     const ids = Array.from(selectedIds);
@@ -402,6 +549,8 @@ export default function AllCasesPage() {
 
   // --- Render ---
 
+  const canEdit = userRole === 'superadmin' || userRole === 'editor';
+
   return (
     <div className="flex flex-col gap-4">
       {/* Page Header */}
@@ -413,7 +562,7 @@ export default function AllCasesPage() {
             {loading ? 'loading...' : `${total} total`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => fetchCases(filters)}
             disabled={loading}
@@ -444,7 +593,37 @@ export default function AllCasesPage() {
             </svg>
             Refresh
           </button>
-          {(userRole === 'superadmin' || userRole === 'editor') && (
+
+          {/* Column Visibility Toggle */}
+          <ColumnVisibilityDropdown
+            visibleColumns={visibleColumns}
+            onVisibleColumnsChange={setVisibleColumns}
+          />
+
+          {/* Edit Mode Toggle */}
+          {canEdit && (
+            <button
+              onClick={() => setEditMode((prev) => !prev)}
+              className={`
+                h-9 px-4 rounded-md text-sm font-medium
+                border transition-colors flex items-center gap-2
+                ${editMode
+                  ? 'text-white bg-[#4472C4] border-[#4472C4] hover:bg-[#3A62A8]'
+                  : 'text-[#6C757D] border-gray-300 bg-white hover:bg-gray-50'
+                }
+              `}
+              title={editMode ? 'Exit inline editing mode' : 'Enter inline editing mode'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              {editMode ? 'Exit Edit Mode' : 'Edit Mode'}
+            </button>
+          )}
+
+          {/* Add Case */}
+          {canEdit && (
             <button
               onClick={() => {
                 setEditCase(null);
@@ -466,6 +645,19 @@ export default function AllCasesPage() {
           )}
         </div>
       </div>
+
+      {/* Edit Mode Banner */}
+      {editMode && (
+        <div className="bg-blue-50 border border-[#4472C4]/20 rounded-lg px-4 py-2.5 flex items-center gap-2 text-sm text-[#4472C4]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span className="font-medium">Edit Mode is ON</span>
+          <span className="text-[#4472C4]/70">&mdash; Click on Status, Priority, NDOH, or Remarks cells to edit inline. Changes save automatically.</span>
+        </div>
+      )}
 
       {/* Filters */}
       <CaseFiltersBar filters={filters} onFiltersChange={handleFiltersChange} />
@@ -521,6 +713,9 @@ export default function AllCasesPage() {
           onEdit={(c) => setEditCase(c)}
           onDelete={(c) => setDeleteTarget(c)}
           userRole={userRole}
+          editMode={editMode}
+          onInlineUpdate={handleInlineUpdate}
+          visibleColumns={visibleColumns}
         />
       )}
 
