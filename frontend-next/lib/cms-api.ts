@@ -306,6 +306,14 @@ export const cmsUsers = {
     if (USE_MOCK) return;
     await apiFetch(`/users/${id}`, { method: 'DELETE' });
   },
+
+  async resetPassword(id: string, password: string): Promise<void> {
+    if (USE_MOCK) return;
+    await apiFetch(`/users/${id}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+  },
 };
 
 // --- Audit ---

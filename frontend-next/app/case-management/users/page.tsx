@@ -357,6 +357,136 @@ function UserModal({
 }
 
 // ============================================================
+// Reset Password Modal
+// ============================================================
+
+function ResetPasswordModal({
+  isOpen,
+  user,
+  onClose,
+  onSubmit,
+  saving,
+}: {
+  readonly isOpen: boolean;
+  readonly user: CmsUser | null;
+  readonly onClose: () => void;
+  readonly onSubmit: (password: string) => void;
+  readonly saving: boolean;
+}) {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setPassword('');
+      setConfirmPassword('');
+      setErrors({});
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  function validate(): boolean {
+    const errs: Record<string, string> = {};
+    if (!password.trim()) errs.password = 'Password is required';
+    else if (password.length < 6) errs.password = 'Min 6 characters';
+    if (!confirmPassword.trim()) errs.confirmPassword = 'Please confirm the password';
+    else if (password !== confirmPassword) errs.confirmPassword = 'Passwords do not match';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validate()) return;
+    onSubmit(password);
+  }
+
+  if (!isOpen || !user) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md">
+        <div className="px-6 pt-6 pb-4 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold" style={{ color: NAVY }}>Reset Password</h2>
+            <button onClick={onClose} className="p-1 rounded hover:bg-gray-100 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C757D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <p className="text-sm mt-1" style={{ color: GREY }}>
+            Set a new password for <strong>{user.name}</strong>
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: NAVY }}>New Password *</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 ${errors.password ? 'border-[#FF4444]' : 'border-gray-300'}`}
+              placeholder="Min 6 characters"
+              autoFocus
+            />
+            {errors.password && <p className="text-xs mt-1" style={{ color: RED }}>{errors.password}</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: NAVY }}>Confirm Password *</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={`w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 ${errors.confirmPassword ? 'border-[#FF4444]' : 'border-gray-300'}`}
+              placeholder="Re-enter password"
+            />
+            {errors.confirmPassword && <p className="text-xs mt-1" style={{ color: RED }}>{errors.confirmPassword}</p>}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-9 px-4 rounded-md text-sm font-medium text-[#333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="h-9 px-5 rounded-md text-sm font-medium text-white bg-[#4472C4] border border-[#4472C4] hover:bg-[#3A62A8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {saving && (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
+              Reset Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // Loading Skeleton
 // ============================================================
 
@@ -423,6 +553,10 @@ export default function UsersPage() {
 
   // Confirm deactivate
   const [deactivateTarget, setDeactivateTarget] = useState<CmsUser | null>(null);
+
+  // Reset password modal
+  const [resetPasswordTarget, setResetPasswordTarget] = useState<CmsUser | null>(null);
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   // Toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -545,10 +679,22 @@ export default function UsersPage() {
   }, [deactivateTarget, fetchUsers, showToast]);
 
   const handleResetPassword = useCallback((user: CmsUser) => {
-    // In a real implementation this would call an API endpoint.
-    // For now we show a confirmation toast.
-    showToast('success', `Password reset link sent to ${user.email}.`);
-  }, [showToast]);
+    setResetPasswordTarget(user);
+  }, []);
+
+  const handleResetPasswordSubmit = useCallback(async (password: string) => {
+    if (!resetPasswordTarget) return;
+    setResettingPassword(true);
+    try {
+      await cmsUsers.resetPassword(resetPasswordTarget.id, password);
+      showToast('success', `Password for "${resetPasswordTarget.name}" has been reset successfully.`);
+      setResetPasswordTarget(null);
+    } catch (err) {
+      showToast('error', err instanceof Error ? err.message : 'Failed to reset password.');
+    } finally {
+      setResettingPassword(false);
+    }
+  }, [resetPasswordTarget, showToast]);
 
   // --- Access check ---
 
@@ -813,6 +959,15 @@ export default function UsersPage() {
         confirmLabel="Deactivate"
         onConfirm={handleConfirmDeactivate}
         onCancel={() => setDeactivateTarget(null)}
+      />
+
+      {/* Reset Password Modal */}
+      <ResetPasswordModal
+        isOpen={!!resetPasswordTarget}
+        user={resetPasswordTarget}
+        onClose={() => setResetPasswordTarget(null)}
+        onSubmit={handleResetPasswordSubmit}
+        saving={resettingPassword}
       />
 
       {/* Toasts */}
