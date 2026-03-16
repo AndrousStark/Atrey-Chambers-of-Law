@@ -96,11 +96,9 @@ test.describe('CMS Live Backend E2E', () => {
   test('6. Users page shows seeded users', async ({ page }) => {
     await login(page);
     await page.goto(`${CMS}/users`);
-    await page.waitForTimeout(3000);
-
-    const content = await page.textContent('body');
-    expect(content).toContain('Dr. Abhishek Atrey');
-    expect(content).toContain('superadmin');
+    // Wait for actual user data to render (not just RSC payload)
+    await page.waitForSelector('text=Dr. Abhishek Atrey', { timeout: 15000 });
+    await expect(page.locator('text=superadmin').first()).toBeVisible();
   });
 
   test('7. Invalid login shows error', async ({ page }) => {
@@ -137,12 +135,14 @@ test.describe('CMS Live Backend E2E', () => {
   test('10. Logout works', async ({ page }) => {
     await login(page);
 
+    // Wait for dashboard to fully load before looking for logout
+    await page.waitForSelector('text=Total Active', { timeout: 10000 }).catch(() => null);
+
     // Click logout button
     const logoutBtn = page.locator('button:has-text("Logout")').or(page.locator('button:has-text("Sign Out")'));
-    if (await logoutBtn.first().isVisible({ timeout: 5000 })) {
-      await logoutBtn.first().click();
-      await page.waitForTimeout(2000);
-      await expect(page).toHaveURL(/login/);
-    }
+    await logoutBtn.first().waitFor({ state: 'visible', timeout: 10000 });
+    await logoutBtn.first().click();
+    await page.waitForURL(/login/, { timeout: 10000 });
+    await expect(page).toHaveURL(/login/);
   });
 });
