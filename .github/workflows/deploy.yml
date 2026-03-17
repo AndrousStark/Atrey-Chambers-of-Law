@@ -84,6 +84,13 @@ jobs:
           sed -i "s/dynamic = 'force-dynamic'/dynamic = 'force-static'/g" app/resources/page.tsx || true
           sed -i "s/revalidate = 0/revalidate = false/g" app/resources/page.tsx || true
 
+          # Add generateStaticParams for CMS case detail page (dynamic [id] route)
+          # This allows static export while the page renders client-side
+          if [ -f "app/case-management/cases/[id]/page.tsx" ]; then
+            sed -i '1s/^/export function generateStaticParams() { return []; }\n/' app/case-management/cases/[id]/page.tsx
+            echo "  ✓ Added generateStaticParams to case detail page"
+          fi
+
           echo "── Verifying next.config.mjs ──"
           cat next.config.mjs
 
@@ -94,6 +101,8 @@ jobs:
           REPO_NAME: ${{ env.REPO_NAME }}
           NEXT_PUBLIC_BASE_PATH: /${{ env.REPO_NAME }}
           NEXT_TELEMETRY_DISABLED: '1'
+          NEXT_PUBLIC_CMS_API_URL: 'https://cms-api.atreychambers.com'
+          NEXT_PUBLIC_CMS_MOCK: 'false'
         run: npx next build
 
       - name: Fix asset paths for GitHub Pages subpath
