@@ -935,8 +935,19 @@ export default function SettingsPage() {
       </SectionCard>
 
       {/* ============================================================ */}
-      {/* Danger Zone Section */}
+      {/* Danger Zone Section — SUPERADMIN ONLY */}
       {/* ============================================================ */}
+      {!isSuperadmin ? (
+        <div className="bg-white rounded-xl p-6 opacity-50" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '2px solid #ccc' }}>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🔒</span>
+            <div>
+              <h2 className="text-base font-bold" style={{ color: GREY }}>Danger Zone</h2>
+              <p className="text-xs mt-0.5" style={{ color: GREY }}>Only super admins can access destructive actions.</p>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div
         className="bg-white rounded-xl p-6"
         style={{
@@ -1046,6 +1057,7 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
