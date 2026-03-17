@@ -19,8 +19,8 @@ import type {
 } from './cms-types';
 import { SEED_CASES } from './data/seed-cases';
 
-const CMS_API_URL = process.env.NEXT_PUBLIC_CMS_API_URL || 'http://localhost:4000';
-const USE_MOCK = process.env.NEXT_PUBLIC_CMS_MOCK === 'true' || !process.env.NEXT_PUBLIC_CMS_API_URL;
+const CMS_API_URL = process.env.NEXT_PUBLIC_CMS_API_URL || 'https://cms-api.atreychambers.com';
+const USE_MOCK = false; // Always use live backend — mock mode disabled
 
 // --- Token Management ---
 
