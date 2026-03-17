@@ -99,14 +99,15 @@ A **production-grade**, **fully responsive** law firm website featuring cinemati
 ### Key Highlights
 
 - **32 Practice Area Pages** — dynamically generated from data
-- **30+ Pages** total across the site
-- **43+ Components** — reusable, modular architecture
-- **11 API Routes** — authentication, CMS, scheduling, uploads
+- **42+ Pages** total across the site (30 public + 12 CMS)
+- **65+ Components** — 43 website + 22 CMS components
+- **11 API Routes** (website) + **35+ API endpoints** (CMS backend)
 - **Full Mobile Responsiveness** — optimized for 320px to 4K screens
 - **Cinematic Page Transitions** — GSAP-powered block reveal animations
 - **3D Visual Effects** — Three.js particle backgrounds
 - **Smooth Scrolling** — Lenis scroll engine
 - **Admin CMS** — manage resources & testimonials
+- **ATREY CMS** — full Case Management System with 208+ cases, RBAC, auto-fetch from courts
 - **SEO Optimized** — JSON-LD structured data, OpenGraph, LLMs.txt
 - **Security Hardened** — CSRF, rate limiting, input sanitization, security headers
 
@@ -162,7 +163,7 @@ A **production-grade**, **fully responsive** law firm website featuring cinemati
 | 32 | `404` | Custom not-found page |
 | 33 | `loading` | Global loading spinner |
 
-> **Total: 30 static pages + 32 dynamic practice area pages = 62+ unique pages**
+> **Total: 30 static pages + 32 dynamic practice area pages + 12 CMS pages = 74+ unique pages**
 
 ---
 
@@ -239,13 +240,28 @@ Website-main/
     │   ├── opengraph-image.tsx              # Dynamic OG image generation
     │   ├── globals.css                      # Global styles (1216 lines)
     │   │
-    │   ├── admin/                           # Admin panel
+    │   ├── admin/                           # Admin panel (website content)
     │   │   ├── layout.tsx                   # Admin layout (no page transitions)
     │   │   ├── page.tsx                     # Dashboard
     │   │   ├── resources/
     │   │   │   └── page.tsx                 # Resource management CMS
     │   │   └── testimonials/
     │   │       └── page.tsx                 # Testimonial management CMS
+    │   │
+    │   ├── case-management/                 # ATREY CMS — Case Management System (12 pages)
+    │   │   ├── layout.tsx                   # CMS layout (auth check + header + nav)
+    │   │   ├── login/page.tsx               # CMS login (separate from website admin)
+    │   │   ├── dashboard/page.tsx           # 6 stat cards, charts, widgets
+    │   │   ├── cases/page.tsx               # Case table — filters, search, sort, inline edit
+    │   │   ├── cases/[id]/page.tsx          # Case detail — 27 fields, history, compliance
+    │   │   ├── hearings/page.tsx            # Hearing diary — urgency badges, print view
+    │   │   ├── calendar/page.tsx            # Monthly calendar with case pills
+    │   │   ├── compliance/page.tsx          # Compliance tracker with status tabs
+    │   │   ├── filings/page.tsx             # Filings table + Kanban board
+    │   │   ├── auto-fetch/page.tsx          # SCI scraper status, conflict resolution
+    │   │   ├── users/page.tsx               # User CRUD, permissions, password reset
+    │   │   ├── audit/page.tsx               # Full audit trail — who did what, when
+    │   │   └── settings/page.tsx            # Export/import, system info, danger zone
     │   │
     │   ├── api/                             # Server-side API routes (11 endpoints)
     │   │   ├── auth/
@@ -365,6 +381,12 @@ Website-main/
     │   ├── TechBackground.tsx               # Three.js 3D background
     │   ├── TestimonialsCarousel.tsx          # Testimonials slider
     │   │
+    │   ├── cms/                              # ATREY CMS Components (22 files)
+    │   │   ├── layout/                      # CmsHeader, CmsNavTabs, CmsLayoutShell
+    │   │   ├── dashboard/                   # StatCardsRow, UpcomingHearings, Overdue, Activity, Charts
+    │   │   ├── cases/                       # CaseTable, CaseFilters, AddCaseModal, CasePagination
+    │   │   └── ui/                          # CmsStatCard, CmsBadge, CmsButton, CmsModal, CmsTable, etc.
+    │   │
     │   └── ui/                              # Atomic UI primitives
     │       ├── 3d-card.tsx                  # 3D tilt card effect
     │       ├── Badge.tsx                    # Status badge
@@ -391,12 +413,15 @@ Website-main/
     │   ├── schema.ts                        # JSON-LD structured data generators
     │   ├── theme.ts                         # Design tokens (colors, typography)
     │   ├── utils.ts                         # Utility functions (assetPath, cn, etc.)
+    │   ├── cms-types.ts                      # CMS TypeScript interfaces (17 enums, 8 models, 5 constants)
+    │   ├── cms-api.ts                       # CMS API client (11 service objects, 40+ methods, mock fallback)
     │   └── data/                            # Static data stores
     │       ├── careers.ts                   # Job listings data
     │       ├── faq.ts                       # FAQ questions & answers
     │       ├── practice-areas.ts            # 32 practice areas (slug, title, description, key matters)
     │       ├── publications.ts              # Publications data
-    │       └── team.ts                      # Team member profiles
+    │       ├── team.ts                      # Team member profiles
+    │       └── seed-cases.ts                # 85 real Supreme Court cases (UK AA list)
     │
     ├── public/                              # Static Assets
     │   ├── logo.png                         # Firm logo
@@ -611,6 +636,10 @@ BLOB_READ_WRITE_TOKEN=...
 ADMIN_USERNAME=...
 ADMIN_PASSWORD=...
 
+# ATREY CMS (Case Management System)
+NEXT_PUBLIC_CMS_API_URL=https://cms-api.atreychambers.com
+NEXT_PUBLIC_CMS_MOCK=false
+
 # Optional
 NEXT_PUBLIC_BASE_PATH=
 ```
@@ -638,9 +667,184 @@ The site is deployed on **Vercel** with automatic deployments on push to `main`.
 
 ---
 
+## ATREY CMS — Case Management System
+
+A full-featured **Case Management System** integrated into the website at `/case-management/*`, purpose-built for Dr. Abhishek Atrey's legal practice managing **208+ cases** across the Supreme Court of India, High Courts, and Tribunals.
+
+**Live API:** `https://cms-api.atreychambers.com` &nbsp;|&nbsp; **Backend Repo:** [atrey-cms-api](https://github.com/AndrousStark/atrey-cms-api)
+
+### CMS Architecture
+
+```
+Frontend (This Repo)                     Backend (atrey-cms-api)
+atreychambers.com/case-management/*      cms-api.atreychambers.com/api/v1/*
+Next.js 14 + Tailwind CSS               Node.js + Express + Prisma + PostgreSQL 16
+Deployed on Vercel                       Deployed on Hetzner VPS (Docker Compose)
+```
+
+### CMS Pages (12 Routes)
+
+| # | Route | Page | Description |
+|---|-------|------|-------------|
+| 1 | `/case-management/login` | Login | Email/password JWT authentication |
+| 2 | `/case-management/dashboard` | Dashboard | 6 stat cards, court/dept charts, upcoming hearings, overdue compliance, recent activity |
+| 3 | `/case-management/cases` | All Cases | Filterable, sortable, paginated table with inline editing, bulk actions, column visibility |
+| 4 | `/case-management/cases/[id]` | Case Detail | All 27 case fields, hearing timeline, compliance items, filings, collapsible sections |
+| 5 | `/case-management/hearings` | Hearing Diary | Chronological hearing list, urgency badges, days-left countdown, print view |
+| 6 | `/case-management/calendar` | Calendar | Monthly grid with colored case pills, day detail panel, mobile week view |
+| 7 | `/case-management/compliance` | Compliance | Status tabs (Pending/InProgress/Overdue/Completed), auto-flagging, mark complete |
+| 8 | `/case-management/filings` | Filings | Table view + Kanban board (Not Started → Drafting → Review → Ready → Filed) |
+| 9 | `/case-management/auto-fetch` | Auto-Fetch | SCI scraper status, conflict resolution, per-case fetch, schedule info |
+| 10 | `/case-management/users` | Users | Create/edit/deactivate users, granular permissions, reset passwords, view activity |
+| 11 | `/case-management/audit` | Audit Log | Who did what, when — filterable by user/action/entity, CSV export |
+| 12 | `/case-management/settings` | Settings | CSV/JSON export & import, system info, danger zone (superadmin only) |
+
+### CMS Components (22 Components)
+
+```
+components/cms/
+├── layout/
+│   ├── CmsHeader.tsx              # "ATREY CMS" branded header — Made by Aniruddh Atrey
+│   ├── CmsNavTabs.tsx             # 10 permission-based navigation tabs
+│   └── CmsLayoutShell.tsx         # Auth check wrapper with header + nav
+├── dashboard/
+│   ├── StatCardsRow.tsx           # 6 KPI cards (active, hearings, compliance, etc.)
+│   ├── UpcomingHearingsWidget.tsx  # Next 10 hearings with urgency badges
+│   ├── OverdueComplianceWidget.tsx # Overdue items with red highlighting
+│   ├── RecentActivityWidget.tsx   # Latest 20 audit log entries
+│   └── DistributionCharts.tsx     # Court + department bar charts
+├── cases/
+│   ├── CaseTable.tsx              # 24-column data table with inline editing + save feedback
+│   ├── CaseFilters.tsx            # Multi-dropdown filters (court, status, dept, priority)
+│   ├── AddCaseModal.tsx           # Create/edit case form (supports add + edit modes)
+│   └── CasePagination.tsx         # Page navigation with size selector
+└── ui/
+    ├── CmsStatCard.tsx            # Colored left-border stat card
+    ├── CmsBadge.tsx               # 10-variant status badge (high, medium, low, active, etc.)
+    ├── CmsButton.tsx              # 5-variant button (primary, secondary, danger, success, warning)
+    ├── CmsModal.tsx               # Modal overlay with ESC close + body scroll lock
+    ├── CmsTable.tsx               # Generic sortable data table
+    ├── CmsDropdown.tsx            # Multi-select dropdown with checkboxes
+    ├── CmsPagination.tsx          # Page navigation with ellipsis
+    ├── CmsSearch.tsx              # Search input with magnifying glass icon
+    ├── CmsDatePicker.tsx          # DD.MM.YYYY date input with validation
+    ├── CmsEmptyState.tsx          # Empty state placeholder
+    └── CmsLoadingState.tsx        # Loading spinner
+```
+
+### User Roles & Permissions (19 Granular Permissions)
+
+| Role | Access | Users |
+|------|--------|-------|
+| **Super Admin** | Full access — all permissions, user management, danger zone | Dr. Abhishek Atrey, Aniruddh Atrey, Aastha Atrey, Ambika Atrey |
+| **Editor** | Add/edit cases, compliance, filings — no delete, no user management | Faheem Ahmed, Deepak Rawat, Atul Sharma |
+| **Viewer** | Read-only, filtered to their client's cases only | (Client accounts) |
+
+**Permission Categories:**
+- Dashboard, Cases (view/add/edit/delete), Hearings, Calendar, Compliance (view/edit), Filings (view/edit), Auto-Fetch (view/trigger), Users (view/edit), Audit, Settings, Export, Import
+
+Super admin can set per-user permissions via checkbox toggles, reset any user's password, and view per-user activity logs.
+
+### Backend API (35+ Endpoints)
+
+**Base URL:** `https://cms-api.atreychambers.com/api/v1`
+
+| Group | Endpoints | Auth |
+|-------|-----------|------|
+| **Auth** | `POST /auth/login`, `GET /auth/me`, `POST /auth/change-password` | Public / JWT |
+| **Cases** | `GET/POST/PUT/DELETE /cases`, `POST /cases/bulk-update` | editor+ / admin |
+| **Compliance** | `GET/POST/PUT/DELETE /compliance`, `GET /compliance/by-case/:id` | editor+ / admin |
+| **Filings** | `GET/POST/PUT/DELETE /filings`, `GET /filings/by-case/:id` | editor+ / admin |
+| **Hearings** | `GET/POST/PUT/DELETE /hearings/by-case/:id` | editor+ / admin |
+| **Users** | `GET/POST/PUT/DELETE /users`, `POST /users/:id/reset-password` | admin only |
+| **Dashboard** | `GET /dashboard/stats,upcoming-hearings,overdue-compliance,recent-activity` | JWT |
+| **Audit** | `GET /audit` (filterable by user/action/entity/date) | admin only |
+| **Scraper** | `POST /scraper/fetch-case/:id,fetch-all,fetch-ecourts,fetch-tribunals` | admin only |
+| **Scraper Status** | `GET /scraper/status,ecourts-status,tribunal-status,conflicts` | admin only |
+| **Export** | `GET /export/csv`, `GET /export/json` | admin only |
+| **Import** | `POST /import/json`, `POST /import/csv` | admin only |
+| **Health** | `GET /health` | Public |
+
+### Backend Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Node.js 20 LTS |
+| Framework | Express.js 4.21 |
+| Database | PostgreSQL 16 (Prisma ORM 6.4) |
+| Auth | JWT (bcryptjs + jsonwebtoken) |
+| Validation | Zod 3.24 |
+| Scraping | Puppeteer + Chromium + custom CAPTCHA solver |
+| Scheduling | node-cron (4 cron jobs) |
+| Security | Helmet, CORS, rate-limiting (100 req/15min) |
+| Docker | Docker Compose (api + postgres:16-alpine) |
+| SSL | Let's Encrypt via Nginx (auto-renewal) |
+
+### Database Schema (6 Tables)
+
+| Model | Key Fields | Indexes |
+|-------|-----------|---------|
+| **User** | name, email, passwordHash, role, permissions[], departmentFilter, clientFilter | email (unique) |
+| **Case** | caseNo, court, client, petitioner, respondent, status, ndoh, priority, department, remarks + 15 more | status, court, client, dept, ndoh, priority, assignedTo, (caseNo+court unique) |
+| **Compliance** | caseId, direction, dueDate, status, assignedTo, completionDate | caseId, status, dueDate |
+| **Filing** | caseId, filingType, status, dueDate, filedDate, filingNumber | caseId, status |
+| **Hearing** | caseId, hearingDate, courtBench, judge, orderSummary, source | caseId, hearingDate |
+| **AuditLog** | userId, action, entityType, entityId, fieldChanged, oldValue, newValue | userId, entityType, timestamp |
+
+### Auto-Fetch Scraper Engine (Phase 2-4)
+
+Automated data fetching from Indian court websites:
+
+| Court | Method | Schedule |
+|-------|--------|----------|
+| **Supreme Court** (sci.gov.in) | Puppeteer + custom CAPTCHA solver (no Tesseract) | Daily 6AM IST + Weekly Sunday |
+| **High Courts** (25 via eCourts) | Kleopatra API + Puppeteer fallback | Weekly Wednesday |
+| **District Courts** (700+) | eCourts API | Weekly Wednesday |
+| **NCLT** | Puppeteer scraper | Bi-monthly (1st & 15th) |
+| **NCLAT** | Puppeteer scraper | Bi-monthly |
+| **ITAT** | Puppeteer + CAPTCHA solver | Bi-monthly |
+| **NGT** | Puppeteer scraper | Bi-monthly |
+| **CAT** | Puppeteer scraper | Bi-monthly |
+
+**CAPTCHA Solver:** Lightweight pixel-analysis engine (~250 lines, `sharp` only — no Tesseract/ML). Detects `+`/`-` operators via structural cross-bar analysis + Zhang-Suen skeleton thinning. Evaluates math expressions (e.g., "3 + 5" → "8").
+
+**Dr. Atrey's AOR Code:** 1601 (hardcoded for SCI bulk fetch)
+
+### CMS Design System
+
+The CMS uses a separate design system from the main website:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| Navy | `#1B2A4A` | Header gradient, headings |
+| Blue | `#2E5090` | Header gradient end, active tabs |
+| Accent | `#4472C4` | Buttons, stat borders, links |
+| Background | `#F0F2F5` | Page background |
+| Red | `#FF4444` | Urgent, overdue, danger |
+| Orange | `#FF8C00` | Warnings |
+| Green | `#28A745` | Completed, success |
+| Yellow | `#FFC107` | Caution, pending |
+| Font | Segoe UI, system-ui | System font (not website fonts) |
+
+### CMS Deployment
+
+| Component | Host | Details |
+|-----------|------|---------|
+| Frontend | Vercel | Auto-deploys on push to main |
+| Backend API | Hetzner VPS (91.98.75.122) | Docker Compose, Nginx reverse proxy |
+| Database | PostgreSQL 16 (Docker) | 208 cases, daily backup cron at 2AM IST |
+| SSL | Let's Encrypt | `cms-api.atreychambers.com`, auto-renew |
+| Domain | `cms-api.atreychambers.com` | A record → 91.98.75.122 |
+
+### E2E Tests (10/10 Passing)
+
+Playwright tests covering: Login, Dashboard, Cases, Navigation, Admin tabs, Users, Invalid login, Auth guard, CMS link, Logout.
+
+---
+
 ## License
 
-All rights reserved. &copy; 2025 Atrey Chambers of Law LLP. This codebase is proprietary and confidential.
+All rights reserved. &copy; 2025-2026 Atrey Chambers of Law LLP. This codebase is proprietary and confidential.
 
 ---
 
