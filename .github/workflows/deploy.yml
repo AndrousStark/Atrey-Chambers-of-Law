@@ -84,9 +84,13 @@ jobs:
           sed -i "s/dynamic = 'force-dynamic'/dynamic = 'force-static'/g" app/resources/page.tsx || true
           sed -i "s/revalidate = 0/revalidate = false/g" app/resources/page.tsx || true
 
-          # Keep [id] route — generateStaticParams returns [] so static export works
-          # The JS chunk is included for client-side navigation from cases list
-          echo "  ✓ Keeping [id] route for client-side rendering"
+          # Verify [id] route has generateStaticParams for static export
+          echo "── Checking [id] route ──"
+          ls -la "app/case-management/cases/[id]/"
+          echo "── page.tsx content ──"
+          cat "app/case-management/cases/[id]/page.tsx"
+          echo "── CaseDetailClient.tsx exists ──"
+          ls -la "app/case-management/cases/[id]/CaseDetailClient.tsx"
 
           echo "── Verifying next.config.mjs ──"
           cat next.config.mjs
