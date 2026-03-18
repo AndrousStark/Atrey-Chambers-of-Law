@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { cmsCases, cmsAuth } from '@/lib/cms-api';
 import type { Case, CaseFilters as CaseFiltersType, CaseStatus, UserRole } from '@/lib/cms-types';
 import { CASE_STATUS_LABELS } from '@/lib/cms-types';
@@ -9,6 +10,13 @@ import CaseTable from '@/components/cms/cases/CaseTable';
 import { DEFAULT_VISIBLE_COLUMNS, TOGGLEABLE_COLUMNS } from '@/components/cms/cases/CaseTable';
 import CasePagination from '@/components/cms/cases/CasePagination';
 import AddCaseModal from '@/components/cms/cases/AddCaseModal';
+import dynamic from 'next/dynamic';
+
+// Lazy-load case detail view (used when ?view=CASE_ID is in URL)
+const CaseDetailClient = dynamic(
+  () => import('./[id]/CaseDetailClient'),
+  { ssr: false, loading: () => <div className="animate-pulse p-12 text-center text-sm text-gray-400">Loading case details...</div> }
+);
 
 // --- Toast ---
 
@@ -333,6 +341,19 @@ function ColumnVisibilityDropdown({
 // --- Main Page ---
 
 export default function AllCasesPage() {
+  // Check if viewing a specific case via ?view=CASE_ID
+  const searchParams = useSearchParams();
+  const viewCaseId = searchParams.get('view');
+
+  // If ?view=CASE_ID is present, render the case detail view
+  if (viewCaseId) {
+    return <CaseDetailClient />;
+  }
+
+  return <CaseListView />;
+}
+
+function CaseListView() {
   // State
   const [cases, setCases] = useState<Case[]>([]);
   const [total, setTotal] = useState(0);

@@ -84,13 +84,12 @@ jobs:
           sed -i "s/dynamic = 'force-dynamic'/dynamic = 'force-static'/g" app/resources/page.tsx || true
           sed -i "s/revalidate = 0/revalidate = false/g" app/resources/page.tsx || true
 
-          # Verify [id] route has generateStaticParams for static export
-          echo "── Checking [id] route ──"
-          ls -la "app/case-management/cases/[id]/"
-          echo "── page.tsx content ──"
-          cat "app/case-management/cases/[id]/page.tsx"
-          echo "── CaseDetailClient.tsx exists ──"
-          ls -la "app/case-management/cases/[id]/CaseDetailClient.tsx"
+          # Remove dynamic [id] route — case detail is rendered client-side
+          # via ?view=CASE_ID on the cases list page
+          if [ -d "app/case-management/cases/[id]" ]; then
+            rm -rf "app/case-management/cases/[id]"
+            echo "  ✓ Removed [id] route (case detail uses ?view= param instead)"
+          fi
 
           echo "── Verifying next.config.mjs ──"
           cat next.config.mjs

@@ -566,7 +566,7 @@ export default function CaseTable({
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm">
                           <Link
-                            href={`/case-management/cases/${caseItem.id}`}
+                            href={`/case-management/cases?view=${caseItem.id}`}
                             className="text-[#4472C4] hover:underline font-medium"
                           >
                             {truncate(caseItem.caseNo, 30)}
@@ -763,7 +763,7 @@ export default function CaseTable({
                         <td key={col.key} className="px-3 py-2.5">
                           <div className="flex items-center gap-1">
                             <Link
-                              href={`/case-management/cases/${caseItem.id}`}
+                              href={`/case-management/cases?view=${caseItem.id}`}
                               className="p-1.5 rounded-md text-[#4472C4] hover:bg-blue-50 transition-colors"
                               title="View case"
                             >

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { cmsCases, cmsCompliance, cmsHearings, cmsScraper, cmsAuth } from '@/lib/cms-api';
 import type {
   Case,
@@ -640,7 +640,10 @@ function editFormToPartial(form: EditFormState): Partial<Case> {
 export default function CaseDetailClient() {
   const params = useParams();
   const router = useRouter();
-  const caseId = typeof params.id === 'string' ? params.id : '';
+  const searchParams = useSearchParams();
+  // Support both /cases/[id] (local dev) and /cases?view=ID (GitHub Pages static export)
+  const paramId = typeof params.id === 'string' ? params.id : '';
+  const caseId = paramId || searchParams.get('view') || '';
 
   // State
   const [caseData, setCaseData] = useState<Case | null>(null);
