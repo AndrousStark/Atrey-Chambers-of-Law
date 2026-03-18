@@ -39,7 +39,7 @@ const GREY = '#6C757D';
 
 function statusBadgeStyle(status: string): { bg: string; text: string } {
   const s = status.toLowerCase();
-  if (['active', 'listendforhearing', 'admitted', 'leavegranted'].includes(s.replace(/\s/g, '').toLowerCase()))
+  if (['active', 'listedforhearing', 'admitted', 'leavegranted'].includes(s.replace(/\s/g, '').toLowerCase()))
     return { bg: `${GREEN}15`, text: GREEN };
   if (['disposed', 'dismissed', 'withdrawn'].includes(s.toLowerCase()))
     return { bg: `${GREY}15`, text: GREY };
@@ -566,6 +566,9 @@ interface EditFormState {
   remarks: string;
   isBatch: boolean;
   batchGroup: string;
+  // Pass-through fields (not editable but must be preserved on save)
+  linkedCases: string[];
+  assignedToId: string | null;
 }
 
 function caseToEditForm(c: Case): EditFormState {
@@ -594,6 +597,8 @@ function caseToEditForm(c: Case): EditFormState {
     remarks: c.remarks || '',
     isBatch: c.isBatch,
     batchGroup: c.batchGroup || '',
+    linkedCases: c.linkedCases,
+    assignedToId: c.assignedToId,
   };
 }
 
@@ -623,6 +628,8 @@ function editFormToPartial(form: EditFormState): Partial<Case> {
     remarks: form.remarks || null,
     isBatch: form.isBatch,
     batchGroup: form.batchGroup || null,
+    linkedCases: form.linkedCases,
+    assignedToId: form.assignedToId,
   };
 }
 
@@ -648,6 +655,7 @@ export default function CaseDetailPage() {
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>('viewer');
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
 
   // Inline form states
   const [showAddHearing, setShowAddHearing] = useState(false);
@@ -661,11 +669,12 @@ export default function CaseDetailPage() {
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Check role
+  // Check role and permissions
   useEffect(() => {
     const user = cmsAuth.getUser();
     if (user) {
       setUserRole(user.role);
+      setUserPermissions(user.permissions ?? []);
     }
   }, []);
 
@@ -838,7 +847,7 @@ export default function CaseDetailPage() {
 
   if (!caseData) return null;
 
-  const canEdit = userRole === 'superadmin' || userRole === 'editor';
+  const canEdit = userRole === 'superadmin' || (userRole === 'editor' && userPermissions.includes('page.cases'));
   const sBadge = statusBadgeStyle(caseData.status);
   const pBadge = priorityBadgeStyle(caseData.priority);
 
