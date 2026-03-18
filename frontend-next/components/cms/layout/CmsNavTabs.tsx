@@ -17,10 +17,8 @@ const TABS: readonly TabDefinition[] = [
   { key: 'hearings', label: 'Hearings', icon: '\uD83D\uDCC5', href: '/case-management/hearings', permission: 'page.hearings' },
   { key: 'calendar', label: 'Calendar', icon: '\uD83D\uDDD3', href: '/case-management/calendar', permission: 'page.calendar' },
   { key: 'compliance', label: 'Compliance', icon: '\u2713', href: '/case-management/compliance', permission: 'page.compliance' },
-  { key: 'filings', label: 'Filings', icon: '\uD83D\uDCC4', href: '/case-management/filings', permission: 'page.filings' },
   { key: 'auto-fetch', label: 'Auto-Fetch', icon: '\uD83D\uDD04', href: '/case-management/auto-fetch', permission: 'page.autofetch' },
   { key: 'users', label: 'Users', icon: '\uD83D\uDC65', href: '/case-management/users', permission: 'page.users' },
-  { key: 'audit', label: 'Audit', icon: '\uD83D\uDCCB', href: '/case-management/audit', permission: 'page.audit' },
   { key: 'settings', label: 'Settings', icon: '\u2699', href: '/case-management/settings', permission: 'page.settings' },
 ] as const;
 
