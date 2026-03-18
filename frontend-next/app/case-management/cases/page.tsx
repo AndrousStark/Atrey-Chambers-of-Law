@@ -13,8 +13,8 @@ import AddCaseModal from '@/components/cms/cases/AddCaseModal';
 import dynamic from 'next/dynamic';
 
 // Lazy-load case detail view (used when ?view=CASE_ID is in URL)
-const CaseDetailClient = dynamic(
-  () => import('./[id]/CaseDetailClient'),
+const CaseDetailView = dynamic(
+  () => import('@/components/cms/cases/CaseDetailView'),
   { ssr: false, loading: () => <div className="animate-pulse p-12 text-center text-sm text-gray-400">Loading case details...</div> }
 );
 
@@ -347,7 +347,7 @@ export default function AllCasesPage() {
 
   // If ?view=CASE_ID is present, render the case detail view
   if (viewCaseId) {
-    return <CaseDetailClient />;
+    return <CaseDetailView />;
   }
 
   return <CaseListView />;
