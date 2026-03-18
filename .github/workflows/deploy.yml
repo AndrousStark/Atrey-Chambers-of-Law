@@ -84,12 +84,9 @@ jobs:
           sed -i "s/dynamic = 'force-dynamic'/dynamic = 'force-static'/g" app/resources/page.tsx || true
           sed -i "s/revalidate = 0/revalidate = false/g" app/resources/page.tsx || true
 
-          # Remove dynamic [id] route from static export (it's client-side rendered anyway)
-          # GitHub Pages serves it via client-side routing — the page works without SSR
-          if [ -d "app/case-management/cases/[id]" ]; then
-            rm -rf "app/case-management/cases/[id]"
-            echo "  ✓ Removed dynamic [id] route for static export (client-side routing)"
-          fi
+          # Keep [id] route — generateStaticParams returns [] so static export works
+          # The JS chunk is included for client-side navigation from cases list
+          echo "  ✓ Keeping [id] route for client-side rendering"
 
           echo "── Verifying next.config.mjs ──"
           cat next.config.mjs
