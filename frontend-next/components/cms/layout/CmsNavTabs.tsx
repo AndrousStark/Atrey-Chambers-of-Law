@@ -19,10 +19,9 @@ const TABS: readonly TabDefinition[] = [
   { key: 'hearings', label: 'Hearings', icon: '\uD83D\uDCC5', href: '/case-management/hearings', permission: 'page.hearings' },
   { key: 'calendar', label: 'Calendar', icon: '\uD83D\uDDD3', href: '/case-management/calendar', permission: 'page.calendar' },
   { key: 'documents', label: 'Documents', icon: '\uD83D\uDCC4', href: '/case-management/documents', permission: 'page.documents' },
-  { key: 'time', label: 'Time', icon: '\u23F1', href: '/case-management/time-tracking', permission: 'page.timetracking' },
+  { key: 'activity', label: 'Activity', icon: '\u26A1', href: '/case-management/activity', permission: 'page.timetracking' },
   { key: 'compliance', label: 'Compliance', icon: '\u2713', href: '/case-management/compliance', permission: 'page.compliance' },
   { key: 'auto-fetch', label: 'Auto-Fetch', icon: '\uD83D\uDD04', href: '/case-management/auto-fetch', permission: 'page.autofetch' },
-  { key: 'notifications', label: 'Alerts', icon: '\uD83D\uDD14', href: '/case-management/notifications', permission: 'page.notifications' },
   { key: 'users', label: 'Users', icon: '\uD83D\uDC65', href: '/case-management/users', permission: 'page.users' },
   { key: 'settings', label: 'Settings', icon: '\u2699', href: '/case-management/settings', permission: 'page.settings' },
 ] as const;
