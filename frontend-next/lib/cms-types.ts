@@ -6,22 +6,31 @@
 
 export type CaseStatus =
   | 'Active'
-  | 'Disposed'
-  | 'StayGranted'
-  | 'NoticeIssued'
+  | 'Pending'
+  | 'ListedForHearing'
   | 'PartHeard'
   | 'ReservedForJudgment'
-  | 'Adjourned'
-  | 'ListedForHearing'
+  | 'Disposed'
   | 'Dismissed'
   | 'Allowed'
   | 'Withdrawn'
   | 'Transferred'
+  | 'StayGranted'
+  | 'NoticeIssued'
   | 'Admitted'
   | 'LeaveGranted'
   | 'CounterFiled'
   | 'CounterNotFiled'
-  | 'Pending';
+  | 'Adjourned'
+  | 'Tagged'
+  | 'Clubbed'
+  | 'PartlyAllowed'
+  | 'RemandedBack'
+  | 'ConvertedToAppeal'
+  | 'FreshNotice'
+  | 'DefectsRemoved'
+  | 'DefectsPending'
+  | 'Closed';
 
 export type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
 
@@ -477,22 +486,31 @@ export interface CaseFilters {
 
 export const CASE_STATUS_LABELS: Record<CaseStatus, string> = {
   Active: 'Active',
-  Disposed: 'Disposed',
-  StayGranted: 'Stay Granted',
-  NoticeIssued: 'Notice Issued',
+  Pending: 'Pending',
+  ListedForHearing: 'Listed for Hearing',
   PartHeard: 'Part Heard',
   ReservedForJudgment: 'Reserved for Judgment',
-  Adjourned: 'Adjourned',
-  ListedForHearing: 'Listed for Hearing',
+  Disposed: 'Disposed',
   Dismissed: 'Dismissed',
   Allowed: 'Allowed',
   Withdrawn: 'Withdrawn',
   Transferred: 'Transferred',
+  StayGranted: 'Stay Granted',
+  NoticeIssued: 'Notice Issued',
   Admitted: 'Admitted',
   LeaveGranted: 'Leave Granted',
   CounterFiled: 'Counter Filed',
   CounterNotFiled: 'Counter Not Filed',
-  Pending: 'Pending',
+  Adjourned: 'Adjourned',
+  Tagged: 'Tagged',
+  Clubbed: 'Clubbed',
+  PartlyAllowed: 'Partly Allowed',
+  RemandedBack: 'Remanded Back',
+  ConvertedToAppeal: 'Converted to Appeal',
+  FreshNotice: 'Fresh Notice',
+  DefectsRemoved: 'Defects Removed',
+  DefectsPending: 'Defects Pending',
+  Closed: 'Closed',
 };
 
 export const PRIORITY_LABELS: Record<Priority, string> = {
@@ -533,54 +551,272 @@ export const COMPLIANCE_STATUS_LABELS: Record<ComplianceStatus, string> = {
   Waived: 'Waived',
 };
 
+// ============================================================
+// Courts — Complete list of Indian courts relevant to an AOR practice
+// Grouped by: Supreme Court, High Courts (all 25), Tribunals, Lower Courts
+// ============================================================
+
 export const COURTS = [
+  // --- Supreme Court ---
   'Supreme Court of India',
-  'High Court of Delhi',
-  'High Court of Uttarakhand',
+
+  // --- High Courts (all 25) ---
   'High Court of Allahabad',
-  'NCLT',
-  'NCLAT',
-  'ITAT',
-  'NGT',
-  'CAT',
-  'Consumer Forum',
+  'High Court of Andhra Pradesh (Amaravati)',
+  'High Court of Bombay',
+  'High Court of Calcutta',
+  'High Court of Chhattisgarh (Bilaspur)',
+  'High Court of Delhi',
+  'High Court of Gauhati',
+  'High Court of Gujarat',
+  'High Court of Himachal Pradesh (Shimla)',
+  'High Court of Jammu & Kashmir and Ladakh',
+  'High Court of Jharkhand (Ranchi)',
+  'High Court of Karnataka',
+  'High Court of Kerala',
+  'High Court of Madhya Pradesh (Jabalpur)',
+  'High Court of Madras',
+  'High Court of Manipur (Imphal)',
+  'High Court of Meghalaya (Shillong)',
+  'High Court of Orissa (Cuttack)',
+  'High Court of Patna',
+  'High Court of Punjab and Haryana (Chandigarh)',
+  'High Court of Rajasthan',
+  'High Court of Sikkim (Gangtok)',
+  'High Court of Telangana (Hyderabad)',
+  'High Court of Tripura (Agartala)',
+  'High Court of Uttarakhand (Nainital)',
+
+  // --- Tribunals ---
+  'National Company Law Tribunal (NCLT)',
+  'National Company Law Appellate Tribunal (NCLAT)',
+  'Income Tax Appellate Tribunal (ITAT)',
+  'National Green Tribunal (NGT)',
+  'Central Administrative Tribunal (CAT)',
+  'Telecom Disputes Settlement & Appellate Tribunal (TDSAT)',
+  'National Consumer Disputes Redressal Commission (NCDRC)',
+  'Securities Appellate Tribunal (SAT)',
+  'Armed Forces Tribunal (AFT)',
+  'Debt Recovery Tribunal (DRT)',
+  'Debt Recovery Appellate Tribunal (DRAT)',
+  'Real Estate Appellate Tribunal (RERA AT)',
+  'Customs, Excise & Service Tax Appellate Tribunal (CESTAT)',
+  'Appellate Tribunal for Electricity (APTEL)',
+  'National Company Law Tribunal - Principal Bench (NCLT Delhi)',
+  'Competition Commission of India (CCI)',
+  'Competition Appellate Tribunal',
+  'Intellectual Property Appellate Board (IPAB)',
+  'Railway Claims Tribunal',
+  'Cyber Appellate Tribunal',
+
+  // --- Consumer Forums ---
+  'District Consumer Disputes Redressal Forum',
+  'State Consumer Disputes Redressal Commission',
+  'National Consumer Disputes Redressal Commission (NCDRC)',
+
+  // --- Lower / Subordinate Courts ---
+  'District Court',
+  'Sessions Court',
+  'Civil Judge (Senior Division)',
+  'Civil Judge (Junior Division)',
+  'Metropolitan Magistrate Court',
+  'Judicial Magistrate First Class (JMFC)',
+  'Chief Judicial Magistrate Court',
+  'Family Court',
+  'Labour Court',
+  'Industrial Tribunal',
+  'Motor Accident Claims Tribunal (MACT)',
+  'Special Court (NIA / PMLA / NDPS)',
+  'Commercial Court',
+  'Revenue Court / Board of Revenue',
+  'Lok Adalat',
+  'Gram Nyayalaya',
+
+  // --- Other ---
+  'Other',
 ] as const;
 
+// Short labels for display in compact views (charts, tags, etc.)
+export const COURT_SHORT_LABELS: Record<string, string> = {
+  'Supreme Court of India': 'SCI',
+  'High Court of Allahabad': 'HC Allahabad',
+  'High Court of Andhra Pradesh (Amaravati)': 'HC AP',
+  'High Court of Bombay': 'HC Bombay',
+  'High Court of Calcutta': 'HC Calcutta',
+  'High Court of Chhattisgarh (Bilaspur)': 'HC Chhattisgarh',
+  'High Court of Delhi': 'HC Delhi',
+  'High Court of Gauhati': 'HC Gauhati',
+  'High Court of Gujarat': 'HC Gujarat',
+  'High Court of Himachal Pradesh (Shimla)': 'HC HP',
+  'High Court of Jammu & Kashmir and Ladakh': 'HC J&K',
+  'High Court of Jharkhand (Ranchi)': 'HC Jharkhand',
+  'High Court of Karnataka': 'HC Karnataka',
+  'High Court of Kerala': 'HC Kerala',
+  'High Court of Madhya Pradesh (Jabalpur)': 'HC MP',
+  'High Court of Madras': 'HC Madras',
+  'High Court of Manipur (Imphal)': 'HC Manipur',
+  'High Court of Meghalaya (Shillong)': 'HC Meghalaya',
+  'High Court of Orissa (Cuttack)': 'HC Orissa',
+  'High Court of Patna': 'HC Patna',
+  'High Court of Punjab and Haryana (Chandigarh)': 'HC P&H',
+  'High Court of Rajasthan': 'HC Rajasthan',
+  'High Court of Sikkim (Gangtok)': 'HC Sikkim',
+  'High Court of Telangana (Hyderabad)': 'HC Telangana',
+  'High Court of Tripura (Agartala)': 'HC Tripura',
+  'High Court of Uttarakhand (Nainital)': 'HC Uttarakhand',
+  'National Company Law Tribunal (NCLT)': 'NCLT',
+  'National Company Law Appellate Tribunal (NCLAT)': 'NCLAT',
+  'Income Tax Appellate Tribunal (ITAT)': 'ITAT',
+  'National Green Tribunal (NGT)': 'NGT',
+  'Central Administrative Tribunal (CAT)': 'CAT',
+  'Telecom Disputes Settlement & Appellate Tribunal (TDSAT)': 'TDSAT',
+  'National Consumer Disputes Redressal Commission (NCDRC)': 'NCDRC',
+  'Securities Appellate Tribunal (SAT)': 'SAT',
+  'Armed Forces Tribunal (AFT)': 'AFT',
+  'Debt Recovery Tribunal (DRT)': 'DRT',
+  'Debt Recovery Appellate Tribunal (DRAT)': 'DRAT',
+  'Real Estate Appellate Tribunal (RERA AT)': 'RERA AT',
+  'Customs, Excise & Service Tax Appellate Tribunal (CESTAT)': 'CESTAT',
+  'Appellate Tribunal for Electricity (APTEL)': 'APTEL',
+};
+
+// ============================================================
+// Departments — Government departments commonly seen in litigation
+// Covers Central, State (Uttarakhand/Delhi focus), and generic departments
+// ============================================================
+
 export const DEPARTMENTS = [
+  // --- Core State Government Departments ---
   'Home',
+  'Finance',
+  'Revenue',
   'Forest',
   'Urban Development',
   'Education',
+  'Higher Education',
   'Medical',
-  'Finance',
+  'Medical Education',
   'PWD',
   'Social Welfare',
   'Labour',
-  'Higher Education',
-  'Industrial Development',
-  'Cooperative Societies',
-  'Sainik Welfare',
+  'Agriculture',
   'Animal Husbandry',
+  'Cooperative Societies',
   'Disaster Management',
-  'Revenue',
+  'Energy',
+  'Environment',
+  'Excise',
+  'Food & Civil Supplies',
+  'Health and Family Welfare',
   'Home Guards',
-  'Medical Education',
+  'Housing',
+  'Industrial Development',
+  'Information Technology',
+  'Irrigation',
+  'Judiciary / Law Department',
+  'Mines & Geology',
+  'Panchayati Raj',
+  'Planning',
+  'Police',
+  'Rural Development',
+  'Sainik Welfare',
+  'Science & Technology',
+  'Sports & Youth Affairs',
+  'Tourism',
+  'Transport',
+  'Tribal Welfare',
+  'Water Supply & Sanitation',
+  'Women & Child Development',
+  'Department of Personnel',
+
+  // --- Central Government Departments ---
+  'Defence (MoD)',
+  'Railways',
+  'Telecom (DoT)',
+  'Petroleum & Natural Gas',
+  'Civil Aviation',
+  'Shipping & Ports',
+  'Commerce & Industry',
+  'Consumer Affairs',
+  'Corporate Affairs (MCA)',
+  'External Affairs',
+  'Heavy Industries',
+  'Steel',
+  'Textiles',
+  'MSME',
+  'Atomic Energy',
+  'Space (ISRO / DoS)',
+  'CBDT / Income Tax',
+  'CBIC / Customs & Excise',
+  'GST Council',
+  'CBI',
+  'NIA',
+  'Enforcement Directorate (ED)',
+  'SEBI',
+  'RBI',
+  'Insurance (IRDAI)',
+
+  // --- Litigation-specific categories ---
   'PIL',
   'Election',
   'Service Matter',
-  'Department of Personnel',
+  'Land Acquisition',
+  'Municipal / Local Bodies',
+  'Cantonment Board',
+  'University / Educational Institution',
+  'Public Sector Undertaking (PSU)',
+  'Autonomous Body',
+  'Private Party (Non-Govt)',
+  'Other',
 ] as const;
+
+// ============================================================
+// Roles — Our role in the case (party capacity / legal standing)
+// ============================================================
 
 export const ROLES = [
+  // --- Primary Party Roles ---
   'Petitioner',
   'Respondent',
+  'Appellant',
+  'Respondent (Appeal)',
+  'Plaintiff',
+  'Defendant',
+  'Complainant',
+  'Accused',
+  'Applicant',
+
+  // --- Secondary / Intervention Roles ---
   'Intervenor',
-  'Amicus',
-  'Caveator',
   'Impleader',
+  'Amicus Curiae',
+  'Caveator',
+  'Party-in-Person',
+  'Third Party',
+  'Proforma Respondent',
+  'Garnishee',
+  'Decree Holder',
+  'Judgment Debtor',
+
+  // --- Special Roles ---
+  'Advocate Commissioner',
+  'Guardian Ad Litem',
+  'Next Friend',
+  'Receiver',
+  'Liquidator',
+  'Administrator',
+
+  // --- Other ---
+  'Other',
 ] as const;
 
+// ============================================================
+// Case Categories — Types of cases filed in Indian courts
+// Covers Supreme Court, High Court, Tribunal, and lower court filings
+// ============================================================
+
 export const CATEGORIES = [
+  // --- Supreme Court specific ---
   'SLP (Civil)',
   'SLP (Criminal)',
   'Civil Appeal',
@@ -589,10 +825,295 @@ export const CATEGORIES = [
   'Writ Petition (Criminal)',
   'Contempt Petition (Civil)',
   'Contempt Petition (Criminal)',
-  'Transfer Petition',
+  'Transfer Petition (Civil)',
+  'Transfer Petition (Criminal)',
   'Review Petition',
+  'Curative Petition',
   'Original Suit',
+  'Arbitration Petition',
   'Miscellaneous Application',
+  'Interlocutory Application',
+
+  // --- High Court common ---
+  'Civil Writ Petition',
+  'Criminal Writ Petition',
+  'First Appeal',
+  'Second Appeal',
+  'Civil Revision',
+  'Criminal Revision',
+  'Criminal Misc. Petition',
+  'Letters Patent Appeal (LPA)',
+  'Reference under Article 228',
+
+  // --- Bail-related ---
+  'Bail Application',
+  'Anticipatory Bail Application',
+  'Default Bail Application',
+  'Interim Bail Application',
+
+  // --- Company / Commercial ---
   'Company Petition',
+  'Company Appeal',
+  'Company Application',
+  'Insolvency Petition (Corporate)',
+  'Insolvency Petition (Personal)',
+  'Commercial Suit',
+  'Commercial Appeal',
+
+  // --- Tax / Revenue ---
   'Tax Appeal',
+  'Customs Appeal',
+  'Central Excise Appeal',
+  'GST Appeal',
+  'Income Tax Appeal',
+  'Income Tax Reference',
+
+  // --- Tribunal-specific ---
+  'OA (Original Application) - CAT',
+  'MA (Misc. Application) - CAT',
+  'OA (Original Application) - NGT',
+  'Appeal - NGT',
+  'OA (Original Application) - AFT',
+  'Petition - TDSAT',
+  'Appeal - SAT',
+  'OA - DRT',
+  'Appeal - DRAT',
+  'Complaint - RERA',
+  'Appeal - RERA AT',
+
+  // --- Consumer ---
+  'Consumer Complaint',
+  'Consumer Appeal',
+  'Consumer Revision',
+
+  // --- Family / Matrimonial ---
+  'Matrimonial Petition',
+  'Divorce Petition',
+  'Maintenance Application',
+  'Domestic Violence Application',
+  'Child Custody Petition',
+  'Guardianship Petition',
+  'Hindu Marriage Petition',
+  'Muslim Personal Law Petition',
+
+  // --- Labour ---
+  'Labour Dispute',
+  'Industrial Dispute',
+  'Workmen Compensation Claim',
+
+  // --- Criminal (lower court) ---
+  'FIR / Complaint Case',
+  'Charge Sheet / Challan',
+  'Private Complaint (Sec 200 CrPC)',
+  'Quashing Petition (Sec 482 CrPC)',
+  'Habeas Corpus Petition',
+
+  // --- Civil (lower court) ---
+  'Civil Suit',
+  'Declaratory Suit',
+  'Injunction Suit',
+  'Partition Suit',
+  'Title Suit',
+  'Money Recovery Suit',
+  'Specific Performance Suit',
+  'Execution Petition',
+  'Land Acquisition Reference',
+
+  // --- Special ---
+  'Public Interest Litigation (PIL)',
+  'Election Petition',
+  'Contempt Application',
+  'Caveat Application',
+  'Succession / Probate Petition',
+  'Motor Accident Claim',
+  'Arbitration Application (Sec 9 / 11 / 34 / 36)',
+  'Mediation Reference',
+  'Lok Adalat Reference',
+
+  // --- Other ---
+  'Other',
 ] as const;
+
+// ============================================================
+// Grouped versions for <optgroup> rendering in dropdowns
+// ============================================================
+
+export const COURTS_GROUPED = [
+  {
+    label: 'Supreme Court',
+    options: ['Supreme Court of India'],
+  },
+  {
+    label: 'High Courts',
+    options: COURTS.filter((c) => c.startsWith('High Court')),
+  },
+  {
+    label: 'Tribunals',
+    options: COURTS.filter((c) =>
+      c.includes('Tribunal') || c.includes('NCLT') || c.includes('NCLAT') ||
+      c.includes('CCI') || c.includes('IPAB')
+    ),
+  },
+  {
+    label: 'Consumer Forums',
+    options: COURTS.filter((c) => c.includes('Consumer')),
+  },
+  {
+    label: 'Lower / Subordinate Courts',
+    options: [
+      'District Court', 'Sessions Court', 'Civil Judge (Senior Division)',
+      'Civil Judge (Junior Division)', 'Metropolitan Magistrate Court',
+      'Judicial Magistrate First Class (JMFC)', 'Chief Judicial Magistrate Court',
+      'Family Court', 'Labour Court', 'Industrial Tribunal',
+      'Motor Accident Claims Tribunal (MACT)', 'Special Court (NIA / PMLA / NDPS)',
+      'Commercial Court', 'Revenue Court / Board of Revenue',
+      'Lok Adalat', 'Gram Nyayalaya',
+    ],
+  },
+  {
+    label: 'Other',
+    options: ['Other'],
+  },
+] as const;
+
+export const CATEGORIES_GROUPED = [
+  {
+    label: 'Supreme Court',
+    options: [
+      'SLP (Civil)', 'SLP (Criminal)', 'Civil Appeal', 'Criminal Appeal',
+      'Writ Petition (Civil)', 'Writ Petition (Criminal)',
+      'Contempt Petition (Civil)', 'Contempt Petition (Criminal)',
+      'Transfer Petition (Civil)', 'Transfer Petition (Criminal)',
+      'Review Petition', 'Curative Petition', 'Original Suit',
+      'Arbitration Petition', 'Miscellaneous Application', 'Interlocutory Application',
+    ],
+  },
+  {
+    label: 'High Court',
+    options: [
+      'Civil Writ Petition', 'Criminal Writ Petition',
+      'First Appeal', 'Second Appeal', 'Civil Revision', 'Criminal Revision',
+      'Criminal Misc. Petition', 'Letters Patent Appeal (LPA)',
+      'Reference under Article 228',
+    ],
+  },
+  {
+    label: 'Bail',
+    options: [
+      'Bail Application', 'Anticipatory Bail Application',
+      'Default Bail Application', 'Interim Bail Application',
+    ],
+  },
+  {
+    label: 'Company / Commercial',
+    options: [
+      'Company Petition', 'Company Appeal', 'Company Application',
+      'Insolvency Petition (Corporate)', 'Insolvency Petition (Personal)',
+      'Commercial Suit', 'Commercial Appeal',
+    ],
+  },
+  {
+    label: 'Tax / Revenue',
+    options: [
+      'Tax Appeal', 'Customs Appeal', 'Central Excise Appeal',
+      'GST Appeal', 'Income Tax Appeal', 'Income Tax Reference',
+    ],
+  },
+  {
+    label: 'Tribunal',
+    options: [
+      'OA (Original Application) - CAT', 'MA (Misc. Application) - CAT',
+      'OA (Original Application) - NGT', 'Appeal - NGT',
+      'OA (Original Application) - AFT', 'Petition - TDSAT',
+      'Appeal - SAT', 'OA - DRT', 'Appeal - DRAT',
+      'Complaint - RERA', 'Appeal - RERA AT',
+    ],
+  },
+  {
+    label: 'Consumer',
+    options: ['Consumer Complaint', 'Consumer Appeal', 'Consumer Revision'],
+  },
+  {
+    label: 'Family / Matrimonial',
+    options: [
+      'Matrimonial Petition', 'Divorce Petition', 'Maintenance Application',
+      'Domestic Violence Application', 'Child Custody Petition',
+      'Guardianship Petition', 'Hindu Marriage Petition', 'Muslim Personal Law Petition',
+    ],
+  },
+  {
+    label: 'Labour',
+    options: ['Labour Dispute', 'Industrial Dispute', 'Workmen Compensation Claim'],
+  },
+  {
+    label: 'Criminal (Lower Court)',
+    options: [
+      'FIR / Complaint Case', 'Charge Sheet / Challan',
+      'Private Complaint (Sec 200 CrPC)', 'Quashing Petition (Sec 482 CrPC)',
+      'Habeas Corpus Petition',
+    ],
+  },
+  {
+    label: 'Civil (Lower Court)',
+    options: [
+      'Civil Suit', 'Declaratory Suit', 'Injunction Suit', 'Partition Suit',
+      'Title Suit', 'Money Recovery Suit', 'Specific Performance Suit',
+      'Execution Petition', 'Land Acquisition Reference',
+    ],
+  },
+  {
+    label: 'Special',
+    options: [
+      'Public Interest Litigation (PIL)', 'Election Petition',
+      'Contempt Application', 'Caveat Application',
+      'Succession / Probate Petition', 'Motor Accident Claim',
+      'Arbitration Application (Sec 9 / 11 / 34 / 36)',
+      'Mediation Reference', 'Lok Adalat Reference',
+    ],
+  },
+  {
+    label: 'Other',
+    options: ['Other'],
+  },
+] as const;
+
+export const DEPARTMENTS_GROUPED = [
+  {
+    label: 'State Government',
+    options: [
+      'Home', 'Finance', 'Revenue', 'Forest', 'Urban Development',
+      'Education', 'Higher Education', 'Medical', 'Medical Education',
+      'PWD', 'Social Welfare', 'Labour', 'Agriculture',
+      'Animal Husbandry', 'Cooperative Societies', 'Disaster Management',
+      'Energy', 'Environment', 'Excise', 'Food & Civil Supplies',
+      'Health and Family Welfare', 'Home Guards', 'Housing', 'Industrial Development',
+      'Information Technology', 'Irrigation', 'Judiciary / Law Department',
+      'Mines & Geology', 'Panchayati Raj', 'Planning', 'Police',
+      'Rural Development', 'Sainik Welfare', 'Science & Technology',
+      'Sports & Youth Affairs', 'Tourism', 'Transport', 'Tribal Welfare',
+      'Water Supply & Sanitation', 'Women & Child Development', 'Department of Personnel',
+    ],
+  },
+  {
+    label: 'Central Government',
+    options: [
+      'Defence (MoD)', 'Railways', 'Telecom (DoT)', 'Petroleum & Natural Gas',
+      'Civil Aviation', 'Shipping & Ports', 'Commerce & Industry', 'Consumer Affairs',
+      'Corporate Affairs (MCA)', 'External Affairs', 'Heavy Industries', 'Steel',
+      'Textiles', 'MSME', 'Atomic Energy', 'Space (ISRO / DoS)',
+      'CBDT / Income Tax', 'CBIC / Customs & Excise', 'GST Council',
+      'CBI', 'NIA', 'Enforcement Directorate (ED)', 'SEBI', 'RBI', 'Insurance (IRDAI)',
+    ],
+  },
+  {
+    label: 'Litigation Categories',
+    options: [
+      'PIL', 'Election', 'Service Matter', 'Land Acquisition',
+      'Municipal / Local Bodies', 'Cantonment Board',
+      'University / Educational Institution', 'Public Sector Undertaking (PSU)',
+      'Autonomous Body', 'Private Party (Non-Govt)', 'Other',
+    ],
+  },
+] as const;
+
+export const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'] as const;

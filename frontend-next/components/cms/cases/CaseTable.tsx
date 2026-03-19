@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { Case, CaseStatus, Priority, UserRole } from '@/lib/cms-types';
-import { CASE_STATUS_LABELS, PRIORITY_LABELS } from '@/lib/cms-types';
+import { CASE_STATUS_LABELS, PRIORITY_LABELS, COURTS, ROLES, CATEGORIES, DEPARTMENTS } from '@/lib/cms-types';
 
 // --- Helpers ---
 
@@ -42,22 +42,31 @@ function truncate(text: string | null, maxLen: number): string {
 
 const STATUS_BADGE_STYLES: Record<CaseStatus, string> = {
   Active: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
-  Disposed: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
-  StayGranted: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
-  NoticeIssued: 'bg-sky-50 text-[#0EA5E9] border-[#0EA5E9]',
+  Pending: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
+  ListedForHearing: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
   PartHeard: 'bg-orange-50 text-[#FF8C00] border-[#FF8C00]',
   ReservedForJudgment: 'bg-purple-50 text-[#7C3AED] border-[#7C3AED]',
-  Adjourned: 'bg-yellow-50 text-[#D97706] border-[#D97706]',
-  ListedForHearing: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
+  Disposed: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
   Dismissed: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
   Allowed: 'bg-green-50 text-[#28A745] border-[#28A745]',
   Withdrawn: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
   Transferred: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
+  StayGranted: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
+  NoticeIssued: 'bg-sky-50 text-[#0EA5E9] border-[#0EA5E9]',
   Admitted: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
   LeaveGranted: 'bg-blue-50 text-[#4472C4] border-[#4472C4]',
   CounterFiled: 'bg-green-50 text-[#28A745] border-[#28A745]',
   CounterNotFiled: 'bg-red-50 text-[#FF4444] border-[#FF4444]',
-  Pending: 'bg-gray-100 text-[#6C757D] border-[#6C757D]',
+  Adjourned: 'bg-yellow-50 text-[#D97706] border-[#D97706]',
+  Tagged: 'bg-indigo-50 text-[#6366F1] border-[#6366F1]',
+  Clubbed: 'bg-indigo-50 text-[#6366F1] border-[#6366F1]',
+  PartlyAllowed: 'bg-emerald-50 text-[#10B981] border-[#10B981]',
+  RemandedBack: 'bg-amber-50 text-[#F59E0B] border-[#F59E0B]',
+  ConvertedToAppeal: 'bg-cyan-50 text-[#06B6D4] border-[#06B6D4]',
+  FreshNotice: 'bg-sky-50 text-[#0EA5E9] border-[#0EA5E9]',
+  DefectsRemoved: 'bg-teal-50 text-[#14B8A6] border-[#14B8A6]',
+  DefectsPending: 'bg-rose-50 text-[#F43F5E] border-[#F43F5E]',
+  Closed: 'bg-slate-100 text-[#475569] border-[#475569]',
 };
 
 function StatusBadge({ status }: { readonly status: CaseStatus }) {
@@ -422,6 +431,147 @@ function InlineRemarksInput({
   );
 }
 
+// --- Generic Inline Editable Cells ---
+
+function InlineTextCell({
+  caseItem,
+  field,
+  placeholder,
+  onInlineUpdate,
+  width = 'w-full min-w-[100px]',
+}: {
+  readonly caseItem: Case;
+  readonly field: string;
+  readonly placeholder: string;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+  readonly width?: string;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, field, onInlineUpdate);
+  const [value, setValue] = useState((caseItem as unknown as Record<string, unknown>)[field] as string || '');
+
+  const handleBlur = useCallback(() => {
+    const trimmed = value.trim();
+    const original = ((caseItem as unknown as Record<string, unknown>)[field] as string) || '';
+    if (trimmed !== original) {
+      handleChange(trimmed || null);
+    }
+  }, [value, caseItem, field, handleChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  }, []);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className={`
+          h-7 ${width} px-1.5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs text-[#333] placeholder:text-[#999]
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          transition-colors
+        `}
+        title={((caseItem as unknown as Record<string, unknown>)[field] as string) || ''}
+      />
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
+
+function InlineSelectCell({
+  caseItem,
+  field,
+  options,
+  onInlineUpdate,
+}: {
+  readonly caseItem: Case;
+  readonly field: string;
+  readonly options: readonly string[];
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, field, onInlineUpdate);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <select
+        defaultValue={((caseItem as unknown as Record<string, unknown>)[field] as string) || ''}
+        onChange={(e) => handleChange(e.target.value || null)}
+        className="
+          h-7 px-1.5 pr-5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs font-medium text-[#333] appearance-none cursor-pointer
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          transition-colors max-w-[160px]
+        "
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234472C4' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 4px center',
+        }}
+      >
+        <option value="">-- Select --</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
+
+function InlineDateCell({
+  caseItem,
+  field,
+  onInlineUpdate,
+}: {
+  readonly caseItem: Case;
+  readonly field: string;
+  readonly onInlineUpdate?: (id: string, data: Partial<Case>) => Promise<boolean>;
+}) {
+  const { saveState, handleChange } = useInlineSave(caseItem.id, field, onInlineUpdate);
+  const [value, setValue] = useState(((caseItem as unknown as Record<string, unknown>)[field] as string) || '');
+
+  const handleBlur = useCallback(() => {
+    const trimmed = value.trim();
+    const original = ((caseItem as unknown as Record<string, unknown>)[field] as string) || '';
+    if (trimmed !== original) {
+      handleChange(trimmed || null);
+    }
+  }, [value, caseItem, field, handleChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  }, []);
+
+  return (
+    <div className="flex items-center gap-0.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder="DD.MM.YYYY"
+        className="
+          h-7 w-[90px] px-1.5 rounded border border-[#4472C4]/30 bg-blue-50/50
+          text-xs text-[#333] placeholder:text-[#999]
+          focus:outline-none focus:ring-2 focus:ring-[#4472C4]/40 focus:border-[#4472C4]
+          transition-colors
+        "
+      />
+      <InlineSaveIcon state={saveState} />
+    </div>
+  );
+}
+
 // --- Component ---
 
 export default function CaseTable({
@@ -557,8 +707,8 @@ export default function CaseTable({
 
                     case 'serialNo':
                       return (
-                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333] font-medium">
-                          {caseItem.serialNo}
+                        <td key={col.key} className="px-3 py-2.5 text-sm text-[#6C757D]">
+                          {rowIndex + 1}
                         </td>
                       );
 
@@ -584,7 +734,11 @@ export default function CaseTable({
                     case 'court':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {truncate(caseItem.court, 20)}
+                          {editMode ? (
+                            <InlineSelectCell caseItem={caseItem} field="court" options={COURTS} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.court, 20)
+                          )}
                         </td>
                       );
 
@@ -598,7 +752,11 @@ export default function CaseTable({
                     case 'client':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {truncate(caseItem.client, 20)}
+                          {editMode ? (
+                            <InlineTextCell caseItem={caseItem} field="client" placeholder="Client name..." onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.client, 20)
+                          )}
                         </td>
                       );
 
@@ -612,56 +770,88 @@ export default function CaseTable({
                     case 'petitioner':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.petitioner}>
-                          {truncate(caseItem.petitioner, 25)}
+                          {editMode ? (
+                            <InlineTextCell caseItem={caseItem} field="petitioner" placeholder="Petitioner..." onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.petitioner, 25)
+                          )}
                         </td>
                       );
 
                     case 'respondent':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.respondent}>
-                          {truncate(caseItem.respondent, 25)}
+                          {editMode ? (
+                            <InlineTextCell caseItem={caseItem} field="respondent" placeholder="Respondent..." onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.respondent, 25)
+                          )}
                         </td>
                       );
 
                     case 'ourRole':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.ourRole || '-'}
+                          {editMode ? (
+                            <InlineSelectCell caseItem={caseItem} field="ourRole" options={ROLES} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.ourRole || '-'
+                          )}
                         </td>
                       );
 
                     case 'category':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.category || '-'}
+                          {editMode ? (
+                            <InlineSelectCell caseItem={caseItem} field="category" options={CATEGORIES} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.category || '-'
+                          )}
                         </td>
                       );
 
                     case 'subjectMatter':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.subjectMatter || ''}>
-                          {truncate(caseItem.subjectMatter, 25)}
+                          {editMode ? (
+                            <InlineTextCell caseItem={caseItem} field="subjectMatter" placeholder="Subject matter..." onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.subjectMatter, 25)
+                          )}
                         </td>
                       );
 
                     case 'department':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.department || '-'}
+                          {editMode ? (
+                            <InlineSelectCell caseItem={caseItem} field="department" options={DEPARTMENTS} onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.department || '-'
+                          )}
                         </td>
                       );
 
                     case 'filingDate':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.filingDate || '-'}
+                          {editMode ? (
+                            <InlineDateCell caseItem={caseItem} field="filingDate" onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.filingDate || '-'
+                          )}
                         </td>
                       );
 
                     case 'registrationDate':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.registrationDate || '-'}
+                          {editMode ? (
+                            <InlineDateCell caseItem={caseItem} field="registrationDate" onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.registrationDate || '-'
+                          )}
                         </td>
                       );
 
@@ -704,21 +894,33 @@ export default function CaseTable({
                     case 'previousHearing':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.previousHearing || '-'}
+                          {editMode ? (
+                            <InlineDateCell caseItem={caseItem} field="previousHearing" onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.previousHearing || '-'
+                          )}
                         </td>
                       );
 
                     case 'benchNumber':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]">
-                          {caseItem.benchNumber || '-'}
+                          {editMode ? (
+                            <InlineTextCell caseItem={caseItem} field="benchNumber" placeholder="Bench no..." onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            caseItem.benchNumber || '-'
+                          )}
                         </td>
                       );
 
                     case 'presidingJudge':
                       return (
                         <td key={col.key} className="px-3 py-2.5 text-sm text-[#333333]" title={caseItem.presidingJudge || ''}>
-                          {truncate(caseItem.presidingJudge, 20)}
+                          {editMode ? (
+                            <InlineTextCell caseItem={caseItem} field="presidingJudge" placeholder="Judge name..." onInlineUpdate={onInlineUpdate} />
+                          ) : (
+                            truncate(caseItem.presidingJudge, 20)
+                          )}
                         </td>
                       );
 
