@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { cmsScraper, cmsAuth } from '@/lib/cms-api';
 import type { ScraperStatus, ScraperConflict } from '@/lib/cms-api';
+import { CmsToastProvider, useToast } from '@/components/cms/ui';
 
 // ============================================================
 // Design tokens
@@ -56,53 +57,19 @@ function Spinner({ size = 16 }: { readonly size?: number }) {
 }
 
 // ============================================================
-// Toast
-// ============================================================
-
-interface ToastData {
-  readonly message: string;
-  readonly type: 'success' | 'error';
-}
-
-function Toast({ toast, onDismiss }: { readonly toast: ToastData; readonly onDismiss: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(onDismiss, 4000);
-    return () => clearTimeout(timer);
-  }, [onDismiss]);
-
-  return (
-    <div
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all"
-      style={{ backgroundColor: toast.type === 'success' ? GREEN : RED }}
-    >
-      {toast.type === 'success' ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-          <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="15" y1="9" x2="9" y2="15" />
-          <line x1="9" y1="9" x2="15" y2="15" />
-        </svg>
-      )}
-      {toast.message}
-      <button onClick={onDismiss} className="ml-2 opacity-80 hover:opacity-100">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
-    </div>
-  );
-}
-
-// ============================================================
 // Main Page
 // ============================================================
 
 export default function AutoFetchPage() {
+  return (
+    <CmsToastProvider>
+      <AutoFetchContent />
+    </CmsToastProvider>
+  );
+}
+
+function AutoFetchContent() {
+  const { showToast } = useToast();
   const [status, setStatus] = useState<ScraperStatus>({
     lastRun: null,
     casesUpdated: 0,
@@ -116,7 +83,6 @@ export default function AutoFetchPage() {
   const [singleCaseId, setSingleCaseId] = useState('');
   const [singleCaseResult, setSingleCaseResult] = useState<{ success: boolean; message: string } | null>(null);
   const [resolvingKey, setResolvingKey] = useState<string | null>(null);
-  const [toast, setToast] = useState<ToastData | null>(null);
   const [isSuperadmin, setIsSuperadmin] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -176,15 +142,15 @@ export default function AutoFetchPage() {
     setFetchingAll(true);
     try {
       const result = await cmsScraper.fetchAll();
-      setToast({ message: result.message, type: 'success' });
+      showToast('success', result.message);
       await loadData();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fetch failed';
-      setToast({ message: msg, type: 'error' });
+      showToast('error', msg);
     } finally {
       setFetchingAll(false);
     }
-  }, [loadData]);
+  }, [loadData, showToast]);
 
   // --- Fetch Single Case ---
   const handleFetchCase = useCallback(async () => {
@@ -195,18 +161,18 @@ export default function AutoFetchPage() {
       const result = await cmsScraper.fetchCase(singleCaseId.trim());
       setSingleCaseResult(result);
       if (result.success) {
-        setToast({ message: result.message, type: 'success' });
+        showToast('success', result.message);
       } else {
-        setToast({ message: result.message, type: 'error' });
+        showToast('error', result.message);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fetch failed';
       setSingleCaseResult({ success: false, message: msg });
-      setToast({ message: msg, type: 'error' });
+      showToast('error', msg);
     } finally {
       setFetchingCase(false);
     }
-  }, [singleCaseId]);
+  }, [singleCaseId, showToast]);
 
   // --- Resolve Conflict ---
   const handleResolveConflict = useCallback(async (caseId: string, field: string, acceptAuto: boolean) => {
@@ -215,17 +181,14 @@ export default function AutoFetchPage() {
     try {
       await cmsScraper.resolveConflict(caseId, field, acceptAuto);
       setConflicts((prev) => prev.filter((c) => !(c.caseId === caseId && c.field === field)));
-      setToast({
-        message: acceptAuto ? 'Accepted auto-fetched value' : 'Kept manual value',
-        type: 'success',
-      });
+      showToast('success', acceptAuto ? 'Accepted auto-fetched value' : 'Kept manual value');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to resolve conflict';
-      setToast({ message: msg, type: 'error' });
+      showToast('error', msg);
     } finally {
       setResolvingKey(null);
     }
-  }, []);
+  }, [showToast]);
 
   // --- Not superadmin ---
   if (!isSuperadmin && !loading) {
@@ -596,8 +559,6 @@ export default function AutoFetchPage() {
         </div>
       </div>
 
-      {/* Toast */}
-      {toast && <Toast toast={toast} onDismiss={() => setToast(null)} />}
     </div>
   );
 }

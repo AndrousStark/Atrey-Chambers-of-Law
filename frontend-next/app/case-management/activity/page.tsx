@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { CmsToastProvider, useToast, CmsConfirmDialog, CmsLoadingState } from '@/components/cms/ui';
+import { tw, selectArrowStyle } from '@/lib/design-tokens';
 import { cmsTimeEntries, cmsNotifications, cmsAuth, cmsCases, cmsUsers } from '@/lib/cms-api';
 import type {
   TimeEntry,
@@ -128,23 +130,14 @@ type MobileTab = 'time' | 'alerts';
 type SortKey = 'date' | 'activityType' | 'description' | 'case' | 'duration' | 'billable' | 'status';
 
 // ============================================================
-// Design System Classes
+// Design System Classes (from shared design-tokens)
 // ============================================================
 
-const INPUT_CLASS =
-  'w-full h-9 px-3 rounded-md border border-gray-300 bg-white text-sm text-[#333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 focus:border-[#4472C4] transition-colors';
-
-const SELECT_CLASS =
-  'w-full h-9 px-3 rounded-md border border-gray-300 bg-white text-sm text-[#333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 focus:border-[#4472C4] transition-colors appearance-none cursor-pointer pr-8';
-
-const SELECT_STYLE = {
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
-  backgroundRepeat: 'no-repeat' as const,
-  backgroundPosition: 'right 10px center' as const,
-};
-
-const LABEL_CLASS = 'text-xs font-semibold uppercase tracking-wider text-[#6C757D]';
-const BADGE_CLASS = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border whitespace-nowrap';
+const INPUT_CLASS = tw.input;
+const SELECT_CLASS = tw.select;
+const SELECT_STYLE = selectArrowStyle;
+const LABEL_CLASS = tw.label;
+const BADGE_CLASS = tw.badge;
 
 // ============================================================
 // SVG Icons
@@ -320,25 +313,6 @@ function IconAlert({ size = 16 }: { readonly size?: number }) {
   );
 }
 
-function IconSuccess({ size = 18 }: { readonly size?: number }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
-}
-
-function IconError({ size = 18 }: { readonly size?: number }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="15" y1="9" x2="9" y2="15" />
-      <line x1="9" y1="9" x2="15" y2="15" />
-    </svg>
-  );
-}
-
 // ============================================================
 // Helpers
 // ============================================================
@@ -397,10 +371,6 @@ function truncate(text: string, maxLen: number): string {
   return text.substring(0, maxLen) + '...';
 }
 
-function generateToastId(): string {
-  return `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-}
-
 function getWeekStartISO(dateStr: string): string {
   const d = new Date(dateStr);
   const day = d.getDay();
@@ -456,105 +426,6 @@ function formatSnoozeTime(dateStr: string): string {
   if (diffHours < 1) return 'Soon';
   if (diffHours < 24) return `in ${diffHours}h`;
   return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
-
-// ============================================================
-// Toast
-// ============================================================
-
-interface Toast {
-  readonly id: string;
-  readonly type: 'success' | 'error';
-  readonly message: string;
-}
-
-function ToastContainer({
-  toasts,
-  onDismiss,
-}: {
-  readonly toasts: readonly Toast[];
-  readonly onDismiss: (id: string) => void;
-}) {
-  if (toasts.length === 0) return null;
-
-  return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 max-w-sm">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium transition-all duration-300 ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-[#28A745]/30 text-[#28A745]'
-              : 'bg-red-50 border-[#FF4444]/30 text-[#FF4444]'
-          }`}
-        >
-          {toast.type === 'success' ? <IconSuccess /> : <IconError />}
-          <span className="flex-1">{toast.message}</span>
-          <button
-            onClick={() => onDismiss(toast.id)}
-            className="p-0.5 rounded hover:bg-black/5 transition-colors cursor-pointer min-w-[24px] min-h-[24px] flex items-center justify-center"
-          >
-            <IconClose />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ============================================================
-// Confirm Dialog
-// ============================================================
-
-function ConfirmDialog({
-  isOpen,
-  title,
-  message,
-  confirmLabel,
-  onConfirm,
-  onCancel,
-}: {
-  readonly isOpen: boolean;
-  readonly title: string;
-  readonly message: string;
-  readonly confirmLabel: string;
-  readonly onConfirm: () => void;
-  readonly onCancel: () => void;
-}) {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onCancel]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={onCancel} aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
-        <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">{title}</h3>
-        <p className="text-sm text-[#666] mb-6">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="h-9 px-4 rounded-md text-sm font-medium text-[#333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="h-9 px-4 rounded-md text-sm font-medium text-white bg-[#FF4444] border border-[#FF4444] hover:bg-[#E63939] transition-colors cursor-pointer"
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ============================================================
@@ -1848,47 +1719,20 @@ function NotificationPreferencesSection({
 }
 
 // ============================================================
-// Loading Skeletons
-// ============================================================
-
-function TimeEntriesSkeleton() {
-  return (
-    <div className="animate-pulse space-y-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-3">
-          <div className="h-3 w-16 bg-gray-200 rounded" />
-          <div className="h-5 w-20 bg-gray-200 rounded-full" />
-          <div className="flex-1 h-3 bg-gray-200 rounded" />
-          <div className="h-3 w-12 bg-gray-200 rounded" />
-          <div className="h-3 w-10 bg-gray-200 rounded" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function NotificationsSkeleton() {
-  return (
-    <div className="animate-pulse space-y-2">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="bg-white rounded-lg border border-gray-200 p-3 flex gap-2" style={{ borderLeftWidth: '4px', borderLeftColor: '#e5e7eb' }}>
-          <div className="w-2 h-2 bg-gray-200 rounded-full mt-1.5" />
-          <div className="flex-1 space-y-1.5">
-            <div className="h-3 w-24 bg-gray-200 rounded" />
-            <div className="h-3 w-3/4 bg-gray-200 rounded" />
-            <div className="h-2 w-1/2 bg-gray-200 rounded" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ============================================================
 // MAIN PAGE COMPONENT
 // ============================================================
 
 export default function ActivityHubPage() {
+  return (
+    <CmsToastProvider>
+      <ActivityHubInner />
+    </CmsToastProvider>
+  );
+}
+
+function ActivityHubInner() {
+  const { showToast } = useToast();
+
   // --- Auth & Reference Data ---
   const [currentUser, setCurrentUser] = useState<CmsUser | null>(null);
   const [users, setUsers] = useState<CmsUser[]>([]);
@@ -1932,21 +1776,6 @@ export default function ActivityHubPage() {
 
   // --- Mobile ---
   const [mobileTab, setMobileTab] = useState<MobileTab>('time');
-
-  // --- Toasts ---
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const showToast = useCallback((type: 'success' | 'error', message: string) => {
-    const id = generateToastId();
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
 
   // ============================================================
   // Data Loading
@@ -2452,7 +2281,7 @@ export default function ActivityHubPage() {
           )}
 
           {/* Loading */}
-          {timeLoading && <TimeEntriesSkeleton />}
+          {timeLoading && <CmsLoadingState text="Loading time entries..." />}
 
           {/* List View */}
           {!timeLoading && viewMode === 'list' && (
@@ -2574,7 +2403,7 @@ export default function ActivityHubPage() {
           )}
 
           {/* Notification Loading */}
-          {notifLoading && <NotificationsSkeleton />}
+          {notifLoading && <CmsLoadingState text="Loading notifications..." />}
 
           {/* Notification Empty */}
           {!notifLoading && !notifError && notifications.length === 0 && (
@@ -2641,11 +2470,12 @@ export default function ActivityHubPage() {
         onClose={handleCloseModal}
       />
 
-      <ConfirmDialog
+      <CmsConfirmDialog
         isOpen={!!deleteTarget}
         title="Delete Time Entry"
         message={`Are you sure you want to delete this time entry (${deleteTarget ? formatDuration(deleteTarget.durationMinutes) : ''} - ${deleteTarget ? truncate(deleteTarget.description, 40) : ''})? This action cannot be undone.`}
         confirmLabel="Delete"
+        variant="danger"
         onConfirm={handleDeleteEntry}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -2656,8 +2486,6 @@ export default function ActivityHubPage() {
         onCancel={() => setRejectTarget(null)}
       />
 
-      {/* ==================== TOASTS ==================== */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

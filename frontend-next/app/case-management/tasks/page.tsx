@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { cmsTasks, cmsClients, cmsUsers, cmsAuth, cmsCases } from '@/lib/cms-api';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { cmsTasks, cmsClients, cmsUsers, cmsCases } from '@/lib/cms-api';
 import type {
   Task,
   TaskStatus,
@@ -12,6 +12,8 @@ import type {
   Case,
 } from '@/lib/cms-types';
 import { TASK_STATUS_LABELS, TASK_CATEGORY_LABELS } from '@/lib/cms-types';
+import { CmsToastProvider, useToast, CmsConfirmDialog, CmsLoadingState } from '@/components/cms/ui';
+import { tw, selectArrowStyle } from '@/lib/design-tokens';
 
 // ============================================================
 // Constants
@@ -63,31 +65,18 @@ const STATUS_STAT_COLORS: Record<string, { bg: string; border: string; text: str
 type ViewMode = 'table' | 'kanban' | 'calendar';
 
 // ============================================================
-// Shared CSS class strings (from design system)
+// Shared CSS class strings (from design tokens)
 // ============================================================
 
-const INPUT_CLASS =
-  'w-full h-9 px-3 rounded-md border border-gray-300 bg-white text-sm text-[#333333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 focus:border-[#4472C4] transition-colors';
-
-const SELECT_CLASS =
-  'w-full h-9 px-3 rounded-md border border-gray-300 bg-white text-sm text-[#333333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#4472C4]/30 focus:border-[#4472C4] transition-colors appearance-none cursor-pointer pr-8';
-
-const SELECT_STYLE = {
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
-  backgroundRepeat: 'no-repeat' as const,
-  backgroundPosition: 'right 10px center' as const,
-};
-
-const LABEL_CLASS = 'text-xs font-semibold uppercase tracking-wider text-[#6C757D]';
-const BADGE_CLASS = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border whitespace-nowrap';
+const INPUT_CLASS = tw.input;
+const SELECT_CLASS = tw.select;
+const SELECT_STYLE = selectArrowStyle;
+const LABEL_CLASS = tw.label;
+const BADGE_CLASS = tw.badge;
 
 // ============================================================
 // Utility Helpers
 // ============================================================
-
-function generateToastId(): string {
-  return `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '--';
@@ -139,119 +128,6 @@ function getInitial(name: string | undefined | null): string {
 function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
   return text.substring(0, maxLen) + '...';
-}
-
-// ============================================================
-// Toast
-// ============================================================
-
-interface Toast {
-  readonly id: string;
-  readonly type: 'success' | 'error';
-  readonly message: string;
-}
-
-function ToastContainer({
-  toasts,
-  onDismiss,
-}: {
-  readonly toasts: Toast[];
-  readonly onDismiss: (id: string) => void;
-}) {
-  if (toasts.length === 0) return null;
-
-  return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 max-w-sm">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-[#28A745]/30 text-[#28A745]'
-              : 'bg-red-50 border-[#FF4444]/30 text-[#FF4444]'
-          }`}
-        >
-          {toast.type === 'success' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-          )}
-          <span className="flex-1">{toast.message}</span>
-          <button
-            onClick={() => onDismiss(toast.id)}
-            className="p-0.5 rounded hover:bg-black/5 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ============================================================
-// Confirm Dialog
-// ============================================================
-
-function ConfirmDialog({
-  isOpen,
-  title,
-  message,
-  confirmLabel,
-  onConfirm,
-  onCancel,
-}: {
-  readonly isOpen: boolean;
-  readonly title: string;
-  readonly message: string;
-  readonly confirmLabel: string;
-  readonly onConfirm: () => void;
-  readonly onCancel: () => void;
-}) {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onCancel]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
-        <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">{title}</h3>
-        <p className="text-sm text-[#666] mb-6">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="h-9 px-4 rounded-md text-sm font-medium text-[#333333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="h-9 px-4 rounded-md text-sm font-medium text-white bg-[#FF4444] border border-[#FF4444] hover:bg-[#E63939] transition-colors"
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ============================================================
@@ -1594,7 +1470,7 @@ function CalendarView({
 // MAIN PAGE
 // ============================================================
 
-export default function TaskManagementPage() {
+function TaskManagementPageInner() {
   // --- Core data ---
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<TaskStats | null>(null);
@@ -1621,20 +1497,8 @@ export default function TaskManagementPage() {
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // --- Toasts ---
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const showToast = useCallback((type: 'success' | 'error', message: string) => {
-    const id = generateToastId();
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  // --- Toast (from shared provider) ---
+  const { showToast } = useToast();
 
   // --- Fetch reference data once ---
   useEffect(() => {
@@ -2025,15 +1889,7 @@ export default function TaskManagementPage() {
       )}
 
       {/* Loading State */}
-      {loading && (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 flex flex-col items-center gap-3">
-          <div
-            className="w-8 h-8 border-3 border-t-transparent rounded-full animate-spin"
-            style={{ borderColor: '#4472C4', borderTopColor: 'transparent', borderWidth: '3px' }}
-          />
-          <p className="text-sm text-[#6C757D]">Loading tasks...</p>
-        </div>
-      )}
+      {loading && <CmsLoadingState text="Loading tasks..." />}
 
       {/* Views */}
       {!loading && viewMode === 'table' && (
@@ -2091,27 +1947,38 @@ export default function TaskManagementPage() {
       />
 
       {/* Delete Confirmation */}
-      <ConfirmDialog
+      <CmsConfirmDialog
         isOpen={!!deleteTarget}
         title="Delete Task"
         message={`Are you sure you want to delete "${deleteTarget ? truncate(deleteTarget.title, 40) : ''}"? This action cannot be undone.`}
         confirmLabel="Delete"
+        variant="danger"
         onConfirm={handleDeleteTask}
         onCancel={() => setDeleteTarget(null)}
       />
 
       {/* Bulk Delete Confirmation */}
-      <ConfirmDialog
+      <CmsConfirmDialog
         isOpen={bulkDeleteConfirm}
         title="Delete Selected Tasks"
         message={`Are you sure you want to delete ${selectedIds.size} selected task(s)? This action cannot be undone.`}
         confirmLabel={`Delete ${selectedIds.size} task(s)`}
+        variant="danger"
         onConfirm={handleBulkDelete}
         onCancel={() => setBulkDeleteConfirm(false)}
       />
-
-      {/* Toasts */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
+  );
+}
+
+// ============================================================
+// Page Export — wrapped in CmsToastProvider
+// ============================================================
+
+export default function TaskManagementPage() {
+  return (
+    <CmsToastProvider>
+      <TaskManagementPageInner />
+    </CmsToastProvider>
   );
 }

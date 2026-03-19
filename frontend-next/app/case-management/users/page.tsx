@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cmsUsers, cmsAuth, cmsAudit } from '@/lib/cms-api';
 import type { CmsUser, UserRole, AuditEntry } from '@/lib/cms-types';
 import { DEPARTMENTS } from '@/lib/cms-types';
+import { CmsToastProvider, useToast, CmsConfirmDialog, CmsLoadingState } from '@/components/cms/ui';
 
 // ============================================================
 // Design tokens
@@ -155,95 +156,6 @@ function roleBadgeColor(role: UserRole): { bg: string; text: string } {
   }
 }
 
-// ============================================================
-// Toast
-// ============================================================
-
-interface Toast {
-  readonly id: string;
-  readonly type: 'success' | 'error';
-  readonly message: string;
-}
-
-function ToastContainer({ toasts, onDismiss }: { readonly toasts: Toast[]; readonly onDismiss: (id: string) => void }) {
-  if (toasts.length === 0) return null;
-  return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 max-w-sm">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-[#28A745]/30 text-[#28A745]'
-              : 'bg-red-50 border-[#FF4444]/30 text-[#FF4444]'
-          }`}
-        >
-          <span className="flex-1">{toast.message}</span>
-          <button onClick={() => onDismiss(toast.id)} className="p-0.5 rounded hover:bg-black/5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ============================================================
-// Confirm Dialog
-// ============================================================
-
-function ConfirmDialog({
-  isOpen,
-  title,
-  message,
-  confirmLabel,
-  onConfirm,
-  onCancel,
-}: {
-  readonly isOpen: boolean;
-  readonly title: string;
-  readonly message: string;
-  readonly confirmLabel: string;
-  readonly onConfirm: () => void;
-  readonly onCancel: () => void;
-}) {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onCancel]);
-
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
-        <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">{title}</h3>
-        <p className="text-sm text-[#666] mb-6">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="h-9 min-h-[44px] px-4 rounded-md text-sm font-medium text-[#333333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="h-9 min-h-[44px] px-4 rounded-md text-sm font-medium text-white bg-[#FF4444] border border-[#FF4444] hover:bg-[#E63939] transition-colors"
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ============================================================
 // Permissions Checkboxes
@@ -986,30 +898,6 @@ function ResetPasswordModal({
   );
 }
 
-// ============================================================
-// Loading Skeleton
-// ============================================================
-
-function LoadingSkeleton() {
-  return (
-    <div className="animate-pulse space-y-4">
-      <div className="h-10 w-48 bg-gray-200 rounded" />
-      <div className="bg-white rounded-xl overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
-            <div className="h-4 w-32 bg-gray-200 rounded" />
-            <div className="h-4 w-48 bg-gray-200 rounded" />
-            <div className="h-5 w-16 bg-gray-200 rounded-full" />
-            <div className="h-5 w-14 bg-gray-200 rounded-full" />
-            <div className="h-4 w-20 bg-gray-200 rounded" />
-            <div className="flex-1" />
-            <div className="h-8 w-20 bg-gray-200 rounded" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ============================================================
 // Access Denied
@@ -1040,6 +928,14 @@ function AccessDenied() {
 // ============================================================
 
 export default function UsersPage() {
+  return (
+    <CmsToastProvider>
+      <UsersPageInner />
+    </CmsToastProvider>
+  );
+}
+
+function UsersPageInner() {
   const [users, setUsers] = useState<CmsUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1064,21 +960,8 @@ export default function UsersPage() {
   // Activity modal
   const [activityTarget, setActivityTarget] = useState<CmsUser | null>(null);
 
-  // Toasts
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const toastIdRef = useRef(0);
-
-  const showToast = useCallback((type: 'success' | 'error', message: string) => {
-    const id = `toast-${++toastIdRef.current}`;
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  // Toasts (shared)
+  const { showToast } = useToast();
 
   // --- Fetch ---
 
@@ -1276,7 +1159,7 @@ export default function UsersPage() {
       )}
 
       {/* Loading */}
-      {loading && <LoadingSkeleton />}
+      {loading && <CmsLoadingState text="Loading users..." />}
 
       {/* Table */}
       {!loading && !error && (
@@ -1482,11 +1365,12 @@ export default function UsersPage() {
       />
 
       {/* Deactivate Confirmation */}
-      <ConfirmDialog
+      <CmsConfirmDialog
         isOpen={!!deactivateTarget}
         title="Deactivate User"
         message={`Are you sure you want to deactivate "${deactivateTarget?.name}"? They will no longer be able to log in.`}
         confirmLabel="Deactivate"
+        variant="danger"
         onConfirm={handleConfirmDeactivate}
         onCancel={() => setDeactivateTarget(null)}
       />
@@ -1514,9 +1398,6 @@ export default function UsersPage() {
         user={activityTarget}
         onClose={() => setActivityTarget(null)}
       />
-
-      {/* Toasts */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

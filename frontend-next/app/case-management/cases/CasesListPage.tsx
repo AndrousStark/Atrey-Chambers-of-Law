@@ -10,6 +10,7 @@ import CaseTable from '@/components/cms/cases/CaseTable';
 import { DEFAULT_VISIBLE_COLUMNS, TOGGLEABLE_COLUMNS } from '@/components/cms/cases/CaseTable';
 import CasePagination from '@/components/cms/cases/CasePagination';
 import AddCaseModal from '@/components/cms/cases/AddCaseModal';
+import { CmsToastProvider, useToast, CmsConfirmDialog } from '@/components/cms/ui';
 import dynamic from 'next/dynamic';
 
 // Lazy-load case detail view (used when ?view=CASE_ID is in URL)
@@ -17,112 +18,6 @@ const CaseDetailView = dynamic(
   () => import('@/components/cms/cases/CaseDetailView'),
   { ssr: false, loading: () => <div className="animate-pulse p-12 text-center text-sm text-gray-400">Loading case details...</div> }
 );
-
-// --- Toast ---
-
-interface Toast {
-  readonly id: string;
-  readonly type: 'success' | 'error';
-  readonly message: string;
-}
-
-function ToastContainer({ toasts, onDismiss }: { readonly toasts: Toast[]; readonly onDismiss: (id: string) => void }) {
-  if (toasts.length === 0) return null;
-
-  return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 max-w-sm">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`
-            flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border
-            text-sm font-medium animate-in slide-in-from-right
-            ${toast.type === 'success'
-              ? 'bg-green-50 border-[#28A745]/30 text-[#28A745]'
-              : 'bg-red-50 border-[#FF4444]/30 text-[#FF4444]'
-            }
-          `.trim()}
-        >
-          {toast.type === 'success' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-          )}
-          <span className="flex-1">{toast.message}</span>
-          <button
-            onClick={() => onDismiss(toast.id)}
-            className="p-0.5 rounded hover:bg-black/5 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// --- Confirm Dialog ---
-
-function ConfirmDialog({
-  isOpen,
-  title,
-  message,
-  confirmLabel,
-  onConfirm,
-  onCancel,
-}: {
-  readonly isOpen: boolean;
-  readonly title: string;
-  readonly message: string;
-  readonly confirmLabel: string;
-  readonly onConfirm: () => void;
-  readonly onCancel: () => void;
-}) {
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onCancel]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
-        <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">{title}</h3>
-        <p className="text-sm text-[#666] mb-6">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="h-9 min-h-[44px] px-4 rounded-md text-sm font-medium text-[#333333] border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="h-9 min-h-[44px] px-4 rounded-md text-sm font-medium text-white bg-[#FF4444] border border-[#FF4444] hover:bg-[#E63939] transition-colors"
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // --- Bulk Actions Bar ---
 
@@ -350,7 +245,11 @@ export default function AllCasesPage() {
     return <CaseDetailView />;
   }
 
-  return <CaseListView />;
+  return (
+    <CmsToastProvider>
+      <CaseListView />
+    </CmsToastProvider>
+  );
 }
 
 function CaseListView() {
@@ -385,23 +284,8 @@ function CaseListView() {
   const [deleteTarget, setDeleteTarget] = useState<Case | null>(null);
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
-  // Toasts
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const toastIdRef = useRef(0);
-
-  // --- Helpers ---
-
-  const showToast = useCallback((type: 'success' | 'error', message: string) => {
-    const id = `toast-${++toastIdRef.current}`;
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  // Toast (shared provider)
+  const { showToast } = useToast();
 
   // --- Data fetching ---
 
@@ -770,7 +654,7 @@ function CaseListView() {
       )}
 
       {/* Delete Confirmation */}
-      <ConfirmDialog
+      <CmsConfirmDialog
         isOpen={!!deleteTarget}
         title="Delete Case"
         message={`Are you sure you want to delete "${deleteTarget?.caseNo}"? This action cannot be undone.`}
@@ -780,7 +664,7 @@ function CaseListView() {
       />
 
       {/* Bulk Delete Confirmation */}
-      <ConfirmDialog
+      <CmsConfirmDialog
         isOpen={bulkDeleteConfirm}
         title="Delete Selected Cases"
         message={`Are you sure you want to delete ${selectedIds.size} selected case(s)? This action cannot be undone.`}
@@ -788,9 +672,6 @@ function CaseListView() {
         onConfirm={handleBulkDelete}
         onCancel={() => setBulkDeleteConfirm(false)}
       />
-
-      {/* Toasts */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
