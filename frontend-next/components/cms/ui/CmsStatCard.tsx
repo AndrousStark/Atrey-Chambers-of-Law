@@ -1,13 +1,14 @@
 'use client';
 
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 interface CmsStatCardProps {
-  label: string;
-  value: string | number;
-  detail?: string;
-  color: string;
-  icon?: string;
+  readonly label: string;
+  readonly value: string | number;
+  readonly detail?: string;
+  readonly color: string;
+  readonly icon?: LucideIcon;
 }
 
 export default function CmsStatCard({
@@ -15,7 +16,7 @@ export default function CmsStatCard({
   value,
   detail,
   color,
-  icon,
+  icon: Icon,
 }: CmsStatCardProps) {
   return (
     <div
@@ -33,10 +34,10 @@ export default function CmsStatCard({
               <p className="text-xs text-[#6C757D] mt-1 truncate">{detail}</p>
             )}
           </div>
-          {icon && (
-            <span className="text-2xl ml-3 flex-shrink-0 select-none" aria-hidden="true">
-              {icon}
-            </span>
+          {Icon && (
+            <div className="ml-3 flex-shrink-0 opacity-40" style={{ color }}>
+              <Icon size={28} />
+            </div>
           )}
         </div>
       </div>
