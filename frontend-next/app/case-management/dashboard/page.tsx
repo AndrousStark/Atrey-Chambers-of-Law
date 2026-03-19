@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { RefreshCw, LayoutDashboard } from 'lucide-react';
 import { cmsDashboard, cmsScraper, cmsAuth } from '@/lib/cms-api';
 import type { ScraperStatus } from '@/lib/cms-api';
 import type { DashboardStats, Case, ComplianceItem, AuditEntry } from '@/lib/cms-types';
@@ -155,7 +156,8 @@ export default function DashboardPage() {
     <div className="p-4 md:p-6 lg:p-8">
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#1B2A4A' }}>
+        <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#1B2A4A' }}>
+          <LayoutDashboard size={24} />
           Dashboard
         </h1>
         <p className="text-sm mt-1" style={{ color: '#6C757D' }}>
@@ -186,11 +188,7 @@ export default function DashboardPage() {
                 color: scraperStatus.lastRun ? '#4472C4' : '#6C757D',
               }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 4 23 10 17 10" />
-                <polyline points="1 20 1 14 7 14" />
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-              </svg>
+              <RefreshCw size={16} />
               <span>
                 <span className="font-semibold">Auto-Fetch:</span>
                 {scraperStatus.lastRun ? (

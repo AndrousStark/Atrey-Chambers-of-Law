@@ -2,6 +2,7 @@
 
 import React from 'react';
 import CmsStatCard from '@/components/cms/ui/CmsStatCard';
+import { Scale, Calendar, AlertTriangle, FileX, CheckCircle, Building2 } from 'lucide-react';
 import type { DashboardStats } from '@/lib/cms-types';
 
 interface StatCardsRowProps {
@@ -20,38 +21,44 @@ export default function StatCardsRow({ stats }: StatCardsRowProps) {
       value: stats.totalActive,
       detail: 'Active cases in the system',
       color: '#4472C4',
+      icon: Scale,
     },
     {
       label: 'Hearings This Week',
       value: stats.hearingsThisWeek,
       detail: 'Upcoming in next 7 days',
       color: '#FF4444',
+      icon: Calendar,
     },
     {
       label: 'Pending Compliance',
       value: stats.pendingCompliance,
       detail: 'Overdue or pending items',
       color: '#FF8C00',
+      icon: AlertTriangle,
     },
     {
       label: 'Counter Not Filed',
       value: stats.counterNotFiled,
       detail: 'Awaiting counter filing',
       color: '#FFC107',
+      icon: FileX,
     },
     {
       label: 'Disposed',
       value: stats.disposedCases,
       detail: 'Disposed or dismissed',
       color: '#28A745',
+      icon: CheckCircle,
     },
     {
       label: 'By Court',
       value: totalCourts,
       detail: topCourt ? `Most: ${topCourt.court} (${topCourt.count})` : 'No data',
       color: '#6C757D',
+      icon: Building2,
     },
-  ];
+  ] as const;
 
   return (
     <div
@@ -65,6 +72,7 @@ export default function StatCardsRow({ stats }: StatCardsRowProps) {
           value={card.value}
           detail={card.detail}
           color={card.color}
+          icon={card.icon}
         />
       ))}
     </div>
