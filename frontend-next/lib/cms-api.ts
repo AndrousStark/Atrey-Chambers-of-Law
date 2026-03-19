@@ -21,6 +21,11 @@ import type {
   TaskStats,
   Notification,
   NotificationPreference,
+  Document,
+  DocumentTemplate,
+  TimeEntry,
+  RunningTimer,
+  TimeSummaryReport,
 } from './cms-types';
 import { SEED_CASES } from './data/seed-cases';
 
@@ -1205,4 +1210,149 @@ export const cmsNotifications = {
 
   sweep: (): Promise<unknown> =>
     apiFetch('/notifications/sweep', { method: 'POST' }),
+};
+
+// ============================================================
+// Document API
+// ============================================================
+
+export const cmsDocuments = {
+  list: (params?: Record<string, string | number>): Promise<{ data: Document[]; meta: { total: number; page: number; limit: number; totalPages: number } }> => {
+    const qs = params ? '?' + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : '';
+    return fetch(`${CMS_API_URL}/api/v1/documents${qs}`, {
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+    }).then(r => r.json()).then(j => ({ data: j.data, meta: j.meta }));
+  },
+
+  getById: (id: string): Promise<Document> =>
+    apiFetch(`/documents/${id}`),
+
+  forCase: (caseId: string): Promise<Document[]> =>
+    apiFetch(`/documents/by-case/${caseId}`),
+
+  stats: (): Promise<{ total: number; byCategory: { category: string; count: number }[] }> =>
+    apiFetch('/documents/stats'),
+
+  upload: async (file: File, meta: { name?: string; caseId?: string; clientId?: string; category?: string; description?: string; tags?: string[] }): Promise<Document> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (meta.name) formData.append('name', meta.name);
+    if (meta.caseId) formData.append('caseId', meta.caseId);
+    if (meta.clientId) formData.append('clientId', meta.clientId);
+    if (meta.category) formData.append('category', meta.category);
+    if (meta.description) formData.append('description', meta.description);
+    if (meta.tags) formData.append('tags', JSON.stringify(meta.tags));
+
+    const token = getToken();
+    const res = await fetch(`${CMS_API_URL}/api/v1/documents/upload`, {
+      method: 'POST',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(err.error || 'Upload failed');
+    }
+    const json = await res.json();
+    return json.data;
+  },
+
+  uploadVersion: async (parentId: string, file: File): Promise<Document> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = getToken();
+    const res = await fetch(`${CMS_API_URL}/api/v1/documents/${parentId}/version`, {
+      method: 'POST',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(err.error || 'Upload failed');
+    }
+    const json = await res.json();
+    return json.data;
+  },
+
+  update: (id: string, data: Partial<Document>): Promise<Document> =>
+    apiFetch(`/documents/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  remove: (id: string): Promise<void> =>
+    apiFetch(`/documents/${id}`, { method: 'DELETE' }),
+
+  downloadUrl: (id: string): string =>
+    `${CMS_API_URL}/api/v1/documents/${id}/download`,
+
+  previewUrl: (id: string): string =>
+    `${CMS_API_URL}/api/v1/documents/${id}/preview`,
+
+  templates: (): Promise<DocumentTemplate[]> =>
+    apiFetch('/documents/templates'),
+
+  generateFromTemplate: (templateId: string, caseId: string, overrides?: Record<string, string>, outputName?: string): Promise<Document> =>
+    apiFetch('/documents/templates/generate', { method: 'POST', body: JSON.stringify({ templateId, caseId, overrides, outputName }) }),
+
+  seedTemplates: (): Promise<{ seeded: number }> =>
+    apiFetch('/documents/templates/seed', { method: 'POST' }),
+};
+
+// ============================================================
+// Time Entry API
+// ============================================================
+
+export const cmsTimeEntries = {
+  list: (params?: Record<string, string | number>): Promise<{ data: TimeEntry[]; meta: { total: number; page: number; limit: number; totalPages: number } }> => {
+    const qs = params ? '?' + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : '';
+    return fetch(`${CMS_API_URL}/api/v1/time-entries${qs}`, {
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+    }).then(r => r.json()).then(j => ({ data: j.data, meta: j.meta }));
+  },
+
+  getById: (id: string): Promise<TimeEntry> =>
+    apiFetch(`/time-entries/${id}`),
+
+  create: (data: Partial<TimeEntry> & { durationMinutes: number; activityType: string; description: string; date: string }): Promise<TimeEntry> =>
+    apiFetch('/time-entries', { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: string, data: Partial<TimeEntry>): Promise<TimeEntry> =>
+    apiFetch(`/time-entries/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  remove: (id: string): Promise<void> =>
+    apiFetch(`/time-entries/${id}`, { method: 'DELETE' }),
+
+  approve: (id: string): Promise<TimeEntry> =>
+    apiFetch(`/time-entries/${id}/approve`, { method: 'POST' }),
+
+  reject: (id: string, rejectionNote?: string): Promise<TimeEntry> =>
+    apiFetch(`/time-entries/${id}/reject`, { method: 'POST', body: JSON.stringify({ rejectionNote }) }),
+
+  reportSummary: (params?: Record<string, string>): Promise<TimeSummaryReport> => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return apiFetch(`/time-entries/reports/summary${qs}`);
+  },
+
+  reportTimesheet: (userId: string, weekStart: string): Promise<{ weekStart: string; weekEnd: string; dailyTotals: { date: string; totalMinutes: number; entries: number }[]; weekTotal: number; entries: TimeEntry[] }> =>
+    apiFetch(`/time-entries/reports/timesheet?userId=${userId}&weekStart=${weekStart}`),
+
+  // Timer
+  timerStatus: (): Promise<RunningTimer | null> =>
+    apiFetch('/time-entries/timer/status'),
+
+  timerStart: (data: { caseId?: string; activityType?: string; description?: string }): Promise<RunningTimer> =>
+    apiFetch('/time-entries/timer/start', { method: 'POST', body: JSON.stringify(data) }),
+
+  timerStop: (description?: string): Promise<{ entry: TimeEntry; durationMinutes: number }> =>
+    apiFetch('/time-entries/timer/stop', { method: 'POST', body: JSON.stringify({ description }) }),
+
+  timerPause: (): Promise<RunningTimer> =>
+    apiFetch('/time-entries/timer/pause', { method: 'POST' }),
+
+  timerResume: (): Promise<RunningTimer> =>
+    apiFetch('/time-entries/timer/resume', { method: 'POST' }),
+
+  timerHeartbeat: (): Promise<RunningTimer | null> =>
+    apiFetch('/time-entries/timer/heartbeat', { method: 'POST' }),
+
+  timerDiscard: (): Promise<{ discarded: boolean }> =>
+    apiFetch('/time-entries/timer/discard', { method: 'POST' }),
 };

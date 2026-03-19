@@ -161,6 +161,141 @@ export interface AuditEntry {
   timestamp: string;
 }
 
+// --- Document ---
+
+export type DocumentCategory = 'Pleading' | 'Application' | 'Affidavit' | 'CourtOrder' | 'Judgment' | 'Notice' | 'Correspondence' | 'Evidence' | 'Agreement' | 'Template' | 'Other';
+
+export interface Document {
+  id: string;
+  name: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  storageKey: string;
+  category: DocumentCategory;
+  description: string | null;
+  tags: string[];
+  version: number;
+  parentId: string | null;
+  isArchived: boolean;
+  caseId: string | null;
+  case?: { id: string; caseNo: string; caseTitle: string } | null;
+  clientId: string | null;
+  client?: { id: string; name: string } | null;
+  uploadedById: string;
+  uploadedBy?: { id: string; name: string } | null;
+  _count?: { versions: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DocumentTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  category: DocumentCategory;
+  templateKey: string;
+  variables: string[];
+  isActive: boolean;
+  createdAt: string;
+}
+
+export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
+  Pleading: 'Pleading',
+  Application: 'Application',
+  Affidavit: 'Affidavit',
+  CourtOrder: 'Court Order',
+  Judgment: 'Judgment',
+  Notice: 'Notice',
+  Correspondence: 'Correspondence',
+  Evidence: 'Evidence',
+  Agreement: 'Agreement',
+  Template: 'Template',
+  Other: 'Other',
+};
+
+// --- Time Tracking ---
+
+export type ActivityType = 'Research' | 'Drafting' | 'CourtAppearance' | 'Travel' | 'ClientMeeting' | 'PhoneCall' | 'ReviewWork' | 'FilingWork' | 'Administrative' | 'Consultation' | 'Conference' | 'Other';
+export type TimeEntryStatus = 'Running' | 'Draft' | 'Submitted' | 'Approved' | 'Rejected';
+
+export interface TimeEntry {
+  id: string;
+  userId: string;
+  user?: { id: string; name: string; email: string } | null;
+  caseId: string | null;
+  case?: { id: string; caseNo: string; caseTitle: string } | null;
+  clientId: string | null;
+  client?: { id: string; name: string } | null;
+  taskId: string | null;
+  task?: { id: string; title: string } | null;
+  hearingId: string | null;
+  activityType: ActivityType;
+  description: string;
+  tags: string[];
+  date: string;
+  startTime: string | null;
+  endTime: string | null;
+  durationMinutes: number;
+  isTimerEntry: boolean;
+  billable: boolean;
+  ratePerHour: number | null;
+  amount: number | null;
+  status: TimeEntryStatus;
+  submittedAt: string | null;
+  approvedAt: string | null;
+  approvedById: string | null;
+  approvedBy?: { id: string; name: string } | null;
+  rejectionNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RunningTimer {
+  id: string;
+  userId: string;
+  caseId: string | null;
+  case?: { id: string; caseNo: string; caseTitle: string } | null;
+  activityType: ActivityType;
+  description: string | null;
+  startedAt: string;
+  isPaused: boolean;
+  accumulatedMs: number;
+  elapsedMs?: number;
+  elapsedMinutes?: number;
+}
+
+export interface TimeSummaryReport {
+  totalMinutes: number;
+  totalEntries: number;
+  byActivity: { activityType: string; totalMinutes: number; count: number }[];
+  billableMinutes: number;
+  nonBillableMinutes: number;
+}
+
+export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
+  Research: 'Research',
+  Drafting: 'Drafting',
+  CourtAppearance: 'Court Appearance',
+  Travel: 'Travel',
+  ClientMeeting: 'Client Meeting',
+  PhoneCall: 'Phone Call',
+  ReviewWork: 'Review',
+  FilingWork: 'Filing',
+  Administrative: 'Administrative',
+  Consultation: 'Consultation',
+  Conference: 'Conference',
+  Other: 'Other',
+};
+
+export const TIME_ENTRY_STATUS_LABELS: Record<TimeEntryStatus, string> = {
+  Running: 'Running',
+  Draft: 'Draft',
+  Submitted: 'Submitted',
+  Approved: 'Approved',
+  Rejected: 'Rejected',
+};
+
 // --- Client ---
 
 export type ClientCategory = 'Individual' | 'Corporate' | 'Government' | 'NGO' | 'Trust' | 'Other';
