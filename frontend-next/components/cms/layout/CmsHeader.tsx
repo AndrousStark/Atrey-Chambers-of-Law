@@ -1,6 +1,7 @@
 'use client';
 
 import type { UserRole } from '@/lib/cms-types';
+import NotificationBell from './NotificationBell';
 
 interface CmsHeaderProps {
   readonly userName: string;
@@ -65,6 +66,7 @@ export default function CmsHeader({ userName, userRole, onLogout }: CmsHeaderPro
       </div>
 
       <div className="flex items-center gap-4 shrink-0">
+        <NotificationBell />
         <div className="text-right hidden sm:block">
           <p className="text-white text-sm font-medium leading-tight">
             {userName}

@@ -161,6 +161,136 @@ export interface AuditEntry {
   timestamp: string;
 }
 
+// --- Client ---
+
+export type ClientCategory = 'Individual' | 'Corporate' | 'Government' | 'NGO' | 'Trust' | 'Other';
+
+export interface Client {
+  id: string;
+  name: string;
+  contactPerson: string | null;
+  email: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
+  category: ClientCategory;
+  organization: string | null;
+  notes: string | null;
+  isActive: boolean;
+  createdById: string | null;
+  createdBy?: { id: string; name: string } | null;
+  _count?: { cases: number; tasks: number };
+  cases?: Case[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Task ---
+
+export type TaskStatus = 'Todo' | 'InProgress' | 'Done' | 'Blocked';
+export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Critical';
+export type TaskCategory = 'Research' | 'Drafting' | 'Filing' | 'CourtAppearance' | 'ClientCommunication' | 'Internal' | 'Review' | 'Other';
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  category: TaskCategory;
+  dueDate: string | null;
+  completedAt: string | null;
+  tags: string[];
+  caseId: string | null;
+  case?: { id: string; caseNo: string; caseTitle: string } | null;
+  clientId: string | null;
+  client?: { id: string; name: string } | null;
+  assignedToId: string | null;
+  assignedTo?: { id: string; name: string; email: string } | null;
+  createdById: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskStats {
+  todo: number;
+  inProgress: number;
+  done: number;
+  blocked: number;
+  overdue: number;
+  total: number;
+}
+
+// --- Notification ---
+
+export type NotificationSeverity = 'info' | 'warning' | 'urgent' | 'critical';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  severity: NotificationSeverity;
+  title: string;
+  body: string | null;
+  data: Record<string, unknown> | null;
+  readAt: string | null;
+  acknowledgedAt: string | null;
+  snoozedUntil: string | null;
+  dismissedAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationPreference {
+  id: string;
+  userId: string;
+  notificationType: string;
+  channel: string;
+  enabled: boolean;
+  advanceDays: number[];
+  quietHoursStart: string | null;
+  quietHoursEnd: string | null;
+}
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  Todo: 'To Do',
+  InProgress: 'In Progress',
+  Done: 'Done',
+  Blocked: 'Blocked',
+};
+
+export const TASK_CATEGORY_LABELS: Record<TaskCategory, string> = {
+  Research: 'Research',
+  Drafting: 'Drafting',
+  Filing: 'Filing',
+  CourtAppearance: 'Court Appearance',
+  ClientCommunication: 'Client Communication',
+  Internal: 'Internal',
+  Review: 'Review',
+  Other: 'Other',
+};
+
+export const CLIENT_CATEGORY_LABELS: Record<ClientCategory, string> = {
+  Individual: 'Individual',
+  Corporate: 'Corporate',
+  Government: 'Government',
+  NGO: 'NGO',
+  Trust: 'Trust',
+  Other: 'Other',
+};
+
+export const NOTIFICATION_TYPE_LABELS: Record<string, string> = {
+  hearing_reminder: 'Hearing Reminder',
+  compliance_deadline: 'Compliance Deadline',
+  task_assigned: 'Task Assigned',
+  task_overdue: 'Task Overdue',
+  case_assigned: 'Case Assigned',
+  case_status_change: 'Case Status Change',
+};
+
 // --- API Types ---
 
 export interface LoginRequest {

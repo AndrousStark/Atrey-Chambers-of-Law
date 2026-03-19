@@ -16,6 +16,11 @@ import type {
   DashboardStats,
   LoginResponse,
   PaginatedResponse,
+  Client,
+  Task,
+  TaskStats,
+  Notification,
+  NotificationPreference,
 } from './cms-types';
 import { SEED_CASES } from './data/seed-cases';
 
@@ -1096,4 +1101,108 @@ const mockScraper = {
     mockConflictStore = mockConflictStore.filter(c => !(c.caseId === _caseId && c.field === field));
     return Promise.resolve();
   },
+};
+
+// ============================================================
+// Client API
+// ============================================================
+
+export const cmsClients = {
+  list: (params?: Record<string, string | number>): Promise<{ data: Client[]; meta: { total: number; page: number; limit: number; totalPages: number } }> => {
+    const qs = params ? '?' + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : '';
+    return fetch(`${CMS_API_URL}/api/v1/clients${qs}`, {
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+    }).then(r => r.json()).then(j => ({ data: j.data, meta: j.meta }));
+  },
+
+  listAll: (): Promise<{ id: string; name: string; category: string; organization: string | null }[]> =>
+    apiFetch('/clients/all'),
+
+  getById: (id: string): Promise<Client> =>
+    apiFetch(`/clients/${id}`),
+
+  create: (data: Partial<Client>): Promise<Client> =>
+    apiFetch('/clients', { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: string, data: Partial<Client>): Promise<Client> =>
+    apiFetch(`/clients/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  remove: (id: string): Promise<void> =>
+    apiFetch(`/clients/${id}`, { method: 'DELETE' }),
+};
+
+// ============================================================
+// Task API
+// ============================================================
+
+export const cmsTasks = {
+  list: (params?: Record<string, string | number>): Promise<{ data: Task[]; meta: { total: number; page: number; limit: number; totalPages: number } }> => {
+    const qs = params ? '?' + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : '';
+    return fetch(`${CMS_API_URL}/api/v1/tasks${qs}`, {
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+    }).then(r => r.json()).then(j => ({ data: j.data, meta: j.meta }));
+  },
+
+  getById: (id: string): Promise<Task> =>
+    apiFetch(`/tasks/${id}`),
+
+  create: (data: Partial<Task>): Promise<Task> =>
+    apiFetch('/tasks', { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: string, data: Partial<Task>): Promise<Task> =>
+    apiFetch(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  remove: (id: string): Promise<void> =>
+    apiFetch(`/tasks/${id}`, { method: 'DELETE' }),
+
+  bulkUpdate: (ids: string[], data: { status?: string; priority?: string; assignedToId?: string | null }): Promise<{ updated: number }> =>
+    apiFetch('/tasks/bulk-update', { method: 'POST', body: JSON.stringify({ ids, ...data }) }),
+
+  stats: (assignedToId?: string): Promise<TaskStats> => {
+    const qs = assignedToId ? `?assignedToId=${assignedToId}` : '';
+    return apiFetch(`/tasks/stats${qs}`);
+  },
+};
+
+// ============================================================
+// Notification API
+// ============================================================
+
+export const cmsNotifications = {
+  list: (params?: Record<string, string | number>): Promise<{ data: Notification[]; meta: { total: number; unreadCount: number; page: number; limit: number; totalPages: number } }> => {
+    const qs = params ? '?' + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : '';
+    return fetch(`${CMS_API_URL}/api/v1/notifications${qs}`, {
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+    }).then(r => r.json()).then(j => ({ data: j.data, meta: j.meta }));
+  },
+
+  unreadCount: (): Promise<{ count: number }> =>
+    apiFetch('/notifications/unread-count'),
+
+  markRead: (id: string): Promise<Notification> =>
+    apiFetch(`/notifications/${id}/read`, { method: 'POST' }),
+
+  markAllRead: (): Promise<{ updated: number }> =>
+    apiFetch('/notifications/mark-all-read', { method: 'POST' }),
+
+  acknowledge: (id: string): Promise<Notification> =>
+    apiFetch(`/notifications/${id}/acknowledge`, { method: 'POST' }),
+
+  snooze: (id: string, snoozedUntil: string): Promise<Notification> =>
+    apiFetch(`/notifications/${id}/snooze`, { method: 'POST', body: JSON.stringify({ snoozedUntil }) }),
+
+  dismiss: (id: string): Promise<Notification> =>
+    apiFetch(`/notifications/${id}/dismiss`, { method: 'POST' }),
+
+  getPreferences: (): Promise<NotificationPreference[]> =>
+    apiFetch('/notifications/preferences'),
+
+  updatePreferences: (preferences: Partial<NotificationPreference>[]): Promise<NotificationPreference[]> =>
+    apiFetch('/notifications/preferences', { method: 'PUT', body: JSON.stringify({ preferences }) }),
+
+  subscribePush: (subscription: PushSubscriptionJSON, userAgent?: string): Promise<unknown> =>
+    apiFetch('/notifications/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription, userAgent }) }),
+
+  sweep: (): Promise<unknown> =>
+    apiFetch('/notifications/sweep', { method: 'POST' }),
 };
