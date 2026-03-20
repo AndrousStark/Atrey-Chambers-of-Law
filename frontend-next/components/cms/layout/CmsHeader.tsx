@@ -3,6 +3,7 @@
 import type { UserRole } from '@/lib/cms-types';
 import NotificationBell from './NotificationBell';
 import TimerWidget from './TimerWidget';
+import LanguageToggle from './LanguageToggle';
 
 interface CmsHeaderProps {
   readonly userName: string;
@@ -67,6 +68,7 @@ export default function CmsHeader({ userName, userRole, onLogout }: CmsHeaderPro
       </div>
 
       <div className="flex items-center gap-4 shrink-0">
+        <LanguageToggle />
         <TimerWidget />
         <NotificationBell />
         <div className="text-right hidden sm:block">

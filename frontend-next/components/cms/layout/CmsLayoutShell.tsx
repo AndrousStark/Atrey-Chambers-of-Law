@@ -6,6 +6,7 @@ import { cmsAuth } from '@/lib/cms-api';
 import type { CmsUser } from '@/lib/cms-types';
 import CmsHeader from './CmsHeader';
 import CmsNavTabs from './CmsNavTabs';
+import '@/lib/i18n'; // Initialize i18n (side-effect import)
 
 function deriveActiveTab(pathname: string): string {
   const segments = pathname.split('/').filter(Boolean);

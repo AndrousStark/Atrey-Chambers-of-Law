@@ -1,0 +1,127 @@
+{
+  "title": "मुकदमे",
+  "subtitle": "मुकदमे, सुनवाई, कैलेंडर और अनुपालन प्रबंधित करें",
+  "tabs": {
+    "allCases": "सभी मुकदमे",
+    "hearings": "सुनवाई",
+    "calendar": "कैलेंडर",
+    "compliance": "अनुपालन"
+  },
+  "statuses": {
+    "Active": "सक्रिय",
+    "Pending": "लंबित",
+    "ListedForHearing": "सुनवाई हेतु सूचीबद्ध",
+    "PartHeard": "आंशिक सुनवाई",
+    "ReservedForJudgment": "निर्णय हेतु सुरक्षित",
+    "Disposed": "निस्तारित",
+    "Dismissed": "खारिज",
+    "Allowed": "स्वीकृत",
+    "Withdrawn": "वापस लिया गया",
+    "Transferred": "स्थानांतरित",
+    "StayGranted": "स्थगन आदेश",
+    "NoticeIssued": "नोटिस जारी",
+    "Admitted": "दाखिल",
+    "LeaveGranted": "अनुमति प्रदान",
+    "CounterFiled": "प्रति-शपथपत्र दाखिल",
+    "CounterNotFiled": "प्रति-शपथपत्र अदाखिल",
+    "Adjourned": "स्थगित",
+    "Tagged": "संलग्न",
+    "Clubbed": "संयुक्त",
+    "PartlyAllowed": "आंशिक स्वीकृत",
+    "RemandedBack": "प्रतिप्रेषित",
+    "ConvertedToAppeal": "अपील में परिवर्तित",
+    "FreshNotice": "नया नोटिस",
+    "DefectsRemoved": "दोष निवारित",
+    "DefectsPending": "दोष लंबित",
+    "Closed": "बंद"
+  },
+  "priorities": {
+    "Critical": "अत्यावश्यक",
+    "High": "उच्च",
+    "Medium": "मध्यम",
+    "Low": "निम्न"
+  },
+  "form": {
+    "caseNumber": "मुकदमा संख्या",
+    "court": "न्यायालय",
+    "client": "मुवक्किल",
+    "caseTitle": "मुकदमा शीर्षक",
+    "petitioner": "याचिकाकर्ता",
+    "respondent": "प्रत्यर्थी",
+    "ourRole": "हमारी भूमिका",
+    "category": "श्रेणी",
+    "department": "विभाग",
+    "filingDate": "दाखिल तिथि",
+    "registrationDate": "पंजीकरण तिथि",
+    "status": "स्थिति",
+    "ndoh": "अगली सुनवाई तिथि",
+    "previousHearing": "पिछली सुनवाई",
+    "presidingJudge": "पीठासीन न्यायाधीश",
+    "benchNumber": "पीठ संख्या",
+    "priority": "प्राथमिकता",
+    "remarks": "टिप्पणी",
+    "subjectMatter": "विषय-वस्तु"
+  },
+  "table": {
+    "sno": "क्र.सं.",
+    "caseNo": "मुकदमा सं.",
+    "court": "न्यायालय",
+    "client": "मुवक्किल",
+    "title": "शीर्षक",
+    "status": "स्थिति",
+    "ndoh": "अगली तिथि",
+    "priority": "प्राथमिकता",
+    "actions": "कार्रवाई"
+  },
+  "buttons": {
+    "addCase": "मुकदमा जोड़ें",
+    "editMode": "संपादन मोड",
+    "exitEditMode": "संपादन बंद"
+  },
+  "empty": {
+    "title": "कोई मुकदमा नहीं मिला",
+    "subtitle": "शुरू करने के लिए नया मुकदमा जोड़ें"
+  },
+  "hearings": {
+    "title": "सुनवाई डायरी",
+    "subtitle": "आगामी न्यायालय तिथियाँ और सुनवाई कार्यक्रम",
+    "filters": {
+      "thisWeek": "इस सप्ताह",
+      "next7": "अगले 7 दिन",
+      "next30": "अगले 30 दिन",
+      "allUpcoming": "सभी आगामी",
+      "overdue": "विलंबित"
+    },
+    "table": {
+      "nextDate": "अगली तिथि",
+      "day": "दिन",
+      "daysLeft": "शेष दिन",
+      "urgency": "तात्कालिकता"
+    },
+    "urgency": {
+      "overdue": "विलंबित",
+      "critical": "अत्यावश्यक",
+      "upcoming": "आगामी",
+      "scheduled": "निर्धारित"
+    },
+    "empty": "इस अवधि में कोई सुनवाई नहीं मिली।",
+    "emptyOverdue": "कोई विलंबित सुनवाई नहीं।",
+    "addToCalendar": "कैलेंडर में जोड़ें"
+  },
+  "compliance": {
+    "title": "अनुपालन ट्रैकर",
+    "direction": "निर्देश",
+    "directionDate": "निर्देश तिथि",
+    "dueDate": "नियत तिथि",
+    "completionDate": "पूर्णता तिथि",
+    "assignedTo": "सौंपा गया",
+    "notes": "टिप्पणी",
+    "statuses": {
+      "Pending": "लंबित",
+      "InProgress": "प्रगति में",
+      "Completed": "पूर्ण",
+      "Overdue": "अतिदेय",
+      "Waived": "माफ़"
+    }
+  }
+}
