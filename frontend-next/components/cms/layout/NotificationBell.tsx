@@ -484,7 +484,7 @@ export default function NotificationBell() {
           {/* Footer */}
           <div className="border-t border-gray-100 px-4 py-2.5 bg-gray-50/50">
             <Link
-              href="/case-management/notifications"
+              href="/case-management/activity"
               onClick={() => setIsOpen(false)}
               className="block text-center text-xs font-medium text-[#4472C4] hover:text-[#3A62A8] hover:underline transition-colors"
             >
