@@ -1356,3 +1356,29 @@ export const cmsTimeEntries = {
   timerDiscard: (): Promise<{ discarded: boolean }> =>
     apiFetch('/time-entries/timer/discard', { method: 'POST' }),
 };
+
+// ============================================================
+// Calendar Sync API
+// ============================================================
+
+export const cmsCalendar = {
+  /** Get or generate the current user's feed token */
+  getFeedToken: (): Promise<{ token: string }> =>
+    apiFetch('/calendar/feed-token'),
+
+  /** Regenerate feed token (invalidates old subscriptions) */
+  regenerateToken: (): Promise<{ token: string }> =>
+    apiFetch('/calendar/feed-token/regenerate', { method: 'POST' }),
+
+  /** Get the .ics download URL (for all hearings) */
+  icsDownloadUrl: (): string =>
+    `${CMS_API_URL}/api/v1/calendar/ics`,
+
+  /** Get the .ics feed subscription URL (for calendar apps) */
+  feedUrl: (token: string): string =>
+    `${CMS_API_URL}/api/v1/calendar/feed.ics?token=${token}`,
+
+  /** Build Google Calendar subscription URL from feed URL */
+  googleSubscribeUrl: (feedUrl: string): string =>
+    `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl.replace('https://', 'webcal://').replace('http://', 'webcal://'))}`,
+};

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import CalendarSyncCard from '@/components/cms/ui/CalendarSyncCard';
 import {
   cmsAuth,
   cmsCases,
@@ -581,6 +582,11 @@ export default function SettingsPage() {
           Import, export, and manage your case management data
         </p>
       </div>
+
+      {/* ============================================================ */}
+      {/* Calendar Sync Section */}
+      {/* ============================================================ */}
+      <CalendarSyncCard />
 
       {/* ============================================================ */}
       {/* Export Section */}
