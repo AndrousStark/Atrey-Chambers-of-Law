@@ -884,26 +884,34 @@ function TaskModal({
 
 type SortKey = 'title' | 'status' | 'priority' | 'category' | 'dueDate' | 'assignedTo' | 'createdAt';
 
+// Ghost-style class for inline editable controls in table view
+const INLINE_GHOST_CLASS =
+  'h-7 px-1.5 rounded border border-transparent hover:border-[#4472C4]/30 bg-transparent focus:bg-blue-50/50 focus:border-[#4472C4]/30 text-xs focus:outline-none focus:ring-1 focus:ring-[#4472C4]/40 transition-all appearance-none cursor-pointer';
+
 function TableView({
   tasks,
   selectedIds,
   sortBy,
   sortOrder,
+  users,
   onSort,
   onToggleSelect,
   onToggleAll,
   onEdit,
   onDelete,
+  onInlineUpdate,
 }: {
   readonly tasks: Task[];
   readonly selectedIds: Set<string>;
   readonly sortBy: SortKey;
   readonly sortOrder: 'asc' | 'desc';
+  readonly users: CmsUser[];
   readonly onSort: (key: SortKey) => void;
   readonly onToggleSelect: (id: string) => void;
   readonly onToggleAll: () => void;
   readonly onEdit: (task: Task) => void;
   readonly onDelete: (task: Task) => void;
+  readonly onInlineUpdate: (id: string, data: Partial<Task>) => Promise<boolean>;
 }) {
   const allSelected = tasks.length > 0 && tasks.every((t) => selectedIds.has(t.id));
   const someSelected = tasks.some((t) => selectedIds.has(t.id)) && !allSelected;
@@ -999,18 +1007,87 @@ function TableView({
                     )}
                   </td>
 
-                  {/* Status */}
+                  {/* Status — inline editable */}
                   <td className="px-3 py-2.5">
-                    <span className={`${BADGE_CLASS} ${STATUS_COLORS[task.status]}`}>
-                      {TASK_STATUS_LABELS[task.status]}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <select
+                        value={task.status}
+                        onChange={(e) => {
+                          const newStatus = e.target.value as TaskStatus;
+                          if (newStatus !== task.status) {
+                            onInlineUpdate(task.id, { status: newStatus });
+                          }
+                        }}
+                        className={INLINE_GHOST_CLASS}
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'right 4px center',
+                          paddingRight: '18px',
+                          color:
+                            task.status === 'Done' ? '#28A745'
+                            : task.status === 'InProgress' ? '#4472C4'
+                            : task.status === 'Blocked' ? '#FF4444'
+                            : '#6C757D',
+                          fontWeight: 600,
+                        }}
+                        title="Change status"
+                      >
+                        {TASK_STATUSES.map((s) => (
+                          <option key={s} value={s}>{TASK_STATUS_LABELS[s]}</option>
+                        ))}
+                      </select>
+                      {/* Quick status transition buttons */}
+                      {task.status === 'Todo' && (
+                        <button
+                          onClick={() => onInlineUpdate(task.id, { status: 'InProgress' })}
+                          className="p-0.5 rounded text-[#4472C4] hover:bg-blue-50 transition-colors flex-shrink-0"
+                          title="Start task"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                          </svg>
+                        </button>
+                      )}
+                      {task.status === 'InProgress' && (
+                        <button
+                          onClick={() => onInlineUpdate(task.id, { status: 'Done' })}
+                          className="p-0.5 rounded text-[#28A745] hover:bg-green-50 transition-colors flex-shrink-0"
+                          title="Mark done"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                   </td>
 
-                  {/* Priority */}
+                  {/* Priority — inline editable */}
                   <td className="px-3 py-2.5">
-                    <span className={`${BADGE_CLASS} ${PRIORITY_COLORS[task.priority]}`}>
-                      {PRIORITY_LABELS[task.priority]}
-                    </span>
+                    <select
+                      value={task.priority}
+                      onChange={(e) => {
+                        const newPriority = e.target.value as TaskPriority;
+                        if (newPriority !== task.priority) {
+                          onInlineUpdate(task.id, { priority: newPriority });
+                        }
+                      }}
+                      className={INLINE_GHOST_CLASS}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 4px center',
+                        paddingRight: '18px',
+                        color: PRIORITY_BORDER_COLORS[task.priority],
+                        fontWeight: 600,
+                      }}
+                      title="Change priority"
+                    >
+                      {TASK_PRIORITIES.map((p) => (
+                        <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>
+                      ))}
+                    </select>
                   </td>
 
                   {/* Category */}
@@ -1018,42 +1095,75 @@ function TableView({
                     {TASK_CATEGORY_LABELS[task.category]}
                   </td>
 
-                  {/* Due Date */}
+                  {/* Due Date — inline editable */}
                   <td className="px-3 py-2.5">
-                    <span
-                      className={`text-sm font-medium ${
-                        overdue
-                          ? 'text-[#FF4444]'
-                          : dueToday
-                            ? 'text-[#FF8C00]'
-                            : 'text-[#333333]'
-                      }`}
-                    >
-                      {formatDate(task.dueDate)}
+                    <div className="flex flex-col">
+                      <input
+                        type="date"
+                        defaultValue={formatDateISO(task.dueDate)}
+                        key={`due-${task.id}-${task.updatedAt}`}
+                        onChange={(e) => {
+                          const newVal = e.target.value || null;
+                          const oldVal = formatDateISO(task.dueDate) || null;
+                          if (newVal !== oldVal) {
+                            onInlineUpdate(task.id, { dueDate: newVal });
+                          }
+                        }}
+                        className={`${INLINE_GHOST_CLASS} w-[130px]`}
+                        style={{
+                          color: overdue
+                            ? '#FF4444'
+                            : dueToday
+                              ? '#FF8C00'
+                              : '#333333',
+                          fontWeight: overdue || dueToday ? 600 : 400,
+                        }}
+                        title="Change due date"
+                      />
                       {overdue && (
-                        <span className="block text-[10px] text-[#FF4444] font-semibold uppercase">Overdue</span>
+                        <span className="text-[10px] text-[#FF4444] font-semibold uppercase ml-1">Overdue</span>
                       )}
                       {dueToday && (
-                        <span className="block text-[10px] text-[#FF8C00] font-semibold uppercase">Today</span>
+                        <span className="text-[10px] text-[#FF8C00] font-semibold uppercase ml-1">Today</span>
                       )}
-                    </span>
+                    </div>
                   </td>
 
-                  {/* Assigned To */}
+                  {/* Assigned To — inline editable */}
                   <td className="px-3 py-2.5">
-                    {task.assignedTo ? (
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      {task.assignedTo && (
                         <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
                           style={{ backgroundColor: '#4472C4' }}
                         >
                           {getInitial(task.assignedTo.name)}
                         </div>
-                        <span className="text-[#333333] truncate text-xs">{task.assignedTo.name}</span>
-                      </div>
-                    ) : (
-                      <span className="text-[#999] text-xs">Unassigned</span>
-                    )}
+                      )}
+                      <select
+                        value={task.assignedToId || ''}
+                        onChange={(e) => {
+                          const newAssigneeId = e.target.value || null;
+                          if (newAssigneeId !== (task.assignedToId || null)) {
+                            onInlineUpdate(task.id, { assignedToId: newAssigneeId });
+                          }
+                        }}
+                        className={`${INLINE_GHOST_CLASS} max-w-[120px] truncate`}
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'right 4px center',
+                          paddingRight: '18px',
+                          color: task.assignedToId ? '#333333' : '#999',
+                        }}
+                        title="Change assignee"
+                      >
+                        <option value="">Unassigned</option>
+                        {users.map((u) => (
+                          <option key={u.id} value={u.id}>{u.name}</option>
+                        ))}
+                      </select>
+                    </div>
                   </td>
 
                   {/* Case */}
@@ -1795,6 +1905,39 @@ function TaskManagementPageInner() {
     }
   }, [selectedIds, fetchTasks, fetchStats, showToast]);
 
+  // --- Inline update handler (for table view inline editing) ---
+  const handleInlineUpdate = useCallback(async (id: string, data: Partial<Task>): Promise<boolean> => {
+    try {
+      await cmsTasks.update(id, data);
+      // Optimistic local update so the row reflects changes instantly
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (t.id !== id) return t;
+          const updated = { ...t, ...data, updatedAt: new Date().toISOString() };
+          // If assignedToId changed, update the nested assignedTo object
+          if ('assignedToId' in data) {
+            if (data.assignedToId) {
+              const user = users.find((u) => u.id === data.assignedToId);
+              updated.assignedTo = user
+                ? { id: user.id, name: user.name, email: user.email }
+                : t.assignedTo;
+            } else {
+              updated.assignedTo = null;
+            }
+          }
+          return updated;
+        })
+      );
+      showToast('success', 'Updated');
+      fetchStats(); // refresh stats in background (e.g. status change affects counts)
+      return true;
+    } catch (err) {
+      showToast('error', err instanceof Error ? err.message : 'Failed to update');
+      fetchTasks(); // revert on error
+      return false;
+    }
+  }, [users, fetchTasks, fetchStats, showToast]);
+
   // --- Render ---
 
   return (
@@ -1898,11 +2041,13 @@ function TaskManagementPageInner() {
           selectedIds={selectedIds}
           sortBy={sortBy}
           sortOrder={sortOrder}
+          users={users}
           onSort={handleSort}
           onToggleSelect={handleToggleSelect}
           onToggleAll={handleToggleAll}
           onEdit={handleOpenEditModal}
           onDelete={(t) => setDeleteTarget(t)}
+          onInlineUpdate={handleInlineUpdate}
         />
       )}
 

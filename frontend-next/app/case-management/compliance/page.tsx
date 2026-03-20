@@ -519,6 +519,23 @@ function ComplianceTrackerInner() {
     }
   }, [deleteTarget, fetchData, showToast]);
 
+  // ---- Inline update handler ----
+
+  const handleInlineUpdate = useCallback(
+    async (id: string, data: Record<string, unknown>) => {
+      try {
+        await cmsCompliance.update(id, data);
+        await fetchData();
+        showToast('success', 'Updated successfully');
+      } catch (err) {
+        showToast('error', err instanceof Error ? err.message : 'Failed to update');
+      }
+    },
+    [fetchData, showToast]
+  );
+
+  const canEdit = userRole === 'superadmin' || userRole === 'editor';
+
   // ---- Build edit form data ----
 
   const editFormData: ComplianceFormData | null = editItem
@@ -631,7 +648,7 @@ function ComplianceTrackerInner() {
             </svg>
             Refresh
           </button>
-          {(userRole === 'superadmin' || userRole === 'editor') && (
+          {canEdit && (
             <button
               onClick={handleOpenAdd}
               className="h-9 px-5 rounded-md text-sm font-medium text-white bg-[#4472C4] border border-[#4472C4] hover:bg-[#3A62A8] transition-colors flex items-center gap-2"
@@ -717,6 +734,7 @@ function ComplianceTrackerInner() {
                 <th className="text-left px-4 py-3 font-semibold text-[#1B2A4A] whitespace-nowrap">Status</th>
                 <th className="text-left px-4 py-3 font-semibold text-[#1B2A4A] whitespace-nowrap">Assigned To</th>
                 <th className="text-left px-4 py-3 font-semibold text-[#1B2A4A] whitespace-nowrap">Days</th>
+                <th className="text-left px-4 py-3 font-semibold text-[#1B2A4A] whitespace-nowrap min-w-[150px]">Notes</th>
                 <th className="text-right px-4 py-3 font-semibold text-[#1B2A4A] whitespace-nowrap">Actions</th>
               </tr>
             </thead>
@@ -762,36 +780,118 @@ function ComplianceTrackerInner() {
 
                     {/* Due Date */}
                     <td className="px-4 py-3 whitespace-nowrap font-medium text-[#1B2A4A]">
-                      {formatDate(item.dueDate)}
+                      {canEdit ? (
+                        <input
+                          type="date"
+                          defaultValue={toInputDate(item.dueDate)}
+                          onBlur={(e) => {
+                            const newVal = fromInputDate(e.target.value);
+                            if (newVal && newVal !== item.dueDate) {
+                              handleInlineUpdate(item.id, { dueDate: newVal });
+                            }
+                          }}
+                          className="h-7 px-1.5 rounded border border-transparent hover:border-[#4472C4]/30 bg-transparent focus:bg-blue-50/50 focus:border-[#4472C4]/30 text-xs focus:outline-none focus:ring-1 focus:ring-[#4472C4]/40 transition-all font-medium text-[#1B2A4A]"
+                        />
+                      ) : (
+                        formatDate(item.dueDate)
+                      )}
                     </td>
 
                     {/* Status */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        style={{ backgroundColor: badge.bg, color: badge.text }}
-                      >
-                        {COMPLIANCE_STATUS_LABELS[item.status]}
-                      </span>
+                      {canEdit ? (
+                        <select
+                          defaultValue={item.status}
+                          onChange={(e) => {
+                            const newStatus = e.target.value as ComplianceStatus;
+                            const updateData: Record<string, unknown> = { status: newStatus };
+                            if (newStatus === 'Completed') {
+                              updateData.completionDate = todayString();
+                            }
+                            handleInlineUpdate(item.id, updateData);
+                          }}
+                          className="h-7 px-1.5 rounded border border-transparent hover:border-[#4472C4]/30 bg-transparent focus:bg-blue-50/50 focus:border-[#4472C4]/30 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-[#4472C4]/40 transition-all cursor-pointer"
+                          style={{ color: badge.text }}
+                        >
+                          {(Object.entries(COMPLIANCE_STATUS_LABELS) as [ComplianceStatus, string][]).map(
+                            ([value, label]) => (
+                              <option key={value} value={value}>
+                                {label}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      ) : (
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          style={{ backgroundColor: badge.bg, color: badge.text }}
+                        >
+                          {COMPLIANCE_STATUS_LABELS[item.status]}
+                        </span>
+                      )}
                     </td>
 
                     {/* Assigned To */}
                     <td className="px-4 py-3 whitespace-nowrap text-[#6C757D]">
-                      {assignedUser?.name ?? '-'}
+                      {canEdit ? (
+                        <select
+                          defaultValue={item.assignedToId ?? ''}
+                          onChange={(e) => {
+                            const newAssignee = e.target.value || null;
+                            handleInlineUpdate(item.id, { assignedToId: newAssignee });
+                          }}
+                          className="h-7 px-1.5 rounded border border-transparent hover:border-[#4472C4]/30 bg-transparent focus:bg-blue-50/50 focus:border-[#4472C4]/30 text-xs focus:outline-none focus:ring-1 focus:ring-[#4472C4]/40 transition-all cursor-pointer"
+                        >
+                          <option value="">Unassigned</option>
+                          {users.map((u) => (
+                            <option key={u.id} value={u.id}>
+                              {u.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        assignedUser?.name ?? '-'
+                      )}
                     </td>
 
                     {/* Days */}
                     <td className="px-4 py-3 whitespace-nowrap">{getDaysBadge(item)}</td>
 
+                    {/* Notes */}
+                    <td className="px-4 py-3">
+                      {canEdit ? (
+                        <input
+                          type="text"
+                          defaultValue={item.notes ?? ''}
+                          placeholder="Add notes..."
+                          onBlur={(e) => {
+                            const newNotes = e.target.value;
+                            const oldNotes = item.notes ?? '';
+                            if (newNotes !== oldNotes) {
+                              handleInlineUpdate(item.id, { notes: newNotes || null });
+                            }
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.width = '200px';
+                          }}
+                          className="h-7 w-[120px] px-1.5 rounded border border-transparent hover:border-[#4472C4]/30 bg-transparent focus:bg-blue-50/50 focus:border-[#4472C4]/30 text-xs text-[#333] placeholder:text-[#B0B8C4] focus:outline-none focus:ring-1 focus:ring-[#4472C4]/40 focus:w-[200px] transition-all"
+                        />
+                      ) : (
+                        <span className="text-xs text-[#6C757D] max-w-[150px] block truncate" title={item.notes ?? ''}>
+                          {item.notes ?? '-'}
+                        </span>
+                      )}
+                    </td>
+
                     {/* Actions */}
                     <td className="px-4 py-3 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {/* Edit */}
-                        {(userRole === 'superadmin' || userRole === 'editor') && (
+                        {/* Edit (full modal) */}
+                        {canEdit && (
                           <button
                             onClick={() => handleOpenEdit(item)}
                             className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-                            title="Edit"
+                            title="Edit all fields"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4472C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -800,16 +900,16 @@ function ComplianceTrackerInner() {
                           </button>
                         )}
 
-                        {/* Mark Complete */}
-                        {(userRole === 'superadmin' || userRole === 'editor') &&
+                        {/* Quick Mark Complete */}
+                        {canEdit &&
                           item.status !== 'Completed' &&
                           item.status !== 'Waived' && (
                             <button
                               onClick={() => handleMarkComplete(item)}
-                              className="p-1.5 rounded hover:bg-green-50 transition-colors"
+                              className="h-7 w-7 inline-flex items-center justify-center rounded bg-[#28A745]/10 hover:bg-[#28A745]/20 border border-[#28A745]/30 transition-colors"
                               title="Mark Complete"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#28A745" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#28A745" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="20 6 9 17 4 12" />
                               </svg>
                             </button>
