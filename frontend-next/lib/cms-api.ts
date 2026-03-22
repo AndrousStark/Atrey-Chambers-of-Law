@@ -1382,3 +1382,33 @@ export const cmsCalendar = {
   googleSubscribeUrl: (feedUrl: string): string =>
     `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl.replace('https://', 'webcal://').replace('http://', 'webcal://'))}`,
 };
+
+// ============================================================
+// Scraper Jobs API (on-demand triggers — no auto-cron)
+// ============================================================
+
+export const cmsScraperJobs = {
+  /** Run daily NDOH fetch (SCI + HC/DC cases with upcoming hearings) */
+  runDailyNdoh: (): Promise<{ message: string }> =>
+    apiFetch('/scraper/jobs/daily-ndoh', { method: 'POST' }),
+
+  /** Run full SCI refresh (all active Supreme Court cases) */
+  runSciRefresh: (): Promise<{ message: string }> =>
+    apiFetch('/scraper/jobs/sci-refresh', { method: 'POST' }),
+
+  /** Run eCourts HC/DC refresh */
+  runEcourtsRefresh: (): Promise<{ message: string }> =>
+    apiFetch('/scraper/jobs/ecourts-refresh', { method: 'POST' }),
+
+  /** Run tribunal refresh (NCLT/NCLAT/ITAT/NGT/CAT) */
+  runTribunalRefresh: (): Promise<{ message: string }> =>
+    apiFetch('/scraper/jobs/tribunal-refresh', { method: 'POST' }),
+
+  /** Run cause list PDF fetch & update (NO CAPTCHA) */
+  runCauseListFetch: (days?: number): Promise<{ message: string }> =>
+    apiFetch(`/scraper/jobs/causelist?days=${days ?? 7}`, { method: 'POST' }),
+
+  /** Preview cause list for a specific date */
+  previewCauseList: (date: string): Promise<{ date: string; entries: Array<{ caseNo: string }>; pdfsFetched: number; totalPages: number }> =>
+    apiFetch(`/scraper/causelist/preview?date=${date}`),
+};
