@@ -51,7 +51,6 @@ const navItems: NavItem[] = [
   { label: 'Media', href: assetPath('/publications') + '#media' },
   { label: 'Careers', href: assetPath('/careers') },
   { label: 'Contact', href: assetPath('/contact') },
-  { label: 'Case Management', href: assetPath('/case-management/dashboard') },
 ];
 
 interface HeaderProps {
